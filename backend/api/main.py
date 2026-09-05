@@ -1,5 +1,6 @@
 from fastapi import FastAPI
 from api.routes import market, analysts, consensus, scanner, legendary, trades, positions
+from api.websocket.handlers import market_websocket, trades_websocket, consensus_websocket
 
 app = FastAPI(title="Dutchkem Trader API", version="1.0.0")
 
@@ -15,3 +16,8 @@ app.include_router(positions.router, prefix="/api/v1/positions", tags=["position
 @app.get("/api/v1/health")
 async def health_check():
     return {"status": "ok", "service": "dutchkem-trader-api"}
+
+
+app.websocket("/ws/market/{symbol}")(market_websocket)
+app.websocket("/ws/trades")(trades_websocket)
+app.websocket("/ws/consensus")(consensus_websocket)
