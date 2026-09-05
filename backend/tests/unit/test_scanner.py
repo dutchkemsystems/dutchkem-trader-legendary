@@ -10,8 +10,21 @@ def test_scanner_creation():
 
 
 def test_bias_filtering():
+    import random
+    random.seed(42)  # Seed for reproducibility
+
     scanner = MultiTimeframeScanner()
-    assert '1H' in scanner.timeframes
+    result = asyncio.run(scanner.scan('EURUSD'))
+
+    # Verify h1_bias is set
+    assert result.h1_bias in ('BUY', 'SELL', 'HOLD')
+
+    # Verify shorter timeframes have reduced confidence when they disagree with 1H bias
+    for tf in ['1M', '5M', '15M']:
+        tf_result = result.timeframes[tf]
+        # If signal disagrees with 1H bias, confidence should be <= 0.45 (0.9 * 0.5)
+        if tf_result.signal != result.h1_bias:
+            assert tf_result.confidence <= 0.45, f"{tf} confidence should be halved when disagreeing with 1H bias"
 
 
 def test_scanner_scan():
