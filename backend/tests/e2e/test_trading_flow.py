@@ -1,6 +1,8 @@
 # backend/tests/e2e/test_trading_flow.py
 import pytest
 import asyncio
+import pandas as pd
+import numpy as np
 from apps.analysts.market import MarketAnalyst
 from apps.analysts.news import NewsAnalyst
 from apps.consensus.engine import ConsensusEngine
@@ -30,8 +32,6 @@ async def test_full_trading_flow():
     assert 0 <= consensus_result['confidence'] <= 1
     
     # 4. Run legendary modules
-    import pandas as pd
-    import numpy as np
     data = pd.DataFrame({
         'close': np.random.randn(200).cumsum() + 100,
         'high': np.random.randn(200).cumsum() + 101,
@@ -42,7 +42,5 @@ async def test_full_trading_flow():
     assert seykota_result['trend'] in ['BULLISH', 'BEARISH', 'NEUTRAL', 'CHOP']
     
     turtle_result = turtle.detect_false_breakout(data)
-    # turtle_result can be None or a dict
-    
-    # 5. Verify all components work together
-    assert True  # If we got here, the flow works
+    assert turtle_result is None or isinstance(turtle_result, dict)
+
