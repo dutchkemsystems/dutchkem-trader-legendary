@@ -1,7 +1,10 @@
 import json
+import logging
 import redis
 from typing import Any, Optional
 from django.conf import settings
+
+logger = logging.getLogger(__name__)
 
 
 class RedisCache:
@@ -9,16 +12,25 @@ class RedisCache:
         self.client = redis.from_url(settings.REDIS_URL, decode_responses=True)
 
     def get(self, key: str) -> Optional[Any]:
-        value = self.client.get(key)
-        if value:
-            return json.loads(value)
+        try:
+            value = self.client.get(key)
+            if value:
+                return json.loads(value)
+        except (redis.RedisError, json.JSONDecodeError) as e:
+            logger.warning(f"Redis get failed for key {key}: {e}")
         return None
 
     def set(self, key: str, value: Any, ttl: int = 60):
-        self.client.setex(key, ttl, json.dumps(value, default=str))
+        try:
+            self.client.setex(key, ttl, json.dumps(value, default=str))
+        except (redis.RedisError, TypeError) as e:
+            logger.warning(f"Redis set failed for key {key}: {e}")
 
     def delete(self, key: str):
-        self.client.delete(key)
+        try:
+            self.client.delete(key)
+        except redis.RedisError as e:
+            logger.warning(f"Redis delete failed for key {key}: {e}")
 
     def get_market_data(self, symbol: str, timeframe: str) -> Optional[dict]:
         return self.get(f'market:{symbol}:{timeframe}')
