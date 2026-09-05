@@ -45,3 +45,40 @@ def test_turtle_soup_detect():
     if result is not None:
         assert 'signal' in result
         assert result['signal'] in ('BUY', 'SELL')
+
+def test_pyramiding_should_add():
+    module = PyramidingLogic()
+    position = {'profit_pips': 30, 'action': 'BUY', 'lot_size': 0.1}
+    data = pd.DataFrame({
+        'close': np.random.randn(200).cumsum() + 100,
+        'high': np.random.randn(200).cumsum() + 101,
+        'low': np.random.randn(200).cumsum() + 99
+    })
+    result = module.should_add_position(position, data)
+    if result is not None:
+        assert 'add' in result
+        assert 'additional_lot' in result
+        assert 'reason' in result
+
+def test_pyramiding_max_entries():
+    module = PyramidingLogic()
+    module.entry_count = 4
+    position = {'profit_pips': 30, 'action': 'BUY', 'lot_size': 0.1}
+    data = pd.DataFrame({
+        'close': np.random.randn(200).cumsum() + 100,
+        'high': np.random.randn(200).cumsum() + 101,
+        'low': np.random.randn(200).cumsum() + 99
+    })
+    result = module.should_add_position(position, data)
+    assert result is None
+
+def test_seykota_blocks_chop():
+    module = SeykotaTrendModule()
+    data = pd.DataFrame({
+        'close': np.ones(200) * 100 + np.random.randn(200) * 0.1,
+        'high': np.ones(200) * 100.1 + np.random.randn(200) * 0.1,
+        'low': np.ones(200) * 99.9 + np.random.randn(200) * 0.1
+    })
+    result = module.analyze_trend(data)
+    assert result['trend'] == 'CHOP'
+    assert result['action'] == 'HOLD'

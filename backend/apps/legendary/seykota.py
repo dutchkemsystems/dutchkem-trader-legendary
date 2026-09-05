@@ -36,14 +36,14 @@ class SeykotaTrendModule:
             }
 
         # Generate signal
-        if trend == 'BULLISH' and adx > 25:
+        if trend == 'BULLISH':
             return {
                 'trend': 'BULLISH',
                 'confidence': min(1.0, adx / 50),
                 'action': 'BUY',
                 'adx': adx
             }
-        elif trend == 'BEARISH' and adx > 25:
+        elif trend == 'BEARISH':
             return {
                 'trend': 'BEARISH',
                 'confidence': min(1.0, adx / 50),
