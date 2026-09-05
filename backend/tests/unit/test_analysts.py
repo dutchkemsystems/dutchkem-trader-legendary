@@ -131,30 +131,35 @@ def test_risk_analyst():
     from apps.analysts.risk import RiskAnalyst
     analyst = RiskAnalyst()
     assert hasattr(analyst, 'analyze')
+    assert 'portfolio_correlation' in analyst.get_capabilities()
 
 
 def test_macro_analyst():
     from apps.analysts.macro import MacroAnalyst
     analyst = MacroAnalyst()
     assert hasattr(analyst, 'analyze')
+    assert 'gdp' in analyst.get_capabilities()
 
 
 def test_on_chain_analyst():
     from apps.analysts.on_chain import OnChainAnalyst
     analyst = OnChainAnalyst()
     assert hasattr(analyst, 'analyze')
+    assert 'hash_rate' in analyst.get_capabilities()
 
 
 def test_quant_analyst():
     from apps.analysts.quant import QuantAnalyst
     analyst = QuantAnalyst()
     assert hasattr(analyst, 'analyze')
+    assert 'stat_arb' in analyst.get_capabilities()
 
 
 def test_compliance_analyst():
     from apps.analysts.compliance import ComplianceAnalyst
     analyst = ComplianceAnalyst()
     assert hasattr(analyst, 'analyze')
+    assert 'regulatory_checks' in analyst.get_capabilities()
 
 
 def test_risk_analyst_analyze():

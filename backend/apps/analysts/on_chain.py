@@ -38,12 +38,12 @@ class OnChainAnalyst(BaseAnalyst):
         }
 
     def _evaluate_on_chain(self, hash_rate: float, wallet_flow: int, exchange_reserves: int, whale_alerts: list) -> tuple:
-        inflow = sum(1 for a in whale_alerts if a.get('direction') == 'outflow')
-        outflow = sum(1 for a in whale_alerts if a.get('direction') == 'inflow')
+        outflow = sum(1 for a in whale_alerts if a.get('direction') == 'outflow')
+        inflow = sum(1 for a in whale_alerts if a.get('direction') == 'inflow')
 
-        if exchange_reserves < 0 and inflow > outflow:
+        if exchange_reserves < 0 and outflow > inflow:
             return ('BUY', 0.7)
-        elif exchange_reserves > 0 and outflow > inflow:
+        elif exchange_reserves > 0 and inflow > outflow:
             return ('SELL', 0.7)
         return ('HOLD', 0.5)
 
