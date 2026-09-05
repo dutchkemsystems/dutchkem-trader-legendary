@@ -1,6 +1,5 @@
 import os
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'config.settings')
-os.environ['DATABASE_URL'] = 'sqlite:///test_db.sqlite3'
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'config.test_settings')
 
 import pytest
 from django.contrib.auth.models import User

@@ -75,9 +75,9 @@ def test_pyramiding_max_entries():
 def test_seykota_blocks_chop():
     module = SeykotaTrendModule()
     data = pd.DataFrame({
-        'close': np.ones(200) * 100 + np.random.randn(200) * 0.1,
-        'high': np.ones(200) * 100.1 + np.random.randn(200) * 0.1,
-        'low': np.ones(200) * 99.9 + np.random.randn(200) * 0.1
+        'close': np.full(200, 100.0),
+        'high': np.full(200, 100.1),
+        'low': np.full(200, 99.9)
     })
     result = module.analyze_trend(data)
     assert result['trend'] == 'CHOP'

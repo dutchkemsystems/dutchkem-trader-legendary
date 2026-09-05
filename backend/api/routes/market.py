@@ -1,6 +1,4 @@
-from fastapi import APIRouter, HTTPException
-from apps.analysts.market import MarketAnalyst
-from cache.redis import RedisCache
+from fastapi import APIRouter
 from api.deps import get_market_analyst, get_redis_cache
 
 router = APIRouter()
