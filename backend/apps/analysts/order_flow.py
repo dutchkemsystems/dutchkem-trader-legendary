@@ -43,7 +43,8 @@ class OrderFlowAnalyst(BaseAnalyst):
     def _calculate_imbalance(self, data: dict) -> float:
         bid_vol = data.get('bid_volume', 1)
         ask_vol = data.get('ask_volume', 1)
-        return (bid_vol - ask_vol) / (bid_vol + ask_vol)
+        total = bid_vol + ask_vol
+        return (bid_vol - ask_vol) / total if total > 0 else 0.0
 
     def _evaluate_flow(self, microprice: float, imbalance: float) -> tuple:
         if imbalance > 0.2:
