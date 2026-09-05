@@ -1,10 +1,12 @@
 from .base import BaseAnalyst, AnalystResult
 import pandas as pd
 import numpy as np
+from data.models import Timeframe
 
 
 class MarketAnalyst(BaseAnalyst):
-    def __init__(self):
+    def __init__(self, data_manager=None):
+        self.data_manager = data_manager
         self.indicators = ['RSI', 'MACD', 'BB', 'ATR', 'Stochastic', 'Ichimoku', 'Fibonacci', 'VWAP']
 
     async def analyze(self, symbol: str, timeframe: str) -> AnalystResult:
@@ -43,6 +45,8 @@ class MarketAnalyst(BaseAnalyst):
             signal = 'HOLD'
             confidence = 0.5
 
+        data_source = 'pipeline' if self.data_manager is not None else 'placeholder'
+
         return AnalystResult(
             analyst_name='market',
             symbol=symbol,
@@ -50,11 +54,19 @@ class MarketAnalyst(BaseAnalyst):
             signal=signal,
             confidence=min(confidence, 1.0),
             reasoning=f'RSI: {rsi:.1f}, MACD: {macd_signal[0]}, BB: {bb_signal[0]}',
-            data={'rsi': rsi, 'macd': macd_signal, 'bb': bb_signal, 'indicators': self.indicators}
+            data={'rsi': rsi, 'macd': macd_signal, 'bb': bb_signal, 'indicators': self.indicators, 'data_source': data_source}
         )
 
     async def _fetch_market_data(self, symbol: str, timeframe: str) -> dict:
-        # TODO: Replace with real market data from broker API
+        if self.data_manager is not None:
+            tf = Timeframe(timeframe)
+            candles = await self.data_manager.get_candles(symbol, tf, 200)
+            return {
+                'close': pd.Series([c.close for c in candles]),
+                'high': pd.Series([c.high for c in candles]),
+                'low': pd.Series([c.low for c in candles]),
+                'volume': pd.Series([c.volume for c in candles]),
+            }
         return {
             'close': pd.Series(np.random.randn(100).cumsum() + 100),
             'high': pd.Series(np.random.randn(100).cumsum() + 101),
