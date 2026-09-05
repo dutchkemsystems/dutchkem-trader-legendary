@@ -15,15 +15,21 @@ class ConnectionManager:
 
     def disconnect(self, websocket: WebSocket, channel: str):
         if channel in self.active_connections:
-            self.active_connections[channel].remove(websocket)
+            try:
+                self.active_connections[channel].remove(websocket)
+            except ValueError:
+                pass
 
     async def broadcast(self, channel: str, message: dict):
         if channel in self.active_connections:
+            dead = []
             for connection in self.active_connections[channel]:
                 try:
                     await connection.send_json(message)
                 except Exception:
-                    pass
+                    dead.append(connection)
+            for conn in dead:
+                self.active_connections[channel].remove(conn)
 
 
 manager = ConnectionManager()
