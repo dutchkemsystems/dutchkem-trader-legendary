@@ -125,3 +125,78 @@ def test_order_flow_analyst_analyze():
     assert result.analyst_name == 'order_flow'
     assert result.signal in ('BUY', 'SELL', 'HOLD')
     assert 0.0 <= result.confidence <= 1.0
+
+
+def test_risk_analyst():
+    from apps.analysts.risk import RiskAnalyst
+    analyst = RiskAnalyst()
+    assert hasattr(analyst, 'analyze')
+
+
+def test_macro_analyst():
+    from apps.analysts.macro import MacroAnalyst
+    analyst = MacroAnalyst()
+    assert hasattr(analyst, 'analyze')
+
+
+def test_on_chain_analyst():
+    from apps.analysts.on_chain import OnChainAnalyst
+    analyst = OnChainAnalyst()
+    assert hasattr(analyst, 'analyze')
+
+
+def test_quant_analyst():
+    from apps.analysts.quant import QuantAnalyst
+    analyst = QuantAnalyst()
+    assert hasattr(analyst, 'analyze')
+
+
+def test_compliance_analyst():
+    from apps.analysts.compliance import ComplianceAnalyst
+    analyst = ComplianceAnalyst()
+    assert hasattr(analyst, 'analyze')
+
+
+def test_risk_analyst_analyze():
+    from apps.analysts.risk import RiskAnalyst
+    analyst = RiskAnalyst()
+    result = asyncio.run(analyst.analyze('EURUSD', '1H'))
+    assert result.analyst_name == 'risk'
+    assert result.signal in ('BUY', 'SELL', 'HOLD')
+    assert 0.0 <= result.confidence <= 1.0
+
+
+def test_macro_analyst_analyze():
+    from apps.analysts.macro import MacroAnalyst
+    analyst = MacroAnalyst()
+    result = asyncio.run(analyst.analyze('EURUSD', '1H'))
+    assert result.analyst_name == 'macro'
+    assert result.signal in ('BUY', 'SELL', 'HOLD')
+    assert 0.0 <= result.confidence <= 1.0
+
+
+def test_on_chain_analyst_analyze():
+    from apps.analysts.on_chain import OnChainAnalyst
+    analyst = OnChainAnalyst()
+    result = asyncio.run(analyst.analyze('BTCUSD', '1H'))
+    assert result.analyst_name == 'on_chain'
+    assert result.signal in ('BUY', 'SELL', 'HOLD')
+    assert 0.0 <= result.confidence <= 1.0
+
+
+def test_quant_analyst_analyze():
+    from apps.analysts.quant import QuantAnalyst
+    analyst = QuantAnalyst()
+    result = asyncio.run(analyst.analyze('EURUSD', '1H'))
+    assert result.analyst_name == 'quant'
+    assert result.signal in ('BUY', 'SELL', 'HOLD')
+    assert 0.0 <= result.confidence <= 1.0
+
+
+def test_compliance_analyst_analyze():
+    from apps.analysts.compliance import ComplianceAnalyst
+    analyst = ComplianceAnalyst()
+    result = asyncio.run(analyst.analyze('EURUSD', '1H'))
+    assert result.analyst_name == 'compliance'
+    assert result.signal in ('BUY', 'SELL', 'HOLD')
+    assert 0.0 <= result.confidence <= 1.0
