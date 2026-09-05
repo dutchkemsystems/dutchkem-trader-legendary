@@ -23,7 +23,7 @@ class VoteCounter:
         else:
             action = 'HOLD'
             agreement = hold_votes / total if hold_votes > 0 else 0.0
-            confidence = 0.5
+            confidence = sum(r.confidence for r in results if r.signal == 'HOLD') / hold_votes if hold_votes > 0 else 0.5
 
         votes = {r.analyst_name: r.signal for r in results}
 

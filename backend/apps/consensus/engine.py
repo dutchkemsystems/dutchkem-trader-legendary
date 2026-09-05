@@ -1,7 +1,10 @@
 import asyncio
+import logging
 from typing import List, Dict, Any
 from apps.analysts.base import BaseAnalyst, AnalystResult
 from apps.consensus.voting import VoteCounter
+
+logger = logging.getLogger(__name__)
 
 
 class ConsensusEngine:
@@ -14,6 +17,11 @@ class ConsensusEngine:
         # 1. Run all analysts in parallel
         tasks = [analyst.analyze(symbol, timeframe) for analyst in self.analysts]
         results = await asyncio.gather(*tasks, return_exceptions=True)
+
+        # Log any exceptions
+        for i, result in enumerate(results):
+            if isinstance(result, Exception):
+                logger.warning(f'Analyst {self.analysts[i].__class__.__name__} failed: {result}')
 
         # Filter out exceptions
         valid_results = [r for r in results if isinstance(r, AnalystResult)]
@@ -43,4 +51,7 @@ class ConsensusEngine:
         self.analysts.append(analyst)
 
     def remove_analyst(self, analyst_name: str):
+        original_count = len(self.analysts)
         self.analysts = [a for a in self.analysts if a.__class__.__name__.lower().replace('analyst', '') != analyst_name]
+        if len(self.analysts) == original_count:
+            raise ValueError(f'Analyst "{analyst_name}" not found')
