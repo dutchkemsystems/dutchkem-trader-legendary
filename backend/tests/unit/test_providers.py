@@ -4,11 +4,13 @@ from datetime import datetime
 from unittest.mock import AsyncMock, MagicMock
 
 from data.models import Candle, Tick, Quote, Timeframe
-from data.providers.base import BaseDataProvider
+from data.providers import BaseDataProvider
 
 
 class ConcreteProvider(BaseDataProvider):
     """Minimal concrete implementation for testing ABC behavior."""
+
+    name: str = "concrete"
 
     async def get_candles(self, symbol: str, timeframe: Timeframe, limit: int = 100) -> list[Candle]:
         return [
@@ -18,6 +20,9 @@ class ConcreteProvider(BaseDataProvider):
                 volume=1000, timestamp=datetime.utcnow()
             )
         ]
+
+    async def get_latest_price(self, symbol: str) -> float:
+        return 100.5
 
     async def get_quote(self, symbol: str) -> Quote:
         return Quote(
