@@ -3,6 +3,12 @@ from django.db import models
 from django.contrib.auth.models import User
 
 
+class UserProxy(User):
+    class Meta:
+        proxy = True
+        db_table = "users"
+
+
 class AnalystResult(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="analyst_results")
@@ -16,6 +22,7 @@ class AnalystResult(models.Model):
 
     class Meta:
         ordering = ["-created_at"]
+        db_table = "analyst_results"
 
     def __str__(self):
         return f"{self.analyst_type} - {self.ticker}: {self.signal} ({self.confidence:.0%})"
@@ -33,6 +40,7 @@ class ConsensusResult(models.Model):
 
     class Meta:
         ordering = ["-created_at"]
+        db_table = "consensus_results"
 
     def __str__(self):
         return f"Consensus {self.ticker}: {self.consensus_signal} (w={self.weight:.2f})"
@@ -62,6 +70,7 @@ class Trade(models.Model):
 
     class Meta:
         ordering = ["-created_at"]
+        db_table = "trades"
 
     def __str__(self):
         return f"{self.side} {self.quantity} {self.ticker} @ {self.price}"
@@ -76,6 +85,9 @@ class Position(models.Model):
     current_price = models.DecimalField(max_digits=15, decimal_places=6, default=0)
     unrealized_pnl = models.DecimalField(max_digits=15, decimal_places=6, default=0)
     updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        db_table = "positions"
 
     def __str__(self):
         return f"{self.ticker}: {self.quantity} @ {self.avg_entry_price}"
@@ -93,6 +105,7 @@ class LegendaryModuleResult(models.Model):
 
     class Meta:
         ordering = ["-created_at"]
+        db_table = "legendary_module_results"
 
     def __str__(self):
         return f"{self.module_name} - {self.ticker}: {self.recommendation} ({self.score:.2f})"

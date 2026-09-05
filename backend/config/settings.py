@@ -1,13 +1,17 @@
 import os
 from pathlib import Path
+import dj_database_url
 from dotenv import load_dotenv
 
 load_dotenv()
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-SECRET_KEY = os.getenv("DJANGO_SECRET_KEY", "django-insecure-fallback-key-change-in-production")
 DEBUG = os.getenv("DJANGO_DEBUG", "True").lower() in ("true", "1", "yes")
+SECRET_KEY = os.getenv("DJANGO_SECRET_KEY")
+if not SECRET_KEY and not DEBUG:
+    raise ValueError("DJANGO_SECRET_KEY environment variable is required in production")
+SECRET_KEY = SECRET_KEY or "django-insecure-dev-key-only"
 ALLOWED_HOSTS = os.getenv("DJANGO_ALLOWED_HOSTS", "localhost,127.0.0.1").split(",")
 
 INSTALLED_APPS = [
@@ -54,14 +58,9 @@ TEMPLATES = [
 WSGI_APPLICATION = "config.wsgi.application"
 
 DATABASES = {
-    "default": {
-        "ENGINE": "django.db.backends.postgresql",
-        "NAME": os.getenv("DATABASE_URL", "postgres://postgres:postgres@localhost:5432/dutchkem_trader").split("/")[-1],
-        "USER": os.getenv("DATABASE_URL", "postgres://postgres:postgres@localhost:5432/dutchkem_trader").split("/")[-2].split(":")[0] if ":" in os.getenv("DATABASE_URL", "postgres://postgres:postgres@localhost:5432/dutchkem_trader").split("/")[-2] else "postgres",
-        "PASSWORD": os.getenv("DATABASE_URL", "postgres://postgres:postgres@localhost:5432/dutchkem_trader").split("/")[-2].split(":")[1] if ":" in os.getenv("DATABASE_URL", "postgres://postgres:postgres@localhost:5432/dutchkem_trader").split("/")[-2] else "postgres",
-        "HOST": os.getenv("DATABASE_URL", "postgres://postgres:postgres@localhost:5432/dutchkem_trader").split("//")[-1].split(":")[0].split("@")[-1] if "@" in os.getenv("DATABASE_URL", "postgres://postgres:postgres@localhost:5432/dutchkem_trader").split("//")[-1] else "localhost",
-        "PORT": os.getenv("DATABASE_URL", "postgres://postgres:postgres@localhost:5432/dutchkem_trader").split(":")[-1].split("/")[0] if ":" in os.getenv("DATABASE_URL", "postgres://postgres:postgres@localhost:5432/dutchkem_trader").split("//")[-1] else "5432",
-    }
+    "default": dj_database_url.config(
+        default=os.getenv("DATABASE_URL", "postgresql://postgres:password@localhost:5432/dutchkem_trader")
+    )
 }
 
 REDIS_URL = os.getenv("REDIS_URL", "redis://localhost:6379/0")
