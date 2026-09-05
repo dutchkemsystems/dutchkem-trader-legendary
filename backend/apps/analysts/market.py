@@ -54,6 +54,7 @@ class MarketAnalyst(BaseAnalyst):
         )
 
     async def _fetch_market_data(self, symbol: str, timeframe: str) -> dict:
+        # TODO: Replace with real market data from broker API
         return {
             'close': pd.Series(np.random.randn(100).cumsum() + 100),
             'high': pd.Series(np.random.randn(100).cumsum() + 101),
@@ -95,4 +96,4 @@ class MarketAnalyst(BaseAnalyst):
         return ('HOLD', 0.5)
 
     def get_capabilities(self) -> list[str]:
-        return self.indicators
+        return list(self.indicators)

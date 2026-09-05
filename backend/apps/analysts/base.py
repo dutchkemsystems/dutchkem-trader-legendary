@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from datetime import datetime, timezone
 from typing import Literal, Dict, Any
 
@@ -12,7 +12,7 @@ class AnalystResult:
     signal: Literal["BUY", "SELL", "HOLD"]
     confidence: float
     reasoning: str
-    data: Dict[str, Any]
+    data: Dict[str, Any] = field(default_factory=dict)
     timestamp: datetime = None
 
     def __post_init__(self):
