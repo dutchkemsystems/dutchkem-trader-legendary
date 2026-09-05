@@ -27,3 +27,24 @@ def test_market_analyst_has_analyze_method():
     analyst = MarketAnalyst()
     assert hasattr(analyst, 'analyze')
     assert hasattr(analyst, 'get_capabilities')
+
+
+def test_news_analyst():
+    from apps.analysts.news import NewsAnalyst
+    analyst = NewsAnalyst()
+    assert hasattr(analyst, 'analyze')
+    assert 'sentiment_analysis' in analyst.get_capabilities()
+
+
+def test_fundamentals_analyst():
+    from apps.analysts.fundamentals import FundamentalsAnalyst
+    analyst = FundamentalsAnalyst()
+    assert hasattr(analyst, 'analyze')
+    assert 'financial_ratios' in analyst.get_capabilities()
+
+
+def test_sentiment_analyst():
+    from apps.analysts.sentiment import SentimentAnalyst
+    analyst = SentimentAnalyst()
+    assert hasattr(analyst, 'analyze')
+    assert 'social_sentiment' in analyst.get_capabilities()
