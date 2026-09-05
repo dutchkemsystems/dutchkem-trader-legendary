@@ -77,3 +77,51 @@ def test_sentiment_analyst_analyze():
     assert result.analyst_name == 'sentiment'
     assert result.signal in ('BUY', 'SELL', 'HOLD')
     assert 0.0 <= result.confidence <= 1.0
+
+
+def test_technical_analyst():
+    from apps.analysts.technical import TechnicalAnalyst
+    analyst = TechnicalAnalyst()
+    assert hasattr(analyst, 'analyze')
+    assert 'chart_patterns' in analyst.get_capabilities()
+
+
+def test_options_analyst():
+    from apps.analysts.options import OptionsAnalyst
+    analyst = OptionsAnalyst()
+    assert hasattr(analyst, 'analyze')
+    assert 'implied_volatility' in analyst.get_capabilities()
+
+
+def test_order_flow_analyst():
+    from apps.analysts.order_flow import OrderFlowAnalyst
+    analyst = OrderFlowAnalyst()
+    assert hasattr(analyst, 'analyze')
+    assert 'microprice' in analyst.get_capabilities()
+
+
+def test_technical_analyst_analyze():
+    from apps.analysts.technical import TechnicalAnalyst
+    analyst = TechnicalAnalyst()
+    result = asyncio.run(analyst.analyze('EURUSD', '1H'))
+    assert result.analyst_name == 'technical'
+    assert result.signal in ('BUY', 'SELL', 'HOLD')
+    assert 0.0 <= result.confidence <= 1.0
+
+
+def test_options_analyst_analyze():
+    from apps.analysts.options import OptionsAnalyst
+    analyst = OptionsAnalyst()
+    result = asyncio.run(analyst.analyze('EURUSD', '1H'))
+    assert result.analyst_name == 'options'
+    assert result.signal in ('BUY', 'SELL', 'HOLD')
+    assert 0.0 <= result.confidence <= 1.0
+
+
+def test_order_flow_analyst_analyze():
+    from apps.analysts.order_flow import OrderFlowAnalyst
+    analyst = OrderFlowAnalyst()
+    result = asyncio.run(analyst.analyze('EURUSD', '1H'))
+    assert result.analyst_name == 'order_flow'
+    assert result.signal in ('BUY', 'SELL', 'HOLD')
+    assert 0.0 <= result.confidence <= 1.0
