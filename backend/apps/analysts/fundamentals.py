@@ -3,7 +3,7 @@ from .base import BaseAnalyst, AnalystResult
 
 class FundamentalsAnalyst(BaseAnalyst):
     def __init__(self):
-        self.capabilities = ['financial_ratios', 'balance_sheet', 'cash_flow', 'income_statement']
+        self._capabilities = ['financial_ratios', 'balance_sheet', 'cash_flow', 'income_statement']
 
     async def analyze(self, symbol: str, timeframe: str) -> AnalystResult:
         financials = await self._fetch_financials(symbol)
@@ -44,9 +44,9 @@ class FundamentalsAnalyst(BaseAnalyst):
 
     def _score_fundamentals(self, ratios: dict) -> float:
         score = 0.0
-        if 0 < ratios['pe_ratio'] < 20:
+        if 0 < ratios.get('pe_ratio', 0) < 20:
             score += 0.2
-        elif ratios['pe_ratio'] > 30:
+        elif ratios.get('pe_ratio', 0) > 30:
             score -= 0.2
         if ratios['roe'] > 0.15:
             score += 0.2
@@ -55,4 +55,4 @@ class FundamentalsAnalyst(BaseAnalyst):
         return score
 
     def get_capabilities(self) -> list[str]:
-        return list(self.capabilities)
+        return list(self._capabilities)

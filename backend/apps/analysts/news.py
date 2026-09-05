@@ -3,7 +3,7 @@ from .base import BaseAnalyst, AnalystResult
 
 class NewsAnalyst(BaseAnalyst):
     def __init__(self):
-        self.capabilities = ['sentiment_analysis', 'keyword_extraction', 'event_detection']
+        self._capabilities = ['sentiment_analysis', 'keyword_extraction', 'event_detection']
 
     async def analyze(self, symbol: str, timeframe: str) -> AnalystResult:
         news_data = await self._fetch_news(symbol)
@@ -48,4 +48,4 @@ class NewsAnalyst(BaseAnalyst):
         return list(keywords)[:10]
 
     def get_capabilities(self) -> list[str]:
-        return list(self.capabilities)
+        return list(self._capabilities)

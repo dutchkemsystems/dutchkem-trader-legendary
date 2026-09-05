@@ -3,7 +3,7 @@ from .base import BaseAnalyst, AnalystResult
 
 class SentimentAnalyst(BaseAnalyst):
     def __init__(self):
-        self.capabilities = ['social_sentiment', 'fear_greed_index', 'positioning_data']
+        self._capabilities = ['social_sentiment', 'fear_greed_index', 'positioning_data']
 
     async def analyze(self, symbol: str, timeframe: str) -> AnalystResult:
         social_data = await self._fetch_social_sentiment(symbol)
@@ -51,4 +51,4 @@ class SentimentAnalyst(BaseAnalyst):
         return (social_avg + fear_greed_normalized + positioning_bias) / 3
 
     def get_capabilities(self) -> list[str]:
-        return list(self.capabilities)
+        return list(self._capabilities)

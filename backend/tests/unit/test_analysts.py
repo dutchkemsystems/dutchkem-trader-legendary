@@ -1,3 +1,5 @@
+import asyncio
+
 import pytest
 from apps.analysts.base import BaseAnalyst, AnalystResult
 
@@ -48,3 +50,30 @@ def test_sentiment_analyst():
     analyst = SentimentAnalyst()
     assert hasattr(analyst, 'analyze')
     assert 'social_sentiment' in analyst.get_capabilities()
+
+
+def test_news_analyst_analyze():
+    from apps.analysts.news import NewsAnalyst
+    analyst = NewsAnalyst()
+    result = asyncio.run(analyst.analyze('EURUSD', '1H'))
+    assert result.analyst_name == 'news'
+    assert result.signal in ('BUY', 'SELL', 'HOLD')
+    assert 0.0 <= result.confidence <= 1.0
+
+
+def test_fundamentals_analyst_analyze():
+    from apps.analysts.fundamentals import FundamentalsAnalyst
+    analyst = FundamentalsAnalyst()
+    result = asyncio.run(analyst.analyze('EURUSD', '1H'))
+    assert result.analyst_name == 'fundamentals'
+    assert result.signal in ('BUY', 'SELL', 'HOLD')
+    assert 0.0 <= result.confidence <= 1.0
+
+
+def test_sentiment_analyst_analyze():
+    from apps.analysts.sentiment import SentimentAnalyst
+    analyst = SentimentAnalyst()
+    result = asyncio.run(analyst.analyze('EURUSD', '1H'))
+    assert result.analyst_name == 'sentiment'
+    assert result.signal in ('BUY', 'SELL', 'HOLD')
+    assert 0.0 <= result.confidence <= 1.0
