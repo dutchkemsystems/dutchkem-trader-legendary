@@ -36,29 +36,39 @@ def run_analyst(analyst_name: str, symbol: str, timeframe: str):
         return {'error': f'Analyst {analyst_name} not found'}
     
     loop = asyncio.new_event_loop()
-    result = loop.run_until_complete(analyst.analyze(symbol, timeframe))
-    loop.close()
-    
-    return {
-        'analyst_name': result.analyst_name,
-        'symbol': result.symbol,
-        'timeframe': result.timeframe,
-        'signal': result.signal,
-        'confidence': result.confidence,
-        'reasoning': result.reasoning,
-        'data': result.data
-    }
+    try:
+        result = loop.run_until_complete(analyst.analyze(symbol, timeframe))
+        return {
+            'analyst_name': result.analyst_name,
+            'symbol': result.symbol,
+            'timeframe': result.timeframe,
+            'signal': result.signal,
+            'confidence': result.confidence,
+            'reasoning': result.reasoning,
+            'data': result.data
+        }
+    except Exception as e:
+        return {'error': f'{analyst_name} failed: {str(e)}'}
+    finally:
+        loop.close()
 
 @shared_task
 def run_all_analysts(symbol: str, timeframe: str):
     results = []
     for name, analyst in ANALYSTS.items():
         loop = asyncio.new_event_loop()
-        result = loop.run_until_complete(analyst.analyze(symbol, timeframe))
-        loop.close()
-        results.append({
-            'analyst_name': result.analyst_name,
-            'signal': result.signal,
-            'confidence': result.confidence
-        })
+        try:
+            result = loop.run_until_complete(analyst.analyze(symbol, timeframe))
+            results.append({
+                'analyst_name': result.analyst_name,
+                'signal': result.signal,
+                'confidence': result.confidence
+            })
+        except Exception as e:
+            results.append({
+                'analyst_name': name,
+                'error': str(e)
+            })
+        finally:
+            loop.close()
     return results
