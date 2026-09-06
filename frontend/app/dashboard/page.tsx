@@ -9,61 +9,130 @@ import { LegendaryModules } from "@/components/dashboard/legendary-modules";
 import { QuickTrade } from "@/components/dashboard/quick-trade";
 import { PriceChart } from "@/components/charts/price-chart";
 import { Indicators } from "@/components/charts/indicators";
+import { ErrorBoundary } from "@/components/error-boundary";
 import { useTrades } from "@/hooks/use-trades";
 import { usePositions } from "@/hooks/use-positions";
 import { useSymbolStore } from "@/stores/symbol-store";
 
+function StatsLoadingSkeleton() {
+  return (
+    <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+      {[1, 2, 3, 4].map((i) => (
+        <div
+          key={i}
+          className="rounded-lg border border-border bg-card p-4 animate-pulse"
+        >
+          <div className="h-3 w-20 bg-muted rounded mb-2" />
+          <div className="h-7 w-16 bg-muted rounded" />
+        </div>
+      ))}
+    </div>
+  );
+}
+
 export default function DashboardPage() {
   const { selectedSymbol } = useSymbolStore();
-  const { count: tradeCount } = useTrades();
-  const { positions } = usePositions();
+  const { count: tradeCount, loading: tradesLoading } = useTrades();
+  const { positions, loading: positionsLoading } = usePositions();
+
+  if (tradesLoading && positionsLoading) {
+    return (
+      <PageWrapper
+        title="Dashboard"
+        description="Overview of your trading intelligence"
+      >
+        <StatsLoadingSkeleton />
+        <div className="grid gap-4 lg:grid-cols-3">
+          <div className="lg:col-span-2 space-y-4">
+            <div className="grid gap-4 sm:grid-cols-2">
+              <div className="h-[320px] rounded-lg border border-border bg-card animate-pulse" />
+              <div className="space-y-4">
+                <div className="h-[160px] rounded-lg border border-border bg-card animate-pulse" />
+                <div className="h-[80px] rounded-lg border border-border bg-card animate-pulse" />
+              </div>
+            </div>
+            <div className="grid gap-4 sm:grid-cols-2">
+              <div className="h-[200px] rounded-lg border border-border bg-card animate-pulse" />
+              <div className="h-[200px] rounded-lg border border-border bg-card animate-pulse" />
+            </div>
+          </div>
+          <div className="space-y-4">
+            <div className="h-[400px] rounded-lg border border-border bg-card animate-pulse" />
+            <div className="h-[400px] rounded-lg border border-border bg-card animate-pulse" />
+            <div className="h-[280px] rounded-lg border border-border bg-card animate-pulse" />
+          </div>
+        </div>
+      </PageWrapper>
+    );
+  }
 
   return (
-    <PageWrapper title="Dashboard" description="Overview of your trading intelligence">
+    <PageWrapper
+      title="Dashboard"
+      description="Overview of your trading intelligence"
+    >
       {/* Top stats */}
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        <div className="rounded-lg border border-border bg-card p-4">
-          <p className="text-sm text-muted-foreground">Selected Symbol</p>
-          <p className="text-2xl font-bold font-mono">{selectedSymbol}</p>
+      <ErrorBoundary>
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+          <div className="rounded-lg border border-border bg-card p-4">
+            <p className="text-sm text-muted-foreground">Selected Symbol</p>
+            <p className="text-2xl font-bold font-mono">{selectedSymbol}</p>
+          </div>
+          <div className="rounded-lg border border-border bg-card p-4">
+            <p className="text-sm text-muted-foreground">Open Positions</p>
+            <p className="text-2xl font-bold">{positions.length}</p>
+          </div>
+          <div className="rounded-lg border border-border bg-card p-4">
+            <p className="text-sm text-muted-foreground">Total Trades</p>
+            <p className="text-2xl font-bold">{tradeCount}</p>
+          </div>
+          <div className="rounded-lg border border-border bg-card p-4">
+            <p className="text-sm text-muted-foreground">Market</p>
+            <p className="text-2xl font-bold">{selectedSymbol}</p>
+          </div>
         </div>
-        <div className="rounded-lg border border-border bg-card p-4">
-          <p className="text-sm text-muted-foreground">Open Positions</p>
-          <p className="text-2xl font-bold">{positions.length}</p>
-        </div>
-        <div className="rounded-lg border border-border bg-card p-4">
-          <p className="text-sm text-muted-foreground">Total Trades</p>
-          <p className="text-2xl font-bold">{tradeCount}</p>
-        </div>
-        <div className="rounded-lg border border-border bg-card p-4">
-          <p className="text-sm text-muted-foreground">Market</p>
-          <p className="text-2xl font-bold">{selectedSymbol}</p>
-        </div>
-      </div>
+      </ErrorBoundary>
 
       {/* Main grid: analysis left, trade + chart right */}
       <div className="grid gap-4 lg:grid-cols-3">
         {/* Left column — consensus + analyst grid + vote breakdown */}
         <div className="space-y-4 lg:col-span-2">
           <div className="grid gap-4 sm:grid-cols-2">
-            <ConsensusGauge />
+            <ErrorBoundary>
+              <ConsensusGauge />
+            </ErrorBoundary>
             <div className="space-y-4">
-              <AnalystGrid />
-              <VoteBreakdown />
+              <ErrorBoundary>
+                <AnalystGrid />
+              </ErrorBoundary>
+              <ErrorBoundary>
+                <VoteBreakdown />
+              </ErrorBoundary>
             </div>
           </div>
 
           {/* Scanner heatmap + legendary */}
           <div className="grid gap-4 sm:grid-cols-2">
-            <ScannerHeatmap />
-            <LegendaryModules />
+            <ErrorBoundary>
+              <ScannerHeatmap />
+            </ErrorBoundary>
+            <ErrorBoundary>
+              <LegendaryModules />
+            </ErrorBoundary>
           </div>
         </div>
 
         {/* Right column — quick trade + chart */}
         <div className="space-y-4">
-          <QuickTrade />
-          <PriceChart />
-          <Indicators />
+          <ErrorBoundary>
+            <QuickTrade />
+          </ErrorBoundary>
+          <ErrorBoundary>
+            <PriceChart />
+          </ErrorBoundary>
+          <ErrorBoundary>
+            <Indicators />
+          </ErrorBoundary>
         </div>
       </div>
     </PageWrapper>
