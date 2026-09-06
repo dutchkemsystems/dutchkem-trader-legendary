@@ -985,3 +985,193 @@ class TestPandasDataReaderProvider:
             candles = await provider.get_candles("INVALID", Timeframe.ONE_DAY, limit=10)
 
             assert candles == []
+
+
+# =============================================================================
+# ProviderRegistry Tests (6-tier fallback)
+# =============================================================================
+
+class TestProviderRegistry:
+    def test_registry_instantiation(self):
+        from data.providers.registry import ProviderRegistry
+        registry = ProviderRegistry()
+        assert registry.providers == []
+
+    def test_register_single_provider(self):
+        from data.providers.registry import ProviderRegistry
+        registry = ProviderRegistry()
+        provider = ConcreteProvider()
+        registry.register(provider)
+        assert len(registry.providers) == 1
+        assert registry.providers[0] is provider
+
+    def test_register_multiple_providers_appends_in_order(self):
+        from data.providers.registry import ProviderRegistry
+        registry = ProviderRegistry()
+        p1 = ConcreteProvider()
+        p1.name = "alpha"
+        p2 = ConcreteProvider()
+        p2.name = "beta"
+        registry.register(p1)
+        registry.register(p2)
+        assert registry.providers[0].name == "alpha"
+        assert registry.providers[1].name == "beta"
+
+    def test_register_with_priority_inserts_at_position(self):
+        from data.providers.registry import ProviderRegistry
+        registry = ProviderRegistry()
+        p1 = ConcreteProvider()
+        p1.name = "first"
+        p2 = ConcreteProvider()
+        p2.name = "second"
+        registry.register(p1)
+        registry.register(p2, priority=0)
+        assert len(registry.providers) == 2
+        assert registry.providers[0].name == "second"
+        assert registry.providers[1].name == "first"
+
+    @pytest.mark.asyncio
+    async def test_get_candles_tries_first_provider(self):
+        from data.providers.registry import ProviderRegistry
+        registry = ProviderRegistry()
+        provider = ConcreteProvider()
+        registry.register(provider)
+        candles = await registry.get_candles("EURUSD", Timeframe.ONE_HOUR, limit=10)
+        assert len(candles) == 1
+        assert isinstance(candles[0], Candle)
+        assert candles[0].symbol == "EURUSD"
+
+    @pytest.mark.asyncio
+    async def test_get_candles_falls_back_on_first_failure(self):
+        from data.providers.registry import ProviderRegistry
+        registry = ProviderRegistry()
+
+        failing = MagicMock(spec=BaseDataProvider)
+        failing.name = "failing"
+        failing.get_candles = AsyncMock(side_effect=Exception("provider down"))
+
+        working = ConcreteProvider()
+        registry.register(failing)
+        registry.register(working)
+
+        candles = await registry.get_candles("EURUSD", Timeframe.ONE_HOUR, limit=10)
+        assert len(candles) == 1
+        assert candles[0].symbol == "EURUSD"
+
+    @pytest.mark.asyncio
+    async def test_get_candles_raises_when_all_providers_fail(self):
+        from data.providers.registry import ProviderRegistry
+        registry = ProviderRegistry()
+
+        f1 = MagicMock(spec=BaseDataProvider)
+        f1.name = "fail1"
+        f1.get_candles = AsyncMock(side_effect=Exception("error1"))
+
+        f2 = MagicMock(spec=BaseDataProvider)
+        f2.name = "fail2"
+        f2.get_candles = AsyncMock(side_effect=Exception("error2"))
+
+        registry.register(f1)
+        registry.register(f2)
+
+        with pytest.raises(RuntimeError, match="All providers failed"):
+            await registry.get_candles("EURUSD", Timeframe.ONE_HOUR, limit=10)
+
+    @pytest.mark.asyncio
+    async def test_get_quote_falls_back(self):
+        from data.providers.registry import ProviderRegistry
+        registry = ProviderRegistry()
+
+        failing = MagicMock(spec=BaseDataProvider)
+        failing.name = "failing"
+        failing.get_quote = AsyncMock(side_effect=Exception("down"))
+
+        working = ConcreteProvider()
+        registry.register(failing)
+        registry.register(working)
+
+        quote = await registry.get_quote("EURUSD")
+        assert isinstance(quote, Quote)
+        assert quote.symbol == "EURUSD"
+
+    @pytest.mark.asyncio
+    async def test_get_quote_raises_when_all_fail(self):
+        from data.providers.registry import ProviderRegistry
+        registry = ProviderRegistry()
+
+        f1 = MagicMock(spec=BaseDataProvider)
+        f1.name = "f1"
+        f1.get_quote = AsyncMock(side_effect=Exception("e1"))
+
+        registry.register(f1)
+
+        with pytest.raises(RuntimeError, match="All providers failed"):
+            await registry.get_quote("EURUSD")
+
+    @pytest.mark.asyncio
+    async def test_get_ticks_falls_back(self):
+        from data.providers.registry import ProviderRegistry
+        registry = ProviderRegistry()
+
+        failing = MagicMock(spec=BaseDataProvider)
+        failing.name = "failing"
+        failing.get_ticks = AsyncMock(side_effect=Exception("down"))
+
+        working = ConcreteProvider()
+        registry.register(failing)
+        registry.register(working)
+
+        ticks = await registry.get_ticks("EURUSD", limit=10)
+        assert len(ticks) == 1
+        assert isinstance(ticks[0], Tick)
+
+    @pytest.mark.asyncio
+    async def test_get_latest_price_falls_back(self):
+        from data.providers.registry import ProviderRegistry
+        registry = ProviderRegistry()
+
+        failing = MagicMock(spec=BaseDataProvider)
+        failing.name = "failing"
+        failing.get_latest_price = AsyncMock(side_effect=Exception("down"))
+
+        working = ConcreteProvider()
+        registry.register(failing)
+        registry.register(working)
+
+        price = await registry.get_latest_price("EURUSD")
+        assert isinstance(price, float)
+        assert price > 0
+
+    @pytest.mark.asyncio
+    async def test_connect_websocket_delegates(self):
+        from data.providers.registry import ProviderRegistry
+        registry = ProviderRegistry()
+        provider = ConcreteProvider()
+        registry.register(provider)
+        await registry.connect_websocket(["EURUSD"])
+
+    @pytest.mark.asyncio
+    async def test_disconnect_websocket_delegates(self):
+        from data.providers.registry import ProviderRegistry
+        registry = ProviderRegistry()
+        provider = ConcreteProvider()
+        registry.register(provider)
+        await registry.disconnect_websocket()
+
+    def test_create_default_returns_registry(self):
+        from data.providers.registry import ProviderRegistry
+        registry = ProviderRegistry.create_default()
+        assert isinstance(registry, ProviderRegistry)
+        assert len(registry.providers) > 0
+
+    def test_create_default_provider_names(self):
+        from data.providers.registry import ProviderRegistry
+        registry = ProviderRegistry.create_default()
+        names = [p.name for p in registry.providers]
+        assert len(names) >= 1
+
+    def test_create_default_provider_is_base_subclass(self):
+        from data.providers.registry import ProviderRegistry
+        registry = ProviderRegistry.create_default()
+        for provider in registry.providers:
+            assert isinstance(provider, BaseDataProvider)
