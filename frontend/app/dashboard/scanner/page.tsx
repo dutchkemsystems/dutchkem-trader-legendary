@@ -1,10 +1,13 @@
 import { PageWrapper } from "@/components/layout/page-wrapper";
+import { ScannerHeatmap } from "@/components/dashboard/scanner-heatmap";
+import { LegendaryModules } from "@/components/dashboard/legendary-modules";
 
 export default function ScannerPage() {
   return (
     <PageWrapper title="Scanner" description="Multi-timeframe market scanner">
-      <div className="rounded-lg border border-border bg-card p-6">
-        <p className="text-muted-foreground">Market scanner coming soon...</p>
+      <div className="space-y-6">
+        <ScannerHeatmap />
+        <LegendaryModules />
       </div>
     </PageWrapper>
   );
