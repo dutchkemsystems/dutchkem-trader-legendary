@@ -43,7 +43,12 @@ def test_broker_status_connected(client):
 
 def test_broker_connect_endpoint(client):
     """POST /api/v1/broker/connect should attempt connection."""
-    with patch("api.routes.broker.get_broker") as mock_get_broker:
+    with patch("api.routes.broker.get_broker") as mock_get_broker, \
+         patch("api.routes.broker.get_current_user") as mock_user, \
+         patch("api.routes.broker._get_or_create_config") as mock_cfg, \
+         patch("api.routes.broker._sync_config_from_broker") as mock_sync:
+        mock_user.return_value = MagicMock()
+        mock_cfg.return_value = MagicMock()
         mock_broker = MagicMock()
         mock_broker.connect.return_value = True
         mock_broker.is_connected.return_value = True
@@ -71,7 +76,12 @@ def test_broker_connect_endpoint(client):
 
 def test_broker_disconnect_endpoint(client):
     """POST /api/v1/broker/disconnect should disconnect."""
-    with patch("api.routes.broker.get_broker") as mock_get_broker:
+    with patch("api.routes.broker.get_broker") as mock_get_broker, \
+         patch("api.routes.broker.get_current_user") as mock_user, \
+         patch("api.routes.broker._get_or_create_config") as mock_cfg, \
+         patch("api.routes.broker._sync_config_from_broker") as mock_sync:
+        mock_user.return_value = MagicMock()
+        mock_cfg.return_value = MagicMock()
         mock_broker = MagicMock()
         mock_broker.disconnect.return_value = None
         mock_get_broker.return_value = mock_broker
@@ -84,7 +94,12 @@ def test_broker_disconnect_endpoint(client):
 
 def test_broker_account_info_endpoint(client):
     """GET /api/v1/broker/account should return account info when connected."""
-    with patch("api.routes.broker.get_broker") as mock_get_broker:
+    with patch("api.routes.broker.get_broker") as mock_get_broker, \
+         patch("api.routes.broker.get_current_user") as mock_user, \
+         patch("api.routes.broker._get_or_create_config") as mock_cfg, \
+         patch("api.routes.broker._sync_config_from_broker") as mock_sync:
+        mock_user.return_value = MagicMock()
+        mock_cfg.return_value = MagicMock()
         mock_broker = MagicMock()
         mock_broker.is_connected.return_value = True
         mock_broker.get_account_info.return_value = MagicMock(
