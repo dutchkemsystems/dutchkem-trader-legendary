@@ -112,3 +112,30 @@ def test_mt5_close_position_not_found(connector):
     connector.connect("SIM-001", "pass", "Sim")
     with pytest.raises(RuntimeError, match="not found"):
         connector.close_position(99999)
+
+
+# =============================================================================
+# Config injection
+# =============================================================================
+
+def test_connector_accepts_config_simulation():
+    from config.broker_config import BrokerConfig
+    cfg = BrokerConfig()
+    with patch("execution.mt5_connector.MT5_AVAILABLE", False):
+        conn = MT5Connector(config=cfg)
+    assert conn._config is cfg
+
+
+def test_connector_config_magic_number():
+    from config.broker_config import BrokerConfig
+    cfg = BrokerConfig(magic_number=999999)
+    with patch("execution.mt5_connector.MT5_AVAILABLE", False):
+        conn = MT5Connector(config=cfg)
+    assert conn._config.magic_number == 999999
+
+
+def test_connector_default_config():
+    with patch("execution.mt5_connector.MT5_AVAILABLE", False):
+        conn = MT5Connector()
+    from config.broker_config import BrokerConfig
+    assert isinstance(conn._config, BrokerConfig)
