@@ -38,7 +38,9 @@ class MT5Connector(BaseBroker):
     and in-memory position tracking.
     """
 
-    def __init__(self) -> None:
+    def __init__(self, config=None) -> None:
+        from config.broker_config import BrokerConfig
+        self._config = config or BrokerConfig()
         self._connected: bool = False
         self._account_number: str = ""
         self._server: str = ""
