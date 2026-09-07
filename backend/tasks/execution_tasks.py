@@ -13,10 +13,10 @@ logger = logging.getLogger(__name__)
 _broker: MT5Connector | None = None
 
 
-def _get_broker() -> MT5BrokerConnector:
+def _get_broker() -> MT5Connector:
     global _broker
     if _broker is None:
-        _broker = MT5BrokerConnector()
+        _broker = MT5Connector()
     return _broker
 
 
