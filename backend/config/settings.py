@@ -93,3 +93,13 @@ REST_FRAMEWORK = {
     "DEFAULT_PAGINATION_CLASS": "rest_framework.pagination.PageNumberPagination",
     "PAGE_SIZE": 20,
 }
+
+# ---------------------------------------------------------------------------
+# Broker (MT5) Configuration
+# ---------------------------------------------------------------------------
+MT5_LOGIN = os.getenv("MT5_LOGIN", "")
+MT5_PASSWORD = os.getenv("MT5_PASSWORD", "")
+MT5_SERVER = os.getenv("MT5_SERVER", "")
+MT5_PATH = os.getenv("MT5_PATH", "")
+MT5_MAGIC = int(os.getenv("MT5_MAGIC", "234000"))
+MT5_SLIPPAGE = int(os.getenv("MT5_SLIPPAGE", "10"))
