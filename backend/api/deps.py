@@ -16,8 +16,8 @@ from apps.analysts.sentiment import SentimentAnalyst
 from apps.analysts.technical import TechnicalAnalyst
 from apps.consensus.engine import ConsensusEngine
 from apps.scanner.scanner import MultiTimeframeScanner
-from backend.execution.engine import OrderExecutionEngine
-from backend.execution.mt5_connector import MT5BrokerConnector
+from execution.engine import OrderExecutionEngine
+from execution.mt5_connector import MT5Connector
 from cache.redis import RedisCache
 
 
@@ -48,7 +48,7 @@ def get_redis_cache():
 
 @lru_cache
 def get_broker():
-    return MT5BrokerConnector()
+    return MT5Connector()
 
 
 @lru_cache

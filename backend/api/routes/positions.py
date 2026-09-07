@@ -4,8 +4,8 @@ from typing import Optional
 from fastapi import APIRouter, HTTPException, Query
 from pydantic import BaseModel
 
-from backend.api.deps import get_current_user, get_execution_engine
-from backend.django_app.models import Position
+from api.deps import get_current_user, get_execution_engine
+from django_app.models import Position
 
 router = APIRouter()
 
@@ -51,7 +51,7 @@ def _serialize_position(pos) -> dict:
 # ---------------------------------------------------------------------------
 
 @router.get("/")
-async def list_positions():
+def list_positions():
     user = _user()
     positions = list(Position.objects.filter(user=user).order_by("-updated_at"))
     return {
@@ -61,14 +61,14 @@ async def list_positions():
 
 
 @router.get("/summary")
-async def position_summary():
+def position_summary():
     user = _user()
     engine = _engine()
     return engine.positions.get_position_summary(user)
 
 
 @router.post("/close")
-async def close_position(payload: PositionClose):
+def close_position(payload: PositionClose):
     user = _user()
     engine = _engine()
 
@@ -96,7 +96,7 @@ async def close_position(payload: PositionClose):
 
 
 @router.post("/close-all")
-async def close_all_positions():
+def close_all_positions():
     user = _user()
     engine = _engine()
     trades = engine.positions.close_all_positions(user)

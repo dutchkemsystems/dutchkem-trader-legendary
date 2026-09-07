@@ -2,19 +2,19 @@ import pytest
 from decimal import Decimal
 from unittest.mock import patch
 
-from backend.execution.broker import (
+from execution.broker import (
     BrokerOrder,
     OrderSide,
     OrderType,
 )
-from backend.execution.mt5_connector import MT5BrokerConnector
+from execution.mt5_connector import MT5Connector
 
 
 @pytest.fixture
 def connector():
-    """Fresh MT5BrokerConnector forced into simulation mode."""
-    with patch("backend.execution.mt5_connector.MT5_AVAILABLE", False):
-        conn = MT5BrokerConnector()
+    """Fresh MT5Connector forced into simulation mode."""
+    with patch("execution.mt5_connector.MT5_AVAILABLE", False):
+        conn = MT5Connector()
         yield conn
 
 

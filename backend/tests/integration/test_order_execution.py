@@ -3,16 +3,16 @@ from decimal import Decimal
 
 from django.contrib.auth.models import User
 
-from backend.django_app.models import Trade, Position
-from backend.execution.engine import OrderExecutionEngine
-from backend.execution import mt5_connector
-from backend.execution.mt5_connector import MT5BrokerConnector
+from django_app.models import Trade, Position
+from execution.engine import OrderExecutionEngine
+from execution import mt5_connector
+from execution.mt5_connector import MT5Connector
 
 
 @pytest.fixture
 def broker(monkeypatch):
     monkeypatch.setattr(mt5_connector, "MT5_AVAILABLE", False)
-    b = MT5BrokerConnector()
+    b = MT5Connector()
     b.connect("SIM-000000", "", "Simulation")
     return b
 

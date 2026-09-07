@@ -23,7 +23,7 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     "rest_framework",
     "corsheaders",
-    "backend.django_app",
+    "django_app",
 ]
 
 MIDDLEWARE = [

@@ -6,7 +6,7 @@ from datetime import datetime, timezone
 from decimal import Decimal
 from typing import Any, Dict, List, Optional
 
-from backend.execution.broker import (
+from execution.broker import (
     AccountInfo,
     BaseBroker,
     BrokerFill,
@@ -30,7 +30,7 @@ SIMULATED_CURRENCY = "USD"
 _MAX_TICKET = 1_000_000
 
 
-class MT5BrokerConnector(BaseBroker):
+class MT5Connector(BaseBroker):
     """MetaTrader 5 broker connector with automatic simulation fallback.
 
     When the ``MetaTrader5`` package is not installed (or import fails),

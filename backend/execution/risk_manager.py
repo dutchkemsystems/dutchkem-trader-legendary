@@ -1,9 +1,9 @@
 from decimal import Decimal
 from typing import Optional, Tuple
 
-from backend.django_app.models import Position
-from backend.execution.broker import BrokerOrder, OrderSide
-from backend.execution.account import AccountManager
+from django_app.models import Position
+from execution.broker import BrokerOrder, OrderSide
+from execution.account import AccountManager
 
 
 class RiskManager:

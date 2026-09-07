@@ -1,7 +1,7 @@
 from decimal import Decimal, ROUND_HALF_UP
 from typing import Optional
 
-from backend.execution.account import AccountManager
+from execution.account import AccountManager
 
 PIP_MAP = {
     "JPY": Decimal("0.01"),

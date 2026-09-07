@@ -2,7 +2,7 @@ import pytest
 from decimal import Decimal
 from unittest.mock import MagicMock
 
-from backend.execution.position_sizer import PositionSizer
+from execution.position_sizer import PositionSizer
 
 
 @pytest.fixture

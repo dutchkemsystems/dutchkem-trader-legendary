@@ -4,8 +4,8 @@ from typing import Optional
 from django.contrib.auth.models import User
 from django.utils import timezone
 
-from backend.django_app.models import AccountConfig
-from backend.execution.broker import AccountInfo, BaseBroker
+from django_app.models import AccountConfig
+from execution.broker import AccountInfo, BaseBroker
 
 
 class AccountManager:

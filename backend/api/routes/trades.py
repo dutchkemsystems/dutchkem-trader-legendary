@@ -4,7 +4,7 @@ from typing import Optional
 from fastapi import APIRouter, HTTPException, Query
 from pydantic import BaseModel
 
-from backend.api.deps import get_current_user, get_execution_engine
+from api.deps import get_current_user, get_execution_engine
 
 router = APIRouter()
 
@@ -65,7 +65,7 @@ def _serialize_trade(trade) -> dict:
 # ---------------------------------------------------------------------------
 
 @router.get("/")
-async def list_trades(limit: int = Query(50, ge=1, le=500)):
+def list_trades(limit: int = Query(50, ge=1, le=500)):
     user = get_current_user()
     if user is None:
         raise HTTPException(status_code=401, detail="No authenticated user")
@@ -75,7 +75,7 @@ async def list_trades(limit: int = Query(50, ge=1, le=500)):
 
 
 @router.post("/")
-async def create_trade(payload: TradeCreate):
+def create_trade(payload: TradeCreate):
     user = get_current_user()
     if user is None:
         raise HTTPException(status_code=401, detail="No authenticated user")
@@ -105,7 +105,7 @@ async def create_trade(payload: TradeCreate):
 
 
 @router.get("/summary/daily")
-async def daily_summary():
+def daily_summary():
     user = get_current_user()
     if user is None:
         raise HTTPException(status_code=401, detail="No authenticated user")
@@ -114,7 +114,7 @@ async def daily_summary():
 
 
 @router.get("/summary/monthly")
-async def monthly_summary():
+def monthly_summary():
     user = get_current_user()
     if user is None:
         raise HTTPException(status_code=401, detail="No authenticated user")
@@ -123,7 +123,7 @@ async def monthly_summary():
 
 
 @router.post("/close")
-async def close_trade(payload: TradeClose):
+def close_trade(payload: TradeClose):
     user = get_current_user()
     if user is None:
         raise HTTPException(status_code=401, detail="No authenticated user")

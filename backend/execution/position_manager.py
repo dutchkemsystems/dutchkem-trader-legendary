@@ -6,15 +6,15 @@ from django.contrib.auth.models import User
 from django.db import transaction
 from django.utils import timezone
 
-from backend.django_app.models import Position, Trade
-from backend.execution.broker import (
+from django_app.models import Position, Trade
+from execution.broker import (
     BaseBroker,
     BrokerFill,
     BrokerPosition,
     OrderSide,
     OrderType,
 )
-from backend.execution.risk_manager import RiskManager
+from execution.risk_manager import RiskManager
 
 logger = logging.getLogger(__name__)
 

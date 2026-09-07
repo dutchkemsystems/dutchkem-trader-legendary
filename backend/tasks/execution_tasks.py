@@ -5,12 +5,12 @@ import logging
 from celery import shared_task
 from django.contrib.auth.models import User
 
-from backend.execution.engine import OrderExecutionEngine
-from backend.execution.mt5_connector import MT5BrokerConnector
+from execution.engine import OrderExecutionEngine
+from execution.mt5_connector import MT5Connector
 
 logger = logging.getLogger(__name__)
 
-_broker: MT5BrokerConnector | None = None
+_broker: MT5Connector | None = None
 
 
 def _get_broker() -> MT5BrokerConnector:

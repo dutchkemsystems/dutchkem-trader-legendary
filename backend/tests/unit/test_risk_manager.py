@@ -2,8 +2,9 @@ import pytest
 from decimal import Decimal
 from unittest.mock import MagicMock, patch
 
-from backend.execution.broker import BrokerOrder, OrderSide, OrderType
-from backend.execution.risk_manager import RiskManager, Position
+from execution.broker import BrokerOrder, OrderSide, OrderType
+from execution.risk_manager import RiskManager
+from django_app.models import Position
 
 
 @pytest.fixture

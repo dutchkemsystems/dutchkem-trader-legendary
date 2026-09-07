@@ -8,17 +8,17 @@ from django.db import transaction
 from django.db.models import Sum
 from django.utils import timezone
 
-from backend.django_app.models import ConsensusResult, Trade
-from backend.execution.account import AccountManager
-from backend.execution.broker import (
+from django_app.models import ConsensusResult, Trade
+from execution.account import AccountManager
+from execution.broker import (
     BaseBroker,
     BrokerOrder,
     OrderSide,
     OrderType,
 )
-from backend.execution.position_manager import PositionManager
-from backend.execution.position_sizer import PositionSizer
-from backend.execution.risk_manager import RiskManager
+from execution.position_manager import PositionManager
+from execution.position_sizer import PositionSizer
+from execution.risk_manager import RiskManager
 
 logger = logging.getLogger(__name__)
 
@@ -224,7 +224,7 @@ class OrderExecutionEngine:
             .sync_positions(user)
         )
 
-        from backend.django_app.models import Position
+        from django_app.models import Position
 
         position = Position.objects.filter(user=user, ticker=trade.ticker).first()
         if position is None:
