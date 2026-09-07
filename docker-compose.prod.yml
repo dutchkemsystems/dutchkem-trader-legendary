@@ -169,6 +169,108 @@ services:
     networks:
       - dutchkem-net
 
+  # --- Monitoring Stack ---
+  prometheus:
+    image: prom/prometheus:v2.53.0
+    container_name: dutchkem-prometheus
+    volumes:
+      - ./monitoring/prometheus:/etc/prometheus:ro
+      - prometheus_data:/prometheus
+    ports:
+      - "9090:9090"
+    restart: unless-stopped
+    networks:
+      - dutchkem-net
+
+  grafana:
+    image: grafana/grafana:11.1.0
+    container_name: dutchkem-grafana
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./monitoring/grafana/provisioning:/etc/grafana/provisioning
+    environment:
+      - GF_SECURITY_ADMIN_USER=${GRAFANA_USER:-admin}
+      - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_PASSWORD:-change_me}
+    ports:
+      - "3001:3000"
+    depends_on:
+      - prometheus
+    restart: unless-stopped
+    networks:
+      - dutchkem-net
+
+  loki:
+    image: grafana/loki:3.1.0
+    container_name: dutchkem-loki
+    volumes:
+      - ./monitoring/loki/loki.yml:/etc/loki/local-config.yaml:ro
+      - loki_data:/loki
+    ports:
+      - "3100:3100"
+    restart: unless-stopped
+    networks:
+      - dutchkem-net
+
+  promtail:
+    image: grafana/promtail:3.1.0
+    container_name: dutchkem-promtail
+    volumes:
+      - ./monitoring/promtail/promtail.yml:/etc/promtail/config.yml:ro
+      - /var/log:/var/log:ro
+      - /var/lib/docker/containers:/var/lib/docker/containers:ro
+    depends_on:
+      - loki
+    restart: unless-stopped
+    networks:
+      - dutchkem-net
+
+  redis-exporter:
+    image: oliver006/redis_exporter:v1.61.0
+    container_name: dutchkem-redis-exporter
+    environment:
+      - REDIS_ADDR=redis://redis:6379
+    ports:
+      - "9121:9121"
+    depends_on:
+      - redis
+    restart: unless-stopped
+    networks:
+      - dutchkem-net
+
+  postgres-exporter:
+    image: prometheuscommunity/postgres-exporter:v0.15.0
+    container_name: dutchkem-postgres-exporter
+    environment:
+      - DATA_SOURCE_NAME=postgresql://postgres:${POSTGRES_PASSWORD}@db:5432/dutchkem_trader?sslmode=disable
+    ports:
+      - "9187:9187"
+    depends_on:
+      - db
+    restart: unless-stopped
+    networks:
+      - dutchkem-net
+
+  node-exporter:
+    image: prom/node-exporter:latest
+    container_name: dutchkem-node-exporter
+    volumes:
+      - /proc:/host/proc:ro
+      - /sys:/host/sys:ro
+      - /:/rootfs:ro
+    command:
+      - "--path.procfs=/host/proc"
+      - "--path.sysfs=/host/sys"
+      - "--path.rootfs=/rootfs"
+      - "--collector.filesystem.mount-points-exclude=^/(sys|proc|dev|host|etc)($$|/)"
+    ports:
+      - "9100:9100"
+    restart: unless-stopped
+    networks:
+      - dutchkem-net
+
 volumes:
   nginx-ssl:
   db-backups:
+  prometheus_data:
+  grafana_data:
+  loki_data:

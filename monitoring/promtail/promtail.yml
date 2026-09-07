@@ -1,0 +1,25 @@
+# monitoring/promtail/promtail.yml
+server:
+  http_listen_port: 9080
+
+positions:
+  filename: /tmp/positions.yaml
+
+clients:
+  - url: http://loki:3100/loki/api/v1/push
+
+scrape_configs:
+  - job_name: docker
+    static_configs:
+      - targets:
+          - localhost
+        labels:
+          job: docker
+          __path__: /var/lib/docker/containers/*/*.log
+    pipeline_stages:
+      - docker: {}
+      - regex:
+          expression: '.*level=(?P<level>\w+).*time="(?P<timestamp>[^"]*).*msg="(?P<message>[^"]*).*'
+      - labels:
+          level:
+          timestamp:
