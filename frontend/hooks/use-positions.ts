@@ -14,7 +14,7 @@ export function usePositions() {
   const fetchPositions = useCallback(async () => {
     try {
       const res = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api"}/positions/`,
+        `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:8001/api/v1"}/positions/`,
         {
           headers: {
             Authorization: `Bearer ${typeof window !== "undefined" ? localStorage.getItem("token") || "" : ""}`,

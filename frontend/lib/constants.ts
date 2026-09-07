@@ -28,10 +28,10 @@ export const SIGNAL_BG_COLORS: Record<Signal, string> = {
 };
 
 export const API_BASE_URL =
-  process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api";
+  process.env.NEXT_PUBLIC_API_URL || "http://localhost:8001/api/v1";
 
 export const WS_BASE_URL =
-  process.env.NEXT_PUBLIC_WS_URL || "ws://localhost:8000/ws";
+  process.env.NEXT_PUBLIC_WS_URL || "ws://localhost:8001/ws";
 
 export const RECONNECT_INTERVAL = 3000;
 export const MAX_RECONNECT_ATTEMPTS = 10;

@@ -1,10 +1,25 @@
+import os
+import django
+
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "config.settings")
+django.setup()
+
 import time
 from fastapi import FastAPI, APIRouter
+from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from api.routes import market, analysts, consensus, scanner, legendary, trades, positions, auth, broker, backtesting
 from api.websocket.handlers import market_websocket, trades_websocket, consensus_websocket
 
 app = FastAPI(title="Dutchkem Trader API", version="1.0.0")
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:3000", "http://127.0.0.1:3000"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 app.include_router(market.router, prefix="/api/v1/market", tags=["market"])
 app.include_router(analysts.router, prefix="/api/v1/analysts", tags=["analysts"])
@@ -22,7 +37,7 @@ _start_time = time.time()
 
 
 @app.get("/api/v1/health")
-async def health_check():
+def health_check():
     checks = {}
     status = "healthy"
 
