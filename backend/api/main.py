@@ -1,4 +1,6 @@
-from fastapi import FastAPI
+import time
+from fastapi import FastAPI, APIRouter
+from fastapi.responses import JSONResponse
 from api.routes import market, analysts, consensus, scanner, legendary, trades, positions, auth, broker, backtesting
 from api.websocket.handlers import market_websocket, trades_websocket, consensus_websocket
 
@@ -16,9 +18,54 @@ app.include_router(broker.router, prefix="/api/v1/broker", tags=["broker"])
 app.include_router(backtesting.router, prefix="/api/v1/backtest", tags=["backtest"])
 
 
+_start_time = time.time()
+
+
 @app.get("/api/v1/health")
 async def health_check():
-    return {"status": "ok", "service": "dutchkem-trader-api"}
+    checks = {}
+    status = "healthy"
+
+    # Database check
+    try:
+        from django.db import connection
+        with connection.cursor() as cursor:
+            cursor.execute("SELECT 1")
+        checks["database"] = "ok"
+    except Exception as e:
+        checks["database"] = f"error: {e}"
+        status = "degraded"
+
+    # Redis check
+    try:
+        from django.core.cache import cache
+        cache.set("_healthcheck", "ok", 10)
+        checks["redis"] = "ok" if cache.get("_healthcheck") == "ok" else "error"
+    except Exception as e:
+        checks["redis"] = f"error: {e}"
+        status = "degraded"
+
+    # Trading readiness
+    checks["trading"] = "ready"
+
+    code = 200 if status == "healthy" else 503
+    return JSONResponse(
+        content={
+            "status": status,
+            "service": "dutchkem-trader-api",
+            "uptime_seconds": round(time.time() - _start_time, 1),
+            "checks": checks,
+        },
+        status_code=code,
+    )
+
+
+@app.get("/metrics")
+async def metrics():
+    """Prometheus metrics endpoint."""
+    from prometheus_client import generate_latest, CONTENT_TYPE_LATEST
+    from fastapi.responses import Response
+    return Response(content=generate_latest(), media_type=CONTENT_TYPE_LATEST)
 
 
 app.websocket("/ws/market/{symbol}")(market_websocket)
