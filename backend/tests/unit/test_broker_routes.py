@@ -130,3 +130,46 @@ def test_broker_account_info_not_connected(client):
 
         response = client.get("/api/v1/broker/account")
         assert response.status_code == 503
+
+
+def test_broker_health_endpoint_connected(client):
+    """GET /api/v1/broker/health should return health metrics when connected."""
+    from decimal import Decimal
+    with patch("api.routes.broker.get_broker") as mock_get_broker:
+        mock_broker = MagicMock()
+        mock_broker.is_connected.return_value = True
+        mock_broker.get_account_info.return_value = MagicMock(
+            account_number="12345",
+            balance=Decimal("10000"),
+            equity=Decimal("10000"),
+            margin=Decimal("2000"),
+            free_margin=Decimal("8000"),
+            leverage=100,
+            currency="USD",
+            account_type="standard",
+            profit=Decimal("0"),
+        )
+        mock_get_broker.return_value = mock_broker
+
+        response = client.get("/api/v1/broker/health")
+        assert response.status_code == 200
+        data = response.json()
+        assert data["status"] == "healthy"
+        assert data["connected"] is True
+        assert "balance" in data
+        assert "drawdown_pct" in data
+        assert "free_margin_pct" in data
+
+
+def test_broker_health_endpoint_disconnected(client):
+    """GET /api/v1/broker/health should report disconnected when not connected."""
+    with patch("api.routes.broker.get_broker") as mock_get_broker:
+        mock_broker = MagicMock()
+        mock_broker.is_connected.return_value = False
+        mock_get_broker.return_value = mock_broker
+
+        response = client.get("/api/v1/broker/health")
+        assert response.status_code == 200
+        data = response.json()
+        assert data["status"] == "disconnected"
+        assert data["connected"] is False
