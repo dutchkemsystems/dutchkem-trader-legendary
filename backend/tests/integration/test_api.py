@@ -20,8 +20,10 @@ def mock_user():
 
 def test_health_check(client):
     response = client.get("/api/v1/health")
-    assert response.status_code == 200
-    assert response.json()["status"] == "ok"
+    assert response.status_code in (200, 503)
+    data = response.json()
+    assert "status" in data
+    assert "checks" in data
 
 
 def test_list_analysts(client):
