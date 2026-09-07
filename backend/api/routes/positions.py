@@ -1,15 +1,117 @@
-from fastapi import APIRouter
+from decimal import Decimal
+from typing import Optional
+
+from fastapi import APIRouter, HTTPException, Query
+from pydantic import BaseModel
+
+from backend.api.deps import get_current_user, get_execution_engine
+from backend.django_app.models import Position
 
 router = APIRouter()
 
 
+# ---------------------------------------------------------------------------
+# Schemas
+# ---------------------------------------------------------------------------
+
+class PositionClose(BaseModel):
+    symbol: str
+    quantity: Optional[float] = None
+
+
+# ---------------------------------------------------------------------------
+# Helpers
+# ---------------------------------------------------------------------------
+
+def _engine():
+    return get_execution_engine()
+
+
+def _user():
+    u = get_current_user()
+    if u is None:
+        raise HTTPException(status_code=401, detail="No authenticated user")
+    return u
+
+
+def _serialize_position(pos) -> dict:
+    return {
+        "id": str(pos.id),
+        "ticker": pos.ticker,
+        "quantity": str(pos.quantity),
+        "avg_entry_price": str(pos.avg_entry_price),
+        "current_price": str(pos.current_price),
+        "unrealized_pnl": str(pos.unrealized_pnl),
+        "updated_at": pos.updated_at.isoformat(),
+    }
+
+
+# ---------------------------------------------------------------------------
+# Endpoints
+# ---------------------------------------------------------------------------
+
 @router.get("/")
 async def list_positions():
-    # Placeholder: will query database
-    return {"positions": [], "count": 0}
+    user = _user()
+    positions = list(Position.objects.filter(user=user).order_by("-updated_at"))
+    return {
+        "positions": [_serialize_position(p) for p in positions],
+        "count": len(positions),
+    }
 
 
-@router.get("/{position_id}")
-async def get_position(position_id: str):
-    # Placeholder: will query database
-    return {"id": position_id, "unrealized_pnl": 0}
+@router.get("/summary")
+async def position_summary():
+    user = _user()
+    engine = _engine()
+    return engine.positions.get_position_summary(user)
+
+
+@router.post("/close")
+async def close_position(payload: PositionClose):
+    user = _user()
+    engine = _engine()
+
+    position = Position.objects.filter(user=user, ticker=payload.symbol.upper()).first()
+    if position is None:
+        raise HTTPException(status_code=404, detail=f"No open position for {payload.symbol}")
+
+    quantity = Decimal(str(payload.quantity)) if payload.quantity is not None else None
+    trade = engine.positions.close_position(position, quantity=quantity)
+    if trade is None:
+        raise HTTPException(status_code=500, detail="Failed to close position")
+
+    return {
+        "status": "closed",
+        "ticker": payload.symbol.upper(),
+        "trade": {
+            "id": str(trade.id),
+            "side": trade.side,
+            "quantity": str(trade.quantity),
+            "fill_price": str(trade.fill_price),
+            "pnl": str(trade.pnl),
+            "status": trade.status,
+        },
+    }
+
+
+@router.post("/close-all")
+async def close_all_positions():
+    user = _user()
+    engine = _engine()
+    trades = engine.positions.close_all_positions(user)
+    return {
+        "status": "closed",
+        "closed_count": len(trades),
+        "trades": [
+            {
+                "id": str(t.id),
+                "ticker": t.ticker,
+                "side": t.side,
+                "quantity": str(t.quantity),
+                "fill_price": str(t.fill_price),
+                "pnl": str(t.pnl),
+            }
+            for t in trades
+        ],
+    }
