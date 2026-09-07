@@ -14,7 +14,7 @@ async def scan_symbol(symbol: str):
         "alignment": result.alignment,
         "overall_signal": result.overall_signal,
         "overall_confidence": result.overall_confidence,
-        "timeframes": {tf: {"signal": r.signal, "confidence": r.confidence} for tf, r in result.timeframes.items()}
+        "timeframes": {tf: {"signal": r.signal, "confidence": r.confidence, "data": getattr(r, 'data', {})} for tf, r in result.timeframes.items()}
     }
 
 

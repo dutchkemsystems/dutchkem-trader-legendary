@@ -37,11 +37,13 @@ def _user():
 def _serialize_position(pos) -> dict:
     return {
         "id": str(pos.id),
-        "ticker": pos.ticker,
-        "quantity": str(pos.quantity),
-        "avg_entry_price": str(pos.avg_entry_price),
-        "current_price": str(pos.current_price),
-        "unrealized_pnl": str(pos.unrealized_pnl),
+        "symbol": pos.ticker,
+        "action": "BUY" if pos.quantity >= 0 else "SELL",
+        "lot_size": float(pos.quantity),
+        "entry_price": float(pos.avg_entry_price),
+        "current_price": float(pos.current_price),
+        "unrealized_pnl": float(pos.unrealized_pnl),
+        "status": "open",
         "updated_at": pos.updated_at.isoformat(),
     }
 

@@ -42,17 +42,17 @@ def _to_decimal(value: Optional[float]) -> Optional[Decimal]:
 def _serialize_trade(trade) -> dict:
     return {
         "id": str(trade.id),
-        "ticker": trade.ticker,
-        "side": trade.side,
+        "symbol": trade.ticker,
+        "action": trade.side,
         "order_type": trade.order_type,
-        "quantity": str(trade.quantity),
-        "price": str(trade.price),
-        "stop_loss": str(trade.stop_loss) if trade.stop_loss else None,
-        "take_profit": str(trade.take_profit) if trade.take_profit else None,
-        "fill_price": str(trade.fill_price) if trade.fill_price else None,
-        "pnl": str(trade.pnl),
-        "commission": str(trade.commission),
-        "slippage": str(trade.slippage),
+        "lot_size": float(trade.quantity),
+        "entry_price": float(trade.price),
+        "stop_loss": float(trade.stop_loss) if trade.stop_loss else None,
+        "take_profit": float(trade.take_profit) if trade.take_profit else None,
+        "fill_price": float(trade.fill_price) if trade.fill_price else None,
+        "pnl": float(trade.pnl),
+        "commission": float(trade.commission),
+        "slippage": float(trade.slippage),
         "status": trade.status,
         "notes": trade.notes,
         "executed_at": trade.executed_at.isoformat() if trade.executed_at else None,
@@ -101,7 +101,8 @@ def create_trade(payload: TradeCreate):
     except Exception as exc:
         raise HTTPException(status_code=500, detail=str(exc))
 
-    return _serialize_trade(trade)
+    serialized = _serialize_trade(trade)
+    return {"id": serialized["id"], "status": serialized["status"], "trade": serialized}
 
 
 @router.get("/summary/daily")

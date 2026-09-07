@@ -18,7 +18,7 @@ export function useWebSocket() {
   const connect = useCallback(() => {
     if (clientRef.current) return;
 
-    const client = new WSClient("market");
+    const client = new WSClient(`market/${selectedSymbol}`);
     clientRef.current = client;
 
     client.subscribe("open", () => setStatus("connected"));
@@ -40,7 +40,7 @@ export function useWebSocket() {
 
     setStatus("connecting");
     client.connect();
-  }, [updatePrice]);
+  }, [updatePrice, selectedSymbol]);
 
   const disconnect = useCallback(() => {
     clientRef.current?.disconnect();
