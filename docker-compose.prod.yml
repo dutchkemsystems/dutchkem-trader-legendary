@@ -1,0 +1,174 @@
+# docker-compose.prod.yml
+version: "3.9"
+
+services:
+  db:
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          memory: 2G
+        reservations:
+          memory: 512M
+    logging:
+      driver: json-file
+      options:
+        max-size: "50m"
+        max-file: "5"
+    ports: []  # No exposed ports in prod
+
+  redis:
+    command: >
+      redis-server --appendonly yes
+      --maxmemory 512mb
+      --maxmemory-policy allkeys-lru
+      --requirepass ${REDIS_PASSWORD}
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+    logging:
+      driver: json-file
+      options:
+        max-size: "20m"
+        max-file: "3"
+    ports: []
+
+  backend:
+    user: "1000:1000"
+    ports: []
+    deploy:
+      resources:
+        limits:
+          cpus: "2"
+          memory: 1G
+        reservations:
+          cpus: "0.5"
+          memory: 256M
+    logging:
+      driver: json-file
+      options:
+        max-size: "50m"
+        max-file: "5"
+
+  fastapi:
+    user: "1000:1000"
+    command: uvicorn api.main:app --host 0.0.0.0 --port 8001
+    ports: []
+    deploy:
+      resources:
+        limits:
+          cpus: "2"
+          memory: 1G
+        reservations:
+          cpus: "0.5"
+          memory: 256M
+    logging:
+      driver: json-file
+      options:
+        max-size: "50m"
+        max-file: "5"
+
+  celery-worker:
+    user: "1000:1000"
+    command: celery -A config.celery_app worker --loglevel=info
+    deploy:
+      resources:
+        limits:
+          cpus: "2"
+          memory: 2G
+        reservations:
+          cpus: "0.5"
+          memory: 512M
+    logging:
+      driver: json-file
+      options:
+        max-size: "50m"
+        max-file: "5"
+
+  celery-beat:
+    user: "1000:1000"
+    command: celery -A config.celery_app beat --loglevel=info
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+    logging:
+      driver: json-file
+      options:
+        max-size: "20m"
+        max-file: "3"
+
+  frontend:
+    user: "nextjs:nodejs"
+    ports: []
+    environment:
+      - NODE_ENV=production
+    deploy:
+      resources:
+        limits:
+          cpus: "1"
+          memory: 512M
+        reservations:
+          cpus: "0.25"
+          memory: 128M
+    logging:
+      driver: json-file
+      options:
+        max-size: "20m"
+        max-file: "3"
+
+  nginx:
+    image: nginx:alpine
+    container_name: dutchkem-nginx
+    restart: always
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/conf.d/default.conf:ro
+      - nginx-ssl:/etc/nginx/ssl:ro
+    depends_on:
+      backend:
+        condition: service_healthy
+      fastapi:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q --spider http://localhost/ || exit 1"]
+      interval: 30s
+      timeout: 5s
+      start_period: 10s
+      retries: 3
+    networks:
+      - dutchkem-net
+    deploy:
+      resources:
+        limits:
+          memory: 256M
+          cpus: "0.5"
+
+  # --- Database Backup ---
+  db-backup:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: dutchkem-backup
+    env_file: .env
+    volumes:
+      - db-backups:/backups
+    command: >
+      sh -c "while true; do
+        pg_dump -h db -U $POSTGRES_USER $POSTGRES_DB | gzip > /backups/backup_$$(date +\%Y\%m\%d_\%H\%M\%S).sql.gz;
+        find /backups -name '*.sql.gz' -mtime +30 -delete;
+        sleep 86400;
+      done"
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: unless-stopped
+    networks:
+      - dutchkem-net
+
+volumes:
+  nginx-ssl:
+  db-backups:
