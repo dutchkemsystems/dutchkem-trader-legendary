@@ -196,6 +196,15 @@ def broker_account():
     )
 
 
+@router.get("/health")
+def broker_health():
+    """Health check with connection status and account risk metrics."""
+    from execution.health import BrokerHealthMonitor
+
+    broker = get_broker()
+    return BrokerHealthMonitor(broker).check()
+
+
 @router.get("/config", response_model=BrokerConfigResponse)
 def broker_config():
     """Get the stored AccountConfig for the current user."""
