@@ -12,6 +12,24 @@ from data.registry import ProviderRegistry
 logger = logging.getLogger(__name__)
 
 
+def _build_default_registry() -> ProviderRegistry:
+    """Build registry with real providers (fallback to StubProvider)."""
+    registry = ProviderRegistry()
+
+    # Try registering AKShare (free, no API key)
+    try:
+        from data.providers.akshare_provider import AKShareProvider
+        registry.register(AKShareProvider())
+        logger.info("Registered AKShareProvider (free, no API key)")
+    except Exception as e:
+        logger.debug("AKShareProvider not available: %s", e)
+
+    # Always register StubProvider as last resort
+    registry.register(StubProvider())
+
+    return registry
+
+
 class MarketDataManager:
     """Orchestrates data providers with caching and normalization."""
 
@@ -21,9 +39,7 @@ class MarketDataManager:
         cache: Optional[DataCache] = None,
         normalizer: Optional[DataNormalizer] = None,
     ) -> None:
-        self.registry = registry or ProviderRegistry()
-        if not registry:
-            self.registry.register(StubProvider())
+        self.registry = registry or _build_default_registry()
         self.cache = cache or DataCache()
         self.normalizer = normalizer or DataNormalizer()
 

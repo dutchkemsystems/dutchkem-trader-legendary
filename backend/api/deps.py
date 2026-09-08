@@ -15,11 +15,15 @@ from apps.analysts.risk import RiskAnalyst
 from apps.analysts.sentiment import SentimentAnalyst
 from apps.analysts.technical import TechnicalAnalyst
 from apps.consensus.engine import ConsensusEngine
+from apps.consensus.gates import ConsensusGates
 from apps.debate.engine import DebateEngine
 from apps.memory.situation_memory import FinancialSituationMemory
+from apps.ml.data_loader import MLDataLoader
+from apps.ml.predictor import MLPredictor
 from apps.scanner.scanner import MultiTimeframeScanner
 from apps.vision import ChartAnalyzer
 from config.broker_config import BrokerConfig
+from data.manager import MarketDataManager
 from execution.broker_factory import create_broker
 from execution.engine import OrderExecutionEngine
 from cache.redis import RedisCache
@@ -27,6 +31,20 @@ from cache.redis import RedisCache
 
 _chart_analyzer = None
 _ml_predictor = None
+_market_data_manager = None
+
+
+def get_market_data_manager():
+    global _market_data_manager
+    if _market_data_manager is None:
+        _market_data_manager = MarketDataManager()
+    return _market_data_manager
+
+
+@lru_cache
+def get_ml_data_loader():
+    data_manager = get_market_data_manager()
+    return MLDataLoader(data_manager=data_manager)
 
 
 def get_chart_analyzer():

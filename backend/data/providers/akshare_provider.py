@@ -65,7 +65,7 @@ class AKShareProvider(BaseDataProvider):
             return candles
         except Exception:
             logger.exception("AKShare get_candles failed for %s", symbol)
-            return []
+            raise  # Let registry fall back to next provider
 
     async def get_latest_price(self, symbol: str) -> float:
         if akshare is None:
@@ -78,7 +78,8 @@ class AKShareProvider(BaseDataProvider):
                 return float(last.get("Close", last.get("收盘", 0.0)))
         except Exception:
             logger.exception("AKShare get_latest_price failed for %s", symbol)
-        return 0.0
+
+        raise RuntimeError(f"AKShare could not get latest price for {symbol}")
 
     async def get_quote(self, symbol: str) -> Quote:
         if akshare is None:
