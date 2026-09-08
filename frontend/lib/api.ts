@@ -14,6 +14,12 @@ import type {
   MarketAnalysis,
   Trade,
 } from "./types";
+import type {
+  FullConsensusResult,
+  DebateResult,
+  MemorySituation,
+  GateStatus,
+} from "./types-v5";
 import { API_BASE_URL } from "./constants";
 
 const api = axios.create({
@@ -151,6 +157,36 @@ export async function createTrade(
     "/trades/",
     trade
   );
+  return res.data;
+}
+
+// --- V5 Intelligence endpoints ---
+
+export async function getFullConsensus(
+  symbol: string,
+  timeframe = "1H"
+): Promise<FullConsensusResult> {
+  const res = await api.get<FullConsensusResult>(
+    `/consensus/${symbol}/full`,
+    { params: { timeframe } }
+  );
+  return res.data;
+}
+
+export async function getDebate(
+  symbol: string
+): Promise<DebateResult> {
+  const res = await api.get<DebateResult>(`/consensus/${symbol}/debate`);
+  return res.data;
+}
+
+export async function getMemory(
+  symbol: string,
+  timeframe = "1H"
+): Promise<{ symbol: string; similar_situations: MemorySituation[] }> {
+  const res = await api.get(`/consensus/${symbol}/memory`, {
+    params: { timeframe },
+  });
   return res.data;
 }
 

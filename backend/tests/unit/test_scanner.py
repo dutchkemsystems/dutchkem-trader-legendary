@@ -6,7 +6,7 @@ from apps.scanner.scanner import MultiTimeframeScanner, ScanResult, TimeframeRes
 def test_scanner_creation():
     scanner = MultiTimeframeScanner()
     assert hasattr(scanner, 'scan')
-    assert scanner.timeframes == ['1M', '5M', '15M', '1H', '4H', 'Daily']
+    assert scanner.timeframes == ['1M', '5M', '15M', '1H', '4H', '1D']
 
 
 def test_bias_filtering():

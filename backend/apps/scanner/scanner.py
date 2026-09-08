@@ -23,7 +23,7 @@ class ScanResult:
 
 class MultiTimeframeScanner:
     def __init__(self):
-        self.timeframes = ['1M', '5M', '15M', '1H', '4H', 'Daily']
+        self.timeframes = ['1M', '5M', '15M', '1H', '4H', '1D']
 
     async def scan(self, symbol: str) -> ScanResult:
         tasks = [self._analyze_timeframe(symbol, tf) for tf in self.timeframes]
@@ -72,7 +72,7 @@ class MultiTimeframeScanner:
         return max(buy_count, sell_count) / total if total > 0 else 0
 
     def _aggregate_signals(self, results: Dict[str, TimeframeResult]) -> Tuple[str, float]:
-        weights = {'1M': 0.1, '5M': 0.15, '15M': 0.2, '1H': 0.25, '4H': 0.3, 'Daily': 0.35}
+        weights = {'1M': 0.1, '5M': 0.15, '15M': 0.2, '1H': 0.25, '4H': 0.3, '1D': 0.35}
         total_weight = sum(weights.values())
 
         buy_score = sum(weights[tf] for tf, r in results.items() if r.signal == 'BUY') / total_weight

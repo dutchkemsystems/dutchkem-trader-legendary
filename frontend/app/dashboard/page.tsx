@@ -7,11 +7,16 @@ import { VoteBreakdown } from "@/components/dashboard/vote-breakdown";
 import { ScannerHeatmap } from "@/components/dashboard/scanner-heatmap";
 import { LegendaryModules } from "@/components/dashboard/legendary-modules";
 import { QuickTrade } from "@/components/dashboard/quick-trade";
+import { MLPredictionCard } from "@/components/dashboard/ml-prediction-card";
+import { GateStatusCard } from "@/components/dashboard/gate-status-card";
+import { DebateResultCard } from "@/components/dashboard/debate-result-card";
+import { MemoryContextCard } from "@/components/dashboard/memory-context-card";
 import { PriceChart } from "@/components/charts/price-chart";
 import { Indicators } from "@/components/charts/indicators";
 import { ErrorBoundary } from "@/components/error-boundary";
 import { useTrades } from "@/hooks/use-trades";
 import { usePositions } from "@/hooks/use-positions";
+import { useFullConsensus } from "@/hooks/use-full-consensus";
 import { useSymbolStore } from "@/stores/symbol-store";
 
 function StatsLoadingSkeleton() {
@@ -34,6 +39,7 @@ export default function DashboardPage() {
   const { selectedSymbol } = useSymbolStore();
   const { count: tradeCount, loading: tradesLoading } = useTrades();
   const { positions, loading: positionsLoading } = usePositions();
+  const { data: fullConsensus, loading: consensusLoading } = useFullConsensus();
 
   if (tradesLoading && positionsLoading) {
     return (
@@ -118,6 +124,27 @@ export default function DashboardPage() {
             </ErrorBoundary>
             <ErrorBoundary>
               <LegendaryModules />
+            </ErrorBoundary>
+          </div>
+
+          {/* V5 Intelligence: ML + Gates + Debate + Memory */}
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            <ErrorBoundary>
+              <MLPredictionCard ml={fullConsensus?.gates?.gates?.ml_model ? {
+                p_up: (fullConsensus.gates.gates.ml_model.value as number) || 0.5,
+                direction: (fullConsensus.gates.gates.ml_model.value as number) >= 0.5 ? "UP" : "DOWN",
+                model_name: "XGBoost",
+                features_used: 10,
+              } : undefined} />
+            </ErrorBoundary>
+            <ErrorBoundary>
+              {fullConsensus?.gates && <GateStatusCard gates={fullConsensus.gates} />}
+            </ErrorBoundary>
+            <ErrorBoundary>
+              <DebateResultCard debate={fullConsensus?.debate} />
+            </ErrorBoundary>
+            <ErrorBoundary>
+              <MemoryContextCard situations={fullConsensus?.similar_situations} />
             </ErrorBoundary>
           </div>
         </div>
