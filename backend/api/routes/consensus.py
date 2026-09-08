@@ -5,9 +5,14 @@ router = APIRouter()
 
 
 @router.get("/{symbol}")
-async def get_consensus(symbol: str, timeframe: str = "1H"):
+async def get_consensus(
+    symbol: str,
+    timeframe: str = "1H",
+    use_debate: bool = False,
+    use_memory: bool = False,
+):
     engine = get_consensus_engine()
-    result = await engine.evaluate(symbol, timeframe)
+    result = await engine.evaluate(symbol, timeframe, use_debate=use_debate, use_memory=use_memory)
 
     # Build signal counts from analyst votes
     analyst_votes = result.get("votes", {})

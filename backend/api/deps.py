@@ -15,6 +15,8 @@ from apps.analysts.risk import RiskAnalyst
 from apps.analysts.sentiment import SentimentAnalyst
 from apps.analysts.technical import TechnicalAnalyst
 from apps.consensus.engine import ConsensusEngine
+from apps.debate.engine import DebateEngine
+from apps.memory.situation_memory import FinancialSituationMemory
 from apps.scanner.scanner import MultiTimeframeScanner
 from apps.vision import ChartAnalyzer
 from config.broker_config import BrokerConfig
@@ -24,6 +26,7 @@ from cache.redis import RedisCache
 
 
 _chart_analyzer = None
+_ml_predictor = None
 
 
 def get_chart_analyzer():
@@ -31,6 +34,13 @@ def get_chart_analyzer():
     if _chart_analyzer is None:
         _chart_analyzer = ChartAnalyzer()
     return _chart_analyzer
+
+
+def get_ml_predictor():
+    global _ml_predictor
+    if _ml_predictor is None:
+        _ml_predictor = MLPredictor(model_type="xgboost")
+    return _ml_predictor
 
 
 @lru_cache
@@ -41,12 +51,26 @@ def get_market_analyst():
 @lru_cache
 def get_consensus_engine():
     chart_analyzer = get_chart_analyzer()
+    ml_predictor = get_ml_predictor()
     analysts = [
         MarketAnalyst(), NewsAnalyst(), FundamentalsAnalyst(), SentimentAnalyst(),
         TechnicalAnalyst(chart_analyzer=chart_analyzer), OptionsAnalyst(), OrderFlowAnalyst(),
         RiskAnalyst(), MacroAnalyst(), OnChainAnalyst(), QuantAnalyst(), ComplianceAnalyst()
     ]
-    return ConsensusEngine(analysts=analysts)
+    debate_engine = DebateEngine(max_rounds=1)
+    memory = FinancialSituationMemory()
+    return ConsensusEngine(
+        analysts=analysts,
+        ml_predictor=ml_predictor,
+        debate_engine=debate_engine,
+        memory=memory,
+    )
+
+
+@lru_cache
+def get_consensus_gates():
+    ml_predictor = get_ml_predictor()
+    return ConsensusGates(ml_predictor=ml_predictor)
 
 
 @lru_cache
