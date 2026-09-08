@@ -91,6 +91,29 @@ class BacktestResult:
     max_consecutive_losses: int = 0
 
 
+# ─── Trade Filters ───────────────────────────────────────────
+# Based on failure analysis of 1358 trades
+BAD_HOURS = {19, 22}  # 62% and 68% loss rates
+MAX_CONSECUTIVE_LOSSES = 3  # Circuit breaker
+
+
+def should_skip_trade(action, symbol, hour, consecutive_losses):
+    """Check if a trade should be filtered out."""
+    # Circuit breaker
+    if consecutive_losses >= MAX_CONSECUTIVE_LOSSES:
+        return True, "circuit_breaker"
+
+    # Avoid bad hours
+    if hour in BAD_HOURS:
+        return True, f"bad_hour_{hour}"
+
+    # Avoid XAUUSD BUY (biggest losses)
+    if symbol == "XAUUSD" and action == "BUY":
+        return True, "xauusd_buy"
+
+    return False, ""
+
+
 # ─── Data Loaders ────────────────────────────────────────────
 DATA_DIR = Path("paper_trades")
 
@@ -226,13 +249,16 @@ class BacktestEngine:
         position = None
         trades = []
         equity_curve = [balance]
+        consecutive_losses = 0
+        filtered_count = 0
 
-        print(f"  Running walk-forward backtest (lookback={lookback}, bars={len(candles)})...")
+        print(f"  Running walk-forward backtest (lookback={lookback}, bars={len(candles)}, filters=ON)...")
         start_time = time.time()
 
         for i in range(lookback, len(candles)):
             current_price = float(candles.iloc[i]["close"])
             current_time = str(candles.index[i])[:19]
+            current_hour = candles.index[i].hour if hasattr(candles.index[i], "hour") else 12
 
             # Close existing position if held
             if position is not None:
@@ -257,6 +283,13 @@ class BacktestEngine:
                         confidence=position["confidence"],
                         agreement_pct=position["agreement_pct"],
                     ))
+
+                    # Track consecutive losses
+                    if pnl <= 0:
+                        consecutive_losses += 1
+                    else:
+                        consecutive_losses = 0
+
                     position = None
 
             # Open new position if none held
@@ -267,20 +300,17 @@ class BacktestEngine:
                     tasks = [a.analyze(symbol, timeframe) for a in self.analysts]
                     results = await _aio.gather(*tasks, return_exceptions=True)
                     valid = [r for r in results if hasattr(r, "signal")]
-                    errors = [r for r in results if isinstance(r, Exception)]
-                    if errors and i == lookback:  # Log first batch
-                        for e in errors:
-                            print(f"    analyst error: {e}")
+
                     if valid:
                         action, confidence, agreement = self._custom_vote(valid)
-                        if i == lookback:  # Log first batch
-                            for r in valid:
-                                print(f"    {r.analyst_name}: {r.signal} ({r.confidence:.2f})")
-                            print(f"    => action={action} agree={agreement:.2f}")
                     else:
                         action, confidence, agreement = "HOLD", 0.5, 0.0
-                        if i == lookback:
-                            print(f"    No valid results! errors={len(errors)}")
+
+                    # Apply filters
+                    skip, reason = should_skip_trade(action, symbol, current_hour, consecutive_losses)
+                    if skip:
+                        filtered_count += 1
+                        continue
 
                     if action in ("BUY", "SELL") and agreement >= 0.25:
                         kelly_frac = self.kelly.calculate(
@@ -321,7 +351,7 @@ class BacktestEngine:
             ))
 
         elapsed = time.time() - start_time
-        print(f"  Backtest done in {elapsed:.1f}s | {len(trades)} trades")
+        print(f"  Backtest done in {elapsed:.1f}s | {len(trades)} trades | {filtered_count} filtered")
 
         return self._compute_metrics(symbol, timeframe, candles, trades, equity_curve)
 
