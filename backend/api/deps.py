@@ -16,10 +16,21 @@ from apps.analysts.sentiment import SentimentAnalyst
 from apps.analysts.technical import TechnicalAnalyst
 from apps.consensus.engine import ConsensusEngine
 from apps.scanner.scanner import MultiTimeframeScanner
+from apps.vision import ChartAnalyzer
 from config.broker_config import BrokerConfig
 from execution.broker_factory import create_broker
 from execution.engine import OrderExecutionEngine
 from cache.redis import RedisCache
+
+
+_chart_analyzer = None
+
+
+def get_chart_analyzer():
+    global _chart_analyzer
+    if _chart_analyzer is None:
+        _chart_analyzer = ChartAnalyzer()
+    return _chart_analyzer
 
 
 @lru_cache
@@ -29,10 +40,11 @@ def get_market_analyst():
 
 @lru_cache
 def get_consensus_engine():
+    chart_analyzer = get_chart_analyzer()
     analysts = [
         MarketAnalyst(), NewsAnalyst(), FundamentalsAnalyst(), SentimentAnalyst(),
-        TechnicalAnalyst(), OptionsAnalyst(), OrderFlowAnalyst(), RiskAnalyst(),
-        MacroAnalyst(), OnChainAnalyst(), QuantAnalyst(), ComplianceAnalyst()
+        TechnicalAnalyst(chart_analyzer=chart_analyzer), OptionsAnalyst(), OrderFlowAnalyst(),
+        RiskAnalyst(), MacroAnalyst(), OnChainAnalyst(), QuantAnalyst(), ComplianceAnalyst()
     ]
     return ConsensusEngine(analysts=analysts)
 

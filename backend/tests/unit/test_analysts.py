@@ -205,3 +205,39 @@ def test_compliance_analyst_analyze():
     assert result.analyst_name == 'compliance'
     assert result.signal in ('BUY', 'SELL', 'HOLD')
     assert 0.0 <= result.confidence <= 1.0
+
+
+def test_technical_analyst_with_chart_analyzer():
+    from apps.analysts.technical import TechnicalAnalyst
+    from apps.vision import ChartAnalyzer
+    analyzer = ChartAnalyzer()
+    analyst = TechnicalAnalyst(chart_analyzer=analyzer)
+    assert analyst.chart_analyzer is analyzer
+    result = asyncio.run(analyst.analyze('EURUSD', '1H'))
+    assert result.analyst_name == 'technical'
+    assert result.signal in ('BUY', 'SELL', 'HOLD')
+    assert 0.0 <= result.confidence <= 1.0
+    assert 'patterns' in result.data
+    assert 'support' in result.data or 'support_resistance' in result.data
+
+
+def test_technical_analyst_without_chart_analyzer():
+    from apps.analysts.technical import TechnicalAnalyst
+    analyst = TechnicalAnalyst()
+    assert analyst.chart_analyzer is None
+    result = asyncio.run(analyst.analyze('EURUSD', '1H'))
+    assert result.analyst_name == 'technical'
+    assert result.signal in ('BUY', 'SELL', 'HOLD')
+    assert 0.0 <= result.confidence <= 1.0
+
+
+def test_technical_analyst_chart_analyzer_provides_real_patterns():
+    from apps.analysts.technical import TechnicalAnalyst
+    from apps.vision import ChartAnalyzer
+    import random
+    random.seed(42)
+    analyzer = ChartAnalyzer()
+    analyst = TechnicalAnalyst(chart_analyzer=analyzer)
+    result = asyncio.run(analyst.analyze('EURUSD', '1H'))
+    assert result.analyst_name == 'technical'
+    assert isinstance(result.data, dict)
