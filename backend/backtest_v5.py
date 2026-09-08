@@ -91,9 +91,37 @@ class BacktestResult:
     max_consecutive_losses: int = 0
 
 
-# ─── Synthetic Data Generator ────────────────────────────────
+# ─── Data Loaders ────────────────────────────────────────────
+DATA_DIR = Path("paper_trades")
+
+
+def load_real_candles(symbol: str) -> pd.DataFrame:
+    """Load real candles from MT5 CSV (fetched by fetch_and_train.py)."""
+    csv_path = DATA_DIR / f"{symbol}_1H.csv"
+    if csv_path.exists():
+        df = pd.read_csv(csv_path, index_col="timestamp", parse_dates=True)
+        print(f"  Loaded {len(df)} real candles from {csv_path}")
+        return df
+    return None
+
+
+def load_trained_model():
+    """Load the trained XGBoost model if available."""
+    model_path = DATA_DIR / "xgboost_model.json"
+    if model_path.exists():
+        try:
+            from xgboost import XGBClassifier
+            model = XGBClassifier()
+            model.load_model(str(model_path))
+            print(f"  Loaded trained XGBoost model from {model_path}")
+            return model
+        except Exception as e:
+            print(f"  Could not load model: {e}")
+    return None
+
+
 def generate_candles(symbol: str, num_candles: int = 500) -> pd.DataFrame:
-    """Generate realistic OHLCV candle data using geometric Brownian motion."""
+    """Generate synthetic OHLCV candles (fallback when real data unavailable)."""
     # Seed based on symbol for reproducibility
     seed = sum(ord(c) for c in symbol)
     rng = np.random.RandomState(seed)
@@ -184,9 +212,14 @@ class BacktestEngine:
 
     async def backtest(self, symbol, timeframe="1H", num_candles=500):
         """Run walk-forward backtest for a symbol."""
-        print(f"\n  Generating {num_candles} candles for {symbol}...")
-        candles = generate_candles(symbol, num_candles)
-        print(f"  Period: {candles.index[0]} -> {candles.index[-1]}")
+        print(f"\n  Loading data for {symbol}...")
+
+        # Try real data first, fall back to synthetic
+        candles = load_real_candles(symbol)
+        if candles is None:
+            print(f"  No real data found, generating synthetic candles...")
+            candles = generate_candles(symbol, num_candles)
+        print(f"  Period: {candles.index[0]} -> {candles.index[-1]} ({len(candles)} bars)")
 
         lookback = 50
         balance = self.initial_balance
