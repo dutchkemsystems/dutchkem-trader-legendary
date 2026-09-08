@@ -32,7 +32,9 @@ class LLMClient:
             import httpx
             resp = httpx.get(f"{self.ollama_url}/api/tags", timeout=3)
             if resp.status_code == 200:
-                self.providers.append(("ollama", self.ollama_url))
+                models = resp.json().get("models", [])
+                if models:
+                    self.providers.append(("ollama", self.ollama_url))
         except Exception:
             pass
 
@@ -99,7 +101,7 @@ class LLMClient:
             "https://integrate.api.nvidia.com/v1/chat/completions",
             headers=headers,
             json=payload,
-            timeout=30,
+            timeout=60,
         )
         resp.raise_for_status()
         data = resp.json()
@@ -112,13 +114,14 @@ class LLMClient:
 
         resp = httpx.post(
             f"{base_url}/api/generate",
-            json={"model": "phi3:3.8b", "prompt": prompt, "stream": False},
+            json={"model": os.getenv("OLLAMA_MODEL", "qwen2:0.5b"), "prompt": prompt, "stream": False},
             timeout=60,
         )
         resp.raise_for_status()
         data = resp.json()
         text = data.get("response", "")
-        return LLMResponse(text=text, confidence=0.8, model_used="ollama/phi3")
+        model = data.get("model", os.getenv("OLLAMA_MODEL", "qwen2:0.5b"))
+        return LLMResponse(text=text, confidence=0.8, model_used=f"ollama/{model}")
 
     def _call_openrouter(self, prompt, output_schema, api_key, model):
         """Call OpenRouter API."""
