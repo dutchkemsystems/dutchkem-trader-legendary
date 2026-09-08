@@ -190,4 +190,24 @@ export async function getMemory(
   return res.data;
 }
 
+export async function getPaperTrades(): Promise<{
+  trades: Record<string, unknown>[];
+  count: number;
+}> {
+  const res = await api.get("/paper-trades");
+  return res.data;
+}
+
+export async function getPaperTradesStats(): Promise<{
+  total_trades: number;
+  buys: number;
+  sells: number;
+  holds: number;
+  symbols: Record<string, Record<string, number>>;
+  last_trade: Record<string, unknown> | null;
+}> {
+  const res = await api.get("/paper-trades/stats");
+  return res.data;
+}
+
 export default api;

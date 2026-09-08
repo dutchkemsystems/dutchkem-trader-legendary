@@ -11,6 +11,7 @@ import { MLPredictionCard } from "@/components/dashboard/ml-prediction-card";
 import { GateStatusCard } from "@/components/dashboard/gate-status-card";
 import { DebateResultCard } from "@/components/dashboard/debate-result-card";
 import { MemoryContextCard } from "@/components/dashboard/memory-context-card";
+import { PaperTradingCard } from "@/components/dashboard/paper-trading-card";
 import { PriceChart } from "@/components/charts/price-chart";
 import { Indicators } from "@/components/charts/indicators";
 import { ErrorBoundary } from "@/components/error-boundary";
@@ -145,6 +146,13 @@ export default function DashboardPage() {
             </ErrorBoundary>
             <ErrorBoundary>
               <MemoryContextCard situations={fullConsensus?.similar_situations} />
+            </ErrorBoundary>
+          </div>
+
+          {/* Paper Trading Stats */}
+          <div className="grid gap-4 sm:grid-cols-2">
+            <ErrorBoundary>
+              <PaperTradingCard />
             </ErrorBoundary>
           </div>
         </div>
