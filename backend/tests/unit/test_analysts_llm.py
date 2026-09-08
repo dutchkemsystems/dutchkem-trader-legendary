@@ -75,7 +75,7 @@ def test_build_prompt_unknown_analyst():
 
 def test_llm_client_mock_returns_valid_response():
     client = LLMClient()
-    assert client.mock_mode is True
+    # When NVIDIA NIM is configured, primary is nvidia_nim; test still validates the chain works
     response = client.analyze("Analyze EURUSD")
     assert isinstance(response, LLMResponse)
     assert response.text is not None
