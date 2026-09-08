@@ -2,10 +2,26 @@ from .base import BaseAnalyst, AnalystResult
 
 
 class SentimentAnalyst(BaseAnalyst):
-    def __init__(self):
+    def __init__(self, llm_client=None):
+        self.llm_client = llm_client
         self._capabilities = ['social_sentiment', 'fear_greed_index', 'positioning_data']
 
     async def analyze(self, symbol: str, timeframe: str) -> AnalystResult:
+        if self.llm_client:
+            from .prompts import build_prompt, parse_llm_response
+            prompt = build_prompt('sentiment', symbol, timeframe)
+            response = self.llm_client.analyze(prompt)
+            parsed = parse_llm_response(response.text, response.confidence)
+            return AnalystResult(
+                analyst_name='sentiment',
+                symbol=symbol,
+                timeframe=timeframe,
+                signal=parsed['signal'],
+                confidence=parsed['confidence'],
+                reasoning=parsed['reasoning'],
+                data={'llm_model': response.model_used, 'data_source': 'llm'}
+            )
+
         social_data = await self._fetch_social_sentiment(symbol)
         fear_greed = await self._fetch_fear_greed()
         positioning = await self._fetch_positioning(symbol)

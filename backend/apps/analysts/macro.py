@@ -2,10 +2,26 @@ from .base import BaseAnalyst, AnalystResult
 
 
 class MacroAnalyst(BaseAnalyst):
-    def __init__(self):
+    def __init__(self, llm_client=None):
+        self.llm_client = llm_client
         self._capabilities = ['gdp', 'inflation', 'interest_rates', 'employment']
 
     async def analyze(self, symbol: str, timeframe: str) -> AnalystResult:
+        if self.llm_client:
+            from .prompts import build_prompt, parse_llm_response
+            prompt = build_prompt('macro', symbol, timeframe)
+            response = self.llm_client.analyze(prompt)
+            parsed = parse_llm_response(response.text, response.confidence)
+            return AnalystResult(
+                analyst_name='macro',
+                symbol=symbol,
+                timeframe=timeframe,
+                signal=parsed['signal'],
+                confidence=parsed['confidence'],
+                reasoning=parsed['reasoning'],
+                data={'llm_model': response.model_used, 'data_source': 'llm'}
+            )
+
         macro_data = await self._fetch_macro_data(symbol)
         gdp_growth = macro_data.get('gdp_growth', 2.0)
         inflation = macro_data.get('inflation_rate', 2.0)

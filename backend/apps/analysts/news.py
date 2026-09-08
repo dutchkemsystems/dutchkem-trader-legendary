@@ -2,10 +2,26 @@ from .base import BaseAnalyst, AnalystResult
 
 
 class NewsAnalyst(BaseAnalyst):
-    def __init__(self):
+    def __init__(self, llm_client=None):
+        self.llm_client = llm_client
         self._capabilities = ['sentiment_analysis', 'keyword_extraction', 'event_detection']
 
     async def analyze(self, symbol: str, timeframe: str) -> AnalystResult:
+        if self.llm_client:
+            from .prompts import build_prompt, parse_llm_response
+            prompt = build_prompt('news', symbol, timeframe)
+            response = self.llm_client.analyze(prompt)
+            parsed = parse_llm_response(response.text, response.confidence)
+            return AnalystResult(
+                analyst_name='news',
+                symbol=symbol,
+                timeframe=timeframe,
+                signal=parsed['signal'],
+                confidence=parsed['confidence'],
+                reasoning=parsed['reasoning'],
+                data={'llm_model': response.model_used, 'data_source': 'llm'}
+            )
+
         news_data = await self._fetch_news(symbol)
         sentiment_score = self._analyze_sentiment(news_data)
         keywords = self._extract_keywords(news_data)

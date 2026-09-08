@@ -5,11 +5,27 @@ from data.models import Timeframe
 
 
 class MarketAnalyst(BaseAnalyst):
-    def __init__(self, data_manager=None):
+    def __init__(self, llm_client=None, data_manager=None):
+        self.llm_client = llm_client
         self.data_manager = data_manager
         self.indicators = ['RSI', 'MACD', 'BB', 'ATR', 'Stochastic', 'Ichimoku', 'Fibonacci', 'VWAP']
 
     async def analyze(self, symbol: str, timeframe: str) -> AnalystResult:
+        if self.llm_client:
+            from .prompts import build_prompt, parse_llm_response
+            prompt = build_prompt('market', symbol, timeframe)
+            response = self.llm_client.analyze(prompt)
+            parsed = parse_llm_response(response.text, response.confidence)
+            return AnalystResult(
+                analyst_name='market',
+                symbol=symbol,
+                timeframe=timeframe,
+                signal=parsed['signal'],
+                confidence=parsed['confidence'],
+                reasoning=parsed['reasoning'],
+                data={'llm_model': response.model_used, 'indicators': self.indicators, 'data_source': 'llm'}
+            )
+
         data = await self._fetch_market_data(symbol, timeframe)
 
         signals = []

@@ -2,10 +2,26 @@ from .base import BaseAnalyst, AnalystResult
 
 
 class OnChainAnalyst(BaseAnalyst):
-    def __init__(self):
+    def __init__(self, llm_client=None):
+        self.llm_client = llm_client
         self._capabilities = ['hash_rate', 'wallet_flow', 'exchange_reserves', 'whale_alerts']
 
     async def analyze(self, symbol: str, timeframe: str) -> AnalystResult:
+        if self.llm_client:
+            from .prompts import build_prompt, parse_llm_response
+            prompt = build_prompt('on_chain', symbol, timeframe)
+            response = self.llm_client.analyze(prompt)
+            parsed = parse_llm_response(response.text, response.confidence)
+            return AnalystResult(
+                analyst_name='on_chain',
+                symbol=symbol,
+                timeframe=timeframe,
+                signal=parsed['signal'],
+                confidence=parsed['confidence'],
+                reasoning=parsed['reasoning'],
+                data={'llm_model': response.model_used, 'data_source': 'llm'}
+            )
+
         on_chain_data = await self._fetch_on_chain_data(symbol)
         hash_rate = on_chain_data.get('hash_rate', 0)
         wallet_flow = on_chain_data.get('wallet_flow', 0)

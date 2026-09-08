@@ -3,10 +3,26 @@ from .base import BaseAnalyst, AnalystResult
 
 
 class RiskAnalyst(BaseAnalyst):
-    def __init__(self):
+    def __init__(self, llm_client=None):
+        self.llm_client = llm_client
         self._capabilities = ['portfolio_correlation', 'var', 'max_drawdown', 'sharpe_ratio']
 
     async def analyze(self, symbol: str, timeframe: str) -> AnalystResult:
+        if self.llm_client:
+            from .prompts import build_prompt, parse_llm_response
+            prompt = build_prompt('risk', symbol, timeframe)
+            response = self.llm_client.analyze(prompt)
+            parsed = parse_llm_response(response.text, response.confidence)
+            return AnalystResult(
+                analyst_name='risk',
+                symbol=symbol,
+                timeframe=timeframe,
+                signal=parsed['signal'],
+                confidence=parsed['confidence'],
+                reasoning=parsed['reasoning'],
+                data={'llm_model': response.model_used, 'data_source': 'llm'}
+            )
+
         risk_data = await self._fetch_risk_data(symbol)
         var_95 = risk_data.get('var_95', 0.02)
         max_dd = risk_data.get('max_drawdown', 0.10)

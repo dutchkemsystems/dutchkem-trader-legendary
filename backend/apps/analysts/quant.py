@@ -2,10 +2,26 @@ from .base import BaseAnalyst, AnalystResult
 
 
 class QuantAnalyst(BaseAnalyst):
-    def __init__(self):
+    def __init__(self, llm_client=None):
+        self.llm_client = llm_client
         self._capabilities = ['stat_arb', 'mean_reversion', 'cointegration', 'momentum']
 
     async def analyze(self, symbol: str, timeframe: str) -> AnalystResult:
+        if self.llm_client:
+            from .prompts import build_prompt, parse_llm_response
+            prompt = build_prompt('quant', symbol, timeframe)
+            response = self.llm_client.analyze(prompt)
+            parsed = parse_llm_response(response.text, response.confidence)
+            return AnalystResult(
+                analyst_name='quant',
+                symbol=symbol,
+                timeframe=timeframe,
+                signal=parsed['signal'],
+                confidence=parsed['confidence'],
+                reasoning=parsed['reasoning'],
+                data={'llm_model': response.model_used, 'data_source': 'llm'}
+            )
+
         quant_data = await self._fetch_quant_data(symbol)
         stat_arb = quant_data.get('stat_arb_zscore', 0.0)
         mean_rev = quant_data.get('mean_reversion_signal', 0.0)

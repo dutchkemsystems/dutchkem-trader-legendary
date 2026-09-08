@@ -2,10 +2,26 @@ from .base import BaseAnalyst, AnalystResult
 
 
 class OptionsAnalyst(BaseAnalyst):
-    def __init__(self):
+    def __init__(self, llm_client=None):
+        self.llm_client = llm_client
         self._capabilities = ['implied_volatility', 'put_call_ratio', 'greeks', 'unusual_activity']
 
     async def analyze(self, symbol: str, timeframe: str) -> AnalystResult:
+        if self.llm_client:
+            from .prompts import build_prompt, parse_llm_response
+            prompt = build_prompt('options', symbol, timeframe)
+            response = self.llm_client.analyze(prompt)
+            parsed = parse_llm_response(response.text, response.confidence)
+            return AnalystResult(
+                analyst_name='options',
+                symbol=symbol,
+                timeframe=timeframe,
+                signal=parsed['signal'],
+                confidence=parsed['confidence'],
+                reasoning=parsed['reasoning'],
+                data={'llm_model': response.model_used, 'data_source': 'llm'}
+            )
+
         options_data = await self._fetch_options_data(symbol)
         iv = options_data.get('implied_volatility', 0.2)
         pc_ratio = options_data.get('put_call_ratio', 1.0)
