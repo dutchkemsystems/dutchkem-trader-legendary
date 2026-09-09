@@ -1,0 +1,371 @@
+{
+  "config": "+Tue bad day",
+  "filters": {
+    "bad_hours": [
+      19,
+      22
+    ],
+    "bad_days": [
+      1
+    ],
+    "circuit_breaker": 3,
+    "min_agreement": 0.25,
+    "max_risk": 0.25
+  },
+  "total_pnl": 15.849506854310093,
+  "results": {
+    "EURUSD": {
+      "trades": 0,
+      "wins": 0,
+      "losses": 0,
+      "win_rate": 0,
+      "pnl": 0,
+      "filtered": 0,
+      "symbol": "EURUSD"
+    },
+    "GBPUSD": {
+      "trades": 11,
+      "wins": 6,
+      "losses": 5,
+      "win_rate": 0.5454545454545454,
+      "pnl": -0.12371768867129283,
+      "filtered": 1346,
+      "symbol": "GBPUSD"
+    },
+    "USDJPY": {
+      "trades": 39,
+      "wins": 23,
+      "losses": 16,
+      "win_rate": 0.5897435897435898,
+      "pnl": -0.44194100741357495,
+      "filtered": 1206,
+      "symbol": "USDJPY"
+    },
+    "AUDUSD": {
+      "trades": 0,
+      "wins": 0,
+      "losses": 0,
+      "win_rate": 0,
+      "pnl": 0,
+      "filtered": 0,
+      "symbol": "AUDUSD"
+    },
+    "USDCAD": {
+      "trades": 3,
+      "wins": 0,
+      "losses": 3,
+      "win_rate": 0.0,
+      "pnl": -0.4446117104231442,
+      "filtered": 1386,
+      "symbol": "USDCAD"
+    },
+    "USDCHF": {
+      "trades": 0,
+      "wins": 0,
+      "losses": 0,
+      "win_rate": 0,
+      "pnl": 0,
+      "filtered": 0,
+      "symbol": "USDCHF"
+    },
+    "NZDUSD": {
+      "trades": 50,
+      "wins": 29,
+      "losses": 21,
+      "win_rate": 0.58,
+      "pnl": 1.3623085496074203,
+      "filtered": 1151,
+      "symbol": "NZDUSD"
+    },
+    "EURJPY": {
+      "trades": 11,
+      "wins": 6,
+      "losses": 5,
+      "win_rate": 0.5454545454545454,
+      "pnl": 0.13663047843665763,
+      "filtered": 1346,
+      "symbol": "EURJPY"
+    },
+    "GBPJPY": {
+      "trades": 14,
+      "wins": 7,
+      "losses": 7,
+      "win_rate": 0.5,
+      "pnl": 0.3003152154806552,
+      "filtered": 1331,
+      "symbol": "GBPJPY"
+    },
+    "AUDJPY": {
+      "trades": 14,
+      "wins": 7,
+      "losses": 7,
+      "win_rate": 0.5,
+      "pnl": -0.8140599620488427,
+      "filtered": 1331,
+      "symbol": "AUDJPY"
+    },
+    "EURGBP": {
+      "trades": 4,
+      "wins": 1,
+      "losses": 3,
+      "win_rate": 0.25,
+      "pnl": -0.1257089852759239,
+      "filtered": 1381,
+      "symbol": "EURGBP"
+    },
+    "EURCHF": {
+      "trades": 10,
+      "wins": 4,
+      "losses": 6,
+      "win_rate": 0.4,
+      "pnl": 0.5226333893154745,
+      "filtered": 1351,
+      "symbol": "EURCHF"
+    },
+    "XAUUSD": {
+      "trades": 28,
+      "wins": 18,
+      "losses": 10,
+      "win_rate": 0.6428571428571429,
+      "pnl": 10.544352099716162,
+      "filtered": 1261,
+      "symbol": "XAUUSD"
+    },
+    "XAGUSD": {
+      "trades": 0,
+      "wins": 0,
+      "losses": 0,
+      "win_rate": 0,
+      "pnl": 0,
+      "filtered": 0,
+      "symbol": "XAGUSD"
+    },
+    "BTCUSD": {
+      "trades": 18,
+      "wins": 7,
+      "losses": 11,
+      "win_rate": 0.3888888888888889,
+      "pnl": -8.395704262547628,
+      "filtered": 1311,
+      "symbol": "BTCUSD"
+    },
+    "ETHUSD": {
+      "trades": 24,
+      "wins": 15,
+      "losses": 9,
+      "win_rate": 0.625,
+      "pnl": 4.266552012106364,
+      "filtered": 1281,
+      "symbol": "ETHUSD"
+    },
+    "US30": {
+      "trades": 0,
+      "wins": 0,
+      "losses": 0,
+      "win_rate": 0,
+      "pnl": 0,
+      "filtered": 0,
+      "symbol": "US30"
+    },
+    "US500": {
+      "trades": 10,
+      "wins": 5,
+      "losses": 5,
+      "win_rate": 0.5,
+      "pnl": 0.31041041488352544,
+      "filtered": 1351,
+      "symbol": "US500"
+    },
+    "UK100": {
+      "trades": 4,
+      "wins": 1,
+      "losses": 3,
+      "win_rate": 0.25,
+      "pnl": -1.628631295407155,
+      "filtered": 1381,
+      "symbol": "UK100"
+    },
+    "AAPL": {
+      "trades": 13,
+      "wins": 7,
+      "losses": 6,
+      "win_rate": 0.5384615384615384,
+      "pnl": -0.6063764503647399,
+      "filtered": 1336,
+      "symbol": "AAPL"
+    },
+    "AMZN": {
+      "trades": 0,
+      "wins": 0,
+      "losses": 0,
+      "win_rate": 0,
+      "pnl": 0,
+      "filtered": 0,
+      "symbol": "AMZN"
+    },
+    "NVDA": {
+      "trades": 9,
+      "wins": 3,
+      "losses": 6,
+      "win_rate": 0.3333333333333333,
+      "pnl": -5.321331931553045,
+      "filtered": 1356,
+      "symbol": "NVDA"
+    },
+    "TSLA": {
+      "trades": 8,
+      "wins": 3,
+      "losses": 5,
+      "win_rate": 0.375,
+      "pnl": -5.874717578677962,
+      "filtered": 1361,
+      "symbol": "TSLA"
+    },
+    "META": {
+      "trades": 48,
+      "wins": 32,
+      "losses": 16,
+      "win_rate": 0.6666666666666666,
+      "pnl": 27.41020808915223,
+      "filtered": 1161,
+      "symbol": "META"
+    },
+    "MSFT": {
+      "trades": 8,
+      "wins": 3,
+      "losses": 5,
+      "win_rate": 0.375,
+      "pnl": -5.227102522005088,
+      "filtered": 1361,
+      "symbol": "MSFT"
+    },
+    "GOOGL": {
+      "trades": 0,
+      "wins": 0,
+      "losses": 0,
+      "win_rate": 0,
+      "pnl": 0,
+      "filtered": 0,
+      "symbol": "GOOGL"
+    },
+    "AMD": {
+      "trades": 0,
+      "wins": 0,
+      "losses": 0,
+      "win_rate": 0,
+      "pnl": 0,
+      "filtered": 0,
+      "symbol": "AMD"
+    }
+  },
+  "signals": {
+    "EURUSD": {
+      "action": "HOLD",
+      "agreement": 0.0
+    },
+    "GBPUSD": {
+      "action": "SELL",
+      "agreement": 0.25
+    },
+    "USDJPY": {
+      "action": "BUY",
+      "agreement": 0.25
+    },
+    "AUDUSD": {
+      "action": "HOLD",
+      "agreement": 0.0
+    },
+    "USDCAD": {
+      "action": "SELL",
+      "agreement": 0.25
+    },
+    "USDCHF": {
+      "action": "HOLD",
+      "agreement": 0.0
+    },
+    "NZDUSD": {
+      "action": "SELL",
+      "agreement": 0.25
+    },
+    "EURJPY": {
+      "action": "BUY",
+      "agreement": 0.25
+    },
+    "GBPJPY": {
+      "action": "BUY",
+      "agreement": 0.25
+    },
+    "AUDJPY": {
+      "action": "BUY",
+      "agreement": 0.25
+    },
+    "EURGBP": {
+      "action": "BUY",
+      "agreement": 0.25
+    },
+    "EURCHF": {
+      "action": "BUY",
+      "agreement": 0.25
+    },
+    "XAUUSD": {
+      "action": "SELL",
+      "agreement": 0.25
+    },
+    "XAGUSD": {
+      "action": "HOLD",
+      "agreement": 0.0
+    },
+    "BTCUSD": {
+      "action": "BUY",
+      "agreement": 0.25
+    },
+    "ETHUSD": {
+      "action": "SELL",
+      "agreement": 0.25
+    },
+    "US30": {
+      "action": "HOLD",
+      "agreement": 0.0
+    },
+    "US500": {
+      "action": "SELL",
+      "agreement": 0.25
+    },
+    "UK100": {
+      "action": "SELL",
+      "agreement": 0.25
+    },
+    "AAPL": {
+      "action": "BUY",
+      "agreement": 0.25
+    },
+    "AMZN": {
+      "action": "HOLD",
+      "agreement": 0.0
+    },
+    "NVDA": {
+      "action": "SELL",
+      "agreement": 0.25
+    },
+    "TSLA": {
+      "action": "BUY",
+      "agreement": 0.25
+    },
+    "META": {
+      "action": "SELL",
+      "agreement": 0.25
+    },
+    "MSFT": {
+      "action": "BUY",
+      "agreement": 0.25
+    },
+    "GOOGL": {
+      "action": "HOLD",
+      "agreement": 0.0
+    },
+    "AMD": {
+      "action": "HOLD",
+      "agreement": 0.0
+    }
+  }
+}

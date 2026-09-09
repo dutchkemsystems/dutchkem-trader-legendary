@@ -1,0 +1,34 @@
+
+======================================================================
+  DUTCHKEM TRADER - PAPER TRADING V2
+  Signal-Agnostic | Technical Indicators Only | 2% Risk
+======================================================================
+  Watchlist: 27 symbols
+  Timeframe: 1H
+  Cycle: 3600s (60min)
+  Duration: 14 days
+  Risk per trade: 2%
+  Min confidence: 0.3
+  Circuit breaker: OFF
+  Bad hours/days: NONE
+
+Connecting to MT5...
+  MT5 Connected: 476963617 | Exness-MT5Trial9 | $10000.00
+
+  Start: 2026-09-09 03:36 UTC
+  End:   2026-09-23 03:36 UTC
+
+  Press Ctrl+C to stop early.
+
+
+======================================================================
+  CYCLE 1 | 2026-09-09 03:36:01 UTC
+  Balance: $10,000.00 | Open: 0
+======================================================================
+  Data loaded: 27/27 symbols
+  OPEN  GBPUSD     BUY  @ 1.35462 | Size=$12.50 | Conf=0.67
+  OPEN  AUDUSD     BUY  @ 0.72229 | Size=$12.50 | Conf=0.50
+
+  SUMMARY: 2 open | 0 closed | WR=0.0% | P&L=$+0.00
+
+  Next cycle in 3600s | 336.0h remaining

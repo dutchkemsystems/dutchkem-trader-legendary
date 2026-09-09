@@ -1,0 +1,249 @@
+{
+  "config": "Risk 30% + no CB",
+  "total_pnl": 68.77910014430789,
+  "results": {
+    "EURUSD": {
+      "trades": 221,
+      "wins": 112,
+      "losses": 109,
+      "win_rate": 0.5067873303167421,
+      "pnl": -3.2513057177461753,
+      "filtered": 296,
+      "symbol": "EURUSD"
+    },
+    "GBPUSD": {
+      "trades": 221,
+      "wins": 105,
+      "losses": 116,
+      "win_rate": 0.4751131221719457,
+      "pnl": 5.533766029125446,
+      "filtered": 296,
+      "symbol": "GBPUSD"
+    },
+    "USDJPY": {
+      "trades": 221,
+      "wins": 98,
+      "losses": 123,
+      "win_rate": 0.4434389140271493,
+      "pnl": 11.010959155970152,
+      "filtered": 296,
+      "symbol": "USDJPY"
+    },
+    "AUDUSD": {
+      "trades": 221,
+      "wins": 107,
+      "losses": 114,
+      "win_rate": 0.4841628959276018,
+      "pnl": -5.438857675035234,
+      "filtered": 296,
+      "symbol": "AUDUSD"
+    },
+    "USDCAD": {
+      "trades": 221,
+      "wins": 100,
+      "losses": 121,
+      "win_rate": 0.45248868778280543,
+      "pnl": -4.079918246877027,
+      "filtered": 296,
+      "symbol": "USDCAD"
+    },
+    "USDCHF": {
+      "trades": 221,
+      "wins": 101,
+      "losses": 120,
+      "win_rate": 0.45701357466063347,
+      "pnl": -0.21687406646456325,
+      "filtered": 296,
+      "symbol": "USDCHF"
+    },
+    "NZDUSD": {
+      "trades": 221,
+      "wins": 102,
+      "losses": 119,
+      "win_rate": 0.46153846153846156,
+      "pnl": 4.799260364887039,
+      "filtered": 296,
+      "symbol": "NZDUSD"
+    },
+    "EURJPY": {
+      "trades": 221,
+      "wins": 99,
+      "losses": 122,
+      "win_rate": 0.4479638009049774,
+      "pnl": 8.13467627389721,
+      "filtered": 296,
+      "symbol": "EURJPY"
+    },
+    "GBPJPY": {
+      "trades": 221,
+      "wins": 113,
+      "losses": 108,
+      "win_rate": 0.5113122171945701,
+      "pnl": -5.868238015435288,
+      "filtered": 296,
+      "symbol": "GBPJPY"
+    },
+    "AUDJPY": {
+      "trades": 221,
+      "wins": 118,
+      "losses": 103,
+      "win_rate": 0.5339366515837104,
+      "pnl": -6.197006525730485,
+      "filtered": 296,
+      "symbol": "AUDJPY"
+    },
+    "EURGBP": {
+      "trades": 221,
+      "wins": 104,
+      "losses": 117,
+      "win_rate": 0.47058823529411764,
+      "pnl": 2.5815044506341542,
+      "filtered": 296,
+      "symbol": "EURGBP"
+    },
+    "EURCHF": {
+      "trades": 0,
+      "wins": 0,
+      "losses": 0,
+      "win_rate": 0,
+      "pnl": 0,
+      "filtered": 0,
+      "symbol": "EURCHF"
+    },
+    "XAUUSD": {
+      "trades": 227,
+      "wins": 107,
+      "losses": 120,
+      "win_rate": 0.4713656387665198,
+      "pnl": 10.508791163513433,
+      "filtered": 266,
+      "symbol": "XAUUSD"
+    },
+    "XAGUSD": {
+      "trades": 227,
+      "wins": 111,
+      "losses": 116,
+      "win_rate": 0.4889867841409692,
+      "pnl": 4.254549233281304,
+      "filtered": 266,
+      "symbol": "XAGUSD"
+    },
+    "BTCUSD": {
+      "trades": 239,
+      "wins": 119,
+      "losses": 120,
+      "win_rate": 0.497907949790795,
+      "pnl": -34.86918501881486,
+      "filtered": 206,
+      "symbol": "BTCUSD"
+    },
+    "ETHUSD": {
+      "trades": 239,
+      "wins": 121,
+      "losses": 118,
+      "win_rate": 0.5062761506276151,
+      "pnl": 52.729396932144105,
+      "filtered": 206,
+      "symbol": "ETHUSD"
+    },
+    "US30": {
+      "trades": 0,
+      "wins": 0,
+      "losses": 0,
+      "win_rate": 0,
+      "pnl": 0,
+      "filtered": 0,
+      "symbol": "US30"
+    },
+    "US500": {
+      "trades": 228,
+      "wins": 108,
+      "losses": 120,
+      "win_rate": 0.47368421052631576,
+      "pnl": -2.0403459156486683,
+      "filtered": 261,
+      "symbol": "US500"
+    },
+    "UK100": {
+      "trades": 219,
+      "wins": 113,
+      "losses": 106,
+      "win_rate": 0.5159817351598174,
+      "pnl": -0.0009684674729557352,
+      "filtered": 306,
+      "symbol": "UK100"
+    },
+    "AAPL": {
+      "trades": 222,
+      "wins": 115,
+      "losses": 107,
+      "win_rate": 0.5180180180180181,
+      "pnl": 4.29731853767318,
+      "filtered": 291,
+      "symbol": "AAPL"
+    },
+    "AMZN": {
+      "trades": 222,
+      "wins": 111,
+      "losses": 111,
+      "win_rate": 0.5,
+      "pnl": -34.58016878617004,
+      "filtered": 291,
+      "symbol": "AMZN"
+    },
+    "NVDA": {
+      "trades": 222,
+      "wins": 103,
+      "losses": 119,
+      "win_rate": 0.46396396396396394,
+      "pnl": -8.413958757605945,
+      "filtered": 291,
+      "symbol": "NVDA"
+    },
+    "TSLA": {
+      "trades": 222,
+      "wins": 121,
+      "losses": 101,
+      "win_rate": 0.545045045045045,
+      "pnl": 39.731421454740484,
+      "filtered": 291,
+      "symbol": "TSLA"
+    },
+    "META": {
+      "trades": 222,
+      "wins": 97,
+      "losses": 125,
+      "win_rate": 0.4369369369369369,
+      "pnl": -33.195202963527265,
+      "filtered": 291,
+      "symbol": "META"
+    },
+    "MSFT": {
+      "trades": 222,
+      "wins": 112,
+      "losses": 110,
+      "win_rate": 0.5045045045045045,
+      "pnl": -41.20427744960071,
+      "filtered": 291,
+      "symbol": "MSFT"
+    },
+    "GOOGL": {
+      "trades": 233,
+      "wins": 118,
+      "losses": 115,
+      "win_rate": 0.5064377682403434,
+      "pnl": 18.272831910070853,
+      "filtered": 236,
+      "symbol": "GOOGL"
+    },
+    "AMD": {
+      "trades": 222,
+      "wins": 117,
+      "losses": 105,
+      "win_rate": 0.527027027027027,
+      "pnl": 86.28093224449975,
+      "filtered": 291,
+      "symbol": "AMD"
+    }
+  }
+}

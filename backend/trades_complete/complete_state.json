@@ -1,0 +1,19 @@
+{
+  "balance": 9999.94,
+  "consecutive_losses": 0,
+  "week_number": 1,
+  "active_improvements": {
+    "correlation_filter": true,
+    "dynamic_risk": true,
+    "spread_filter": true,
+    "news_avoidance": false,
+    "breakout_detection": false,
+    "mean_reversion": false,
+    "position_scaling": false
+  },
+  "positions": {},
+  "total_trades": 0,
+  "total_pnl": 0,
+  "wins": 0,
+  "losses": 0
+}

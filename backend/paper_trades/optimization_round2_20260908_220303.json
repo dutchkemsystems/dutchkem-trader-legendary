@@ -1,0 +1,222 @@
+{
+  "config": "All 27 (baseline)",
+  "total_pnl": 46.801691116244925,
+  "results": {
+    "EURUSD": {
+      "trades": 0,
+      "wins": 0,
+      "losses": 0,
+      "win_rate": 0,
+      "pnl": 0,
+      "symbol": "EURUSD"
+    },
+    "GBPUSD": {
+      "trades": 0,
+      "wins": 0,
+      "losses": 0,
+      "win_rate": 0,
+      "pnl": 0,
+      "symbol": "GBPUSD"
+    },
+    "USDJPY": {
+      "trades": 39,
+      "wins": 23,
+      "losses": 16,
+      "win_rate": 0.5897435897435898,
+      "pnl": -0.44194100741357495,
+      "symbol": "USDJPY"
+    },
+    "AUDUSD": {
+      "trades": 0,
+      "wins": 0,
+      "losses": 0,
+      "win_rate": 0,
+      "pnl": 0,
+      "symbol": "AUDUSD"
+    },
+    "USDCAD": {
+      "trades": 0,
+      "wins": 0,
+      "losses": 0,
+      "win_rate": 0,
+      "pnl": 0,
+      "symbol": "USDCAD"
+    },
+    "USDCHF": {
+      "trades": 29,
+      "wins": 15,
+      "losses": 14,
+      "win_rate": 0.5172413793103449,
+      "pnl": 0.6807568672951404,
+      "symbol": "USDCHF"
+    },
+    "NZDUSD": {
+      "trades": 50,
+      "wins": 29,
+      "losses": 21,
+      "win_rate": 0.58,
+      "pnl": 1.3623085496074203,
+      "symbol": "NZDUSD"
+    },
+    "EURJPY": {
+      "trades": 11,
+      "wins": 6,
+      "losses": 5,
+      "win_rate": 0.5454545454545454,
+      "pnl": 0.13663047843665763,
+      "symbol": "EURJPY"
+    },
+    "GBPJPY": {
+      "trades": 8,
+      "wins": 3,
+      "losses": 5,
+      "win_rate": 0.375,
+      "pnl": -0.46833236871341716,
+      "symbol": "GBPJPY"
+    },
+    "AUDJPY": {
+      "trades": 8,
+      "wins": 3,
+      "losses": 5,
+      "win_rate": 0.375,
+      "pnl": -0.2774630850384604,
+      "symbol": "AUDJPY"
+    },
+    "EURGBP": {
+      "trades": 0,
+      "wins": 0,
+      "losses": 0,
+      "win_rate": 0,
+      "pnl": 0,
+      "symbol": "EURGBP"
+    },
+    "EURCHF": {
+      "trades": 43,
+      "wins": 25,
+      "losses": 18,
+      "win_rate": 0.5813953488372093,
+      "pnl": 0.05882970432986405,
+      "symbol": "EURCHF"
+    },
+    "XAUUSD": {
+      "trades": 28,
+      "wins": 18,
+      "losses": 10,
+      "win_rate": 0.6428571428571429,
+      "pnl": 10.544352099716162,
+      "symbol": "XAUUSD"
+    },
+    "XAGUSD": {
+      "trades": 0,
+      "wins": 0,
+      "losses": 0,
+      "win_rate": 0,
+      "pnl": 0,
+      "symbol": "XAGUSD"
+    },
+    "BTCUSD": {
+      "trades": 24,
+      "wins": 12,
+      "losses": 12,
+      "win_rate": 0.5,
+      "pnl": 5.044163754105532,
+      "symbol": "BTCUSD"
+    },
+    "ETHUSD": {
+      "trades": 13,
+      "wins": 5,
+      "losses": 8,
+      "win_rate": 0.38461538461538464,
+      "pnl": 2.2150520847845487,
+      "symbol": "ETHUSD"
+    },
+    "US30": {
+      "trades": 20,
+      "wins": 12,
+      "losses": 8,
+      "win_rate": 0.6,
+      "pnl": 0.8570712160537876,
+      "symbol": "US30"
+    },
+    "US500": {
+      "trades": 10,
+      "wins": 5,
+      "losses": 5,
+      "win_rate": 0.5,
+      "pnl": 0.31041041488352544,
+      "symbol": "US500"
+    },
+    "UK100": {
+      "trades": 4,
+      "wins": 1,
+      "losses": 3,
+      "win_rate": 0.25,
+      "pnl": -1.628631295407155,
+      "symbol": "UK100"
+    },
+    "AAPL": {
+      "trades": 13,
+      "wins": 7,
+      "losses": 6,
+      "win_rate": 0.5384615384615384,
+      "pnl": -0.6063764503647399,
+      "symbol": "AAPL"
+    },
+    "AMZN": {
+      "trades": 22,
+      "wins": 11,
+      "losses": 11,
+      "win_rate": 0.5,
+      "pnl": -2.140816838434359,
+      "symbol": "AMZN"
+    },
+    "NVDA": {
+      "trades": 9,
+      "wins": 3,
+      "losses": 6,
+      "win_rate": 0.3333333333333333,
+      "pnl": -5.321331931553045,
+      "symbol": "NVDA"
+    },
+    "TSLA": {
+      "trades": 8,
+      "wins": 3,
+      "losses": 5,
+      "win_rate": 0.375,
+      "pnl": -5.874717578677962,
+      "symbol": "TSLA"
+    },
+    "META": {
+      "trades": 48,
+      "wins": 32,
+      "losses": 16,
+      "win_rate": 0.6666666666666666,
+      "pnl": 27.41020808915223,
+      "symbol": "META"
+    },
+    "MSFT": {
+      "trades": 19,
+      "wins": 10,
+      "losses": 9,
+      "win_rate": 0.5263157894736842,
+      "pnl": 1.7946784639109699,
+      "symbol": "MSFT"
+    },
+    "GOOGL": {
+      "trades": 0,
+      "wins": 0,
+      "losses": 0,
+      "win_rate": 0,
+      "pnl": 0,
+      "symbol": "GOOGL"
+    },
+    "AMD": {
+      "trades": 19,
+      "wins": 11,
+      "losses": 8,
+      "win_rate": 0.5789473684210527,
+      "pnl": 13.146839949571799,
+      "symbol": "AMD"
+    }
+  }
+}

@@ -1,0 +1,14 @@
+sma_5
+sma_10
+sma_20
+sma_50
+macd
+macd_signal
+macd_hist
+rsi
+bb_width
+atr
+stoch_rsi
+momentum_5
+momentum_10
+volatility_10
