@@ -1,0 +1,113 @@
+{
+  "config": "risk50 AMD3x noCB",
+  "total_pnl": 597.0096923102337,
+  "results": {
+    "EURUSD": {
+      "trades": 39,
+      "wins": 19,
+      "pnl": 3.3855305771889896,
+      "win_rate": 0.48717948717948717
+    },
+    "GBPUSD": {
+      "trades": 31,
+      "wins": 14,
+      "pnl": -31.39965168244836,
+      "win_rate": 0.45161290322580644
+    },
+    "USDJPY": {
+      "trades": 29,
+      "wins": 13,
+      "pnl": 55.61529453911617,
+      "win_rate": 0.4482758620689655
+    },
+    "AUDUSD": {
+      "trades": 28,
+      "wins": 14,
+      "pnl": -16.610734301105555,
+      "win_rate": 0.5
+    },
+    "USDCAD": {
+      "trades": 31,
+      "wins": 18,
+      "pnl": 66.3568263729981,
+      "win_rate": 0.5806451612903226
+    },
+    "USDCHF": {
+      "trades": 34,
+      "wins": 15,
+      "pnl": 37.56774125775012,
+      "win_rate": 0.4411764705882353
+    },
+    "NZDUSD": {
+      "trades": 36,
+      "wins": 18,
+      "pnl": 221.55627272932864,
+      "win_rate": 0.5
+    },
+    "EURJPY": {
+      "trades": 27,
+      "wins": 17,
+      "pnl": 127.79977375168137,
+      "win_rate": 0.6296296296296297
+    },
+    "GBPJPY": {
+      "trades": 24,
+      "wins": 12,
+      "pnl": 77.52072791086748,
+      "win_rate": 0.5
+    },
+    "AUDJPY": {
+      "trades": 27,
+      "wins": 14,
+      "pnl": 41.844165588232585,
+      "win_rate": 0.5185185185185185
+    },
+    "EURGBP": {
+      "trades": 60,
+      "wins": 29,
+      "pnl": -14.297642576790928,
+      "win_rate": 0.48333333333333334
+    },
+    "XAUUSD": {
+      "trades": 35,
+      "wins": 19,
+      "pnl": 234.46291970036958,
+      "win_rate": 0.5428571428571428
+    },
+    "US30": {
+      "trades": 32,
+      "wins": 15,
+      "pnl": 19.448262265878885,
+      "win_rate": 0.46875
+    },
+    "AMD": {
+      "trades": 0,
+      "wins": 0,
+      "pnl": 0,
+      "win_rate": 0
+    },
+    "GOOGL": {
+      "trades": 45,
+      "wins": 24,
+      "pnl": -226.2397938228333,
+      "win_rate": 0.5333333333333333
+    }
+  },
+  "recommendation": {
+    "max_risk": 0.3,
+    "min_confidence": 0.3,
+    "sym_weights": {
+      "AMD": 3.0
+    },
+    "circuit_breaker": 99,
+    "excluded_symbols": [
+      "NVDA",
+      "XAGUSD",
+      "US500",
+      "UK100",
+      "TSLA",
+      "AAPL",
+      "ETHUSD"
+    ]
+  }
+}
