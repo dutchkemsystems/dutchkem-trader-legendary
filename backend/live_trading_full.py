@@ -55,11 +55,13 @@ MT5_SLIPPAGE = 20
 
 # All 27 instruments
 WATCHLIST = [
+    # OPTIMIZED: Round 8 production config (2026-09-10)
+    # Excluded: NVDA, XAGUSD, US500, UK100, TSLA, AAPL, ETHUSD, BTCUSD, MSFT, META, AMZN
     "EURUSD", "GBPUSD", "USDJPY", "AUDUSD", "USDCAD", "USDCHF", "NZDUSD",
-    "EURJPY", "GBPJPY", "AUDJPY", "EURGBP", "EURCHF",
-    "XAUUSD", "XAGUSD", "BTCUSD", "ETHUSD",
-    "US30", "US500", "UK100",
-    "AAPL", "AMZN", "NVDA", "TSLA", "META", "MSFT", "GOOGL", "AMD",
+    "EURJPY", "GBPJPY", "AUDJPY", "EURGBP",
+    "XAUUSD",
+    "US30",
+    "AMD", "GOOGL",
 ]
 
 # 7 Timeframes
@@ -347,8 +349,13 @@ class ComprehensiveTrader:
         return None
 
     def get_lot_size(self, symbol, price, volatility=0.01, atr=0):
-        """Calculate lot size with volatility + Kelly sizing."""
+        """Calculate lot size with volatility, Kelly sizing, and symbol weights."""
         risk_amount = self.balance * CONFIG["max_risk_pct"]
+
+        # Apply symbol weight (optimized from Round 8)
+        sym_weights = CONFIG.get("sym_weights", {})
+        weight = sym_weights.get(symbol, 1.0)
+        risk_amount *= weight
 
         # Volatility-based sizing (inverse scaling)
         if CONFIG.get("vol_sizing") and volatility > 0:

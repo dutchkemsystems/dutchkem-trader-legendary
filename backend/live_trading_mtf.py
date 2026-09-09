@@ -47,11 +47,13 @@ MT5_MAGIC = 234000
 MT5_SLIPPAGE = 20
 
 WATCHLIST = [
+    # OPTIMIZED: Round 8 production config (2026-09-10)
+    # Excluded: NVDA, XAGUSD, US500, UK100, TSLA, AAPL, ETHUSD, BTCUSD, MSFT, META, AMZN
     "EURUSD", "GBPUSD", "USDJPY", "AUDUSD", "USDCAD", "USDCHF", "NZDUSD",
-    "EURJPY", "GBPJPY", "AUDJPY", "EURGBP", "EURCHF",
-    "XAUUSD", "XAGUSD", "BTCUSD", "ETHUSD",
-    "US30", "US500", "UK100",
-    "AAPL", "AMZN", "NVDA", "TSLA", "META", "MSFT", "GOOGL", "AMD",
+    "EURJPY", "GBPJPY", "AUDJPY", "EURGBP",
+    "XAUUSD",
+    "US30",
+    "AMD", "GOOGL",
 ]
 
 # Timeframes to scan
@@ -318,8 +320,13 @@ class MT5TraderMTF:
         return None
 
     def get_lot_size(self, symbol, price, volatility=0.01, atr=0.001):
-        """Calculate lot size based on risk, volatility, and ATR."""
+        """Calculate lot size based on risk, volatility, ATR, and symbol weights."""
         risk_amount = self.balance * CONFIG["max_risk_pct"]
+
+        # Apply symbol weight (optimized from Round 8)
+        sym_weights = CONFIG.get("sym_weights", {})
+        weight = sym_weights.get(symbol, 1.0)
+        risk_amount *= weight
 
         # Volatility-based sizing
         if CONFIG.get("vol_sizing", False):

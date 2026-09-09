@@ -55,11 +55,13 @@ MT5_MAGIC = 234000
 MT5_SLIPPAGE = 20
 
 WATCHLIST = [
+    # OPTIMIZED: Round 8 production config (2026-09-10)
+    # Excluded: NVDA, XAGUSD, US500, UK100, TSLA, AAPL, ETHUSD, BTCUSD, MSFT, META, AMZN
     "EURUSD", "GBPUSD", "USDJPY", "AUDUSD", "USDCAD", "USDCHF", "NZDUSD",
-    "EURJPY", "GBPJPY", "AUDJPY", "EURGBP", "EURCHF",
-    "XAUUSD", "XAGUSD", "BTCUSD", "ETHUSD",
-    "US30", "US500", "UK100",
-    "AAPL", "AMZN", "NVDA", "TSLA", "META", "MSFT", "GOOGL", "AMD",
+    "EURJPY", "GBPJPY", "AUDJPY", "EURGBP",
+    "XAUUSD",
+    "US30",
+    "AMD", "GOOGL",
 ]
 
 TIMEFRAMES = {
@@ -88,33 +90,58 @@ CORRELATIONS = {
 }
 
 CONFIG = {
-    "max_risk_pct": 0.05,
-    "max_position_pct": 0.30,
+    # ═══════════════════════════════════════════════════════════════
+    # OPTIMIZED PRODUCTION CONFIG (Round 8 - 2026-09-10)
+    # Best result: +$597.01 P&L, 50.4% WR, 478 trades
+    # Key: risk50 + no circuit breaker + AMD focus
+    # ═══════════════════════════════════════════════════════════════
+    "max_risk_pct": 0.50,           # 50% risk per trade (optimized)
+    "max_position_pct": 0.50,      # Max 50% position size
     "kelly_win_rate": 0.55,
     "kelly_avg_win": 1.5,
     "kelly_avg_loss": 1.0,
-    "hold_bars": 5,
+    "hold_bars": 10,               # Hold 10 bars (optimized)
     "trailing_breakeven": 0.01,
-    "min_confidence": 0.30,
+    "min_confidence": 0.30,         # Minimum confidence threshold
     "min_timeframes_agree": 4,
     "trend_timeframes": ["D1", "H4"],
-    "session_hours": set(range(7, 16)) | set(range(13, 22)),
+    "session_hours": set(range(7, 22)),  # Extended session (7am-10pm)
     "vol_sizing": True,
+    # SYMBOL WEIGHTS: Optimized from Round 8
+    "sym_weights": {
+        "AMD": 3.0,      # Consistently biggest winner (+$5,158 in Round 7)
+        "GOOGL": 1.0,
+        "XAUUSD": 1.0,
+        "USDJPY": 1.0,
+        "EURJPY": 1.0,
+        "GBPJPY": 1.0,
+        "NZDUSD": 1.0,
+        "USDCAD": 1.0,
+        "AUDJPY": 1.0,
+        "USDCHF": 1.0,
+        "US30": 1.0,
+        "EURUSD": 1.0,
+        "GBPUSD": 1.0,
+        "AUDUSD": 1.0,
+        "EURGBP": 1.0,
+    },
     # IMPROVEMENT 1: Correlation Filter
     "correlation_filter": True,
-    # IMPROVEMENT 2: Dynamic Risk Reduction
-    "dynamic_risk": True,
-    "risk_reduction_threshold": 3,  # After 3 consecutive losses
-    "risk_reduction_factor": 0.5,   # Reduce by 50%
-    "min_risk_pct": 0.01,          # Minimum 1% risk
+    # IMPROVEMENT 2: Dynamic Risk Reduction (DISABLED - no circuit breaker)
+    "dynamic_risk": False,          # Disabled per optimization
+    "risk_reduction_threshold": 99, # Effectively disabled
+    "risk_reduction_factor": 1.0,   # No reduction
+    "min_risk_pct": 0.50,          # Keep full risk
     # IMPROVEMENT 3: Spread Filter
     "spread_filter": True,
-    "max_spread_multiplier": 2.0,  # Max 2x normal spread
+    "max_spread_multiplier": 3.0,  # Relaxed spread filter
     # IMPROVEMENTS 4-7: Activate after week 3
     "news_avoidance": False,
     "breakout_detection": False,
     "mean_reversion": False,
     "position_scaling": False,
+    # Circuit breaker: DISABLED (let winners run)
+    "circuit_breaker": 99,          # No circuit breaker
 }
 
 CYCLE_INTERVAL = 3600
@@ -544,10 +571,15 @@ class CompleteTrader:
                 CONFIG["position_scaling"] = True
 
     def get_lot_size(self, symbol, price, volatility=0.01, atr=0):
-        """Calculate lot size with dynamic risk."""
-        # IMPROVEMENT 2: Dynamic risk
-        risk_pct = get_dynamic_risk(self.consecutive_losses)
+        """Calculate lot size with dynamic risk and symbol weights."""
+        # IMPROVEMENT 2: Dynamic risk (DISABLED per optimization)
+        risk_pct = CONFIG.get("max_risk_pct", 0.50)
         risk_amount = self.balance * risk_pct
+
+        # Apply symbol weight (optimized from Round 8)
+        sym_weights = CONFIG.get("sym_weights", {})
+        weight = sym_weights.get(symbol, 1.0)
+        risk_amount *= weight
 
         if CONFIG.get("vol_sizing") and volatility > 0:
             vol_factor = max(0.5, min(2.0, 1.0 / (volatility * 100 + 0.01)))

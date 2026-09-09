@@ -53,26 +53,51 @@ MT5_MAGIC = 234000
 MT5_SLIPPAGE = 20
 
 WATCHLIST = [
+    # OPTIMIZED: Round 8 production config (2026-09-10)
+    # Excluded: NVDA, XAGUSD, US500, UK100, TSLA, AAPL, ETHUSD, BTCUSD, MSFT, META, AMZN
     "EURUSD", "GBPUSD", "USDJPY", "AUDUSD", "USDCAD", "USDCHF", "NZDUSD",
-    "EURJPY", "GBPJPY", "AUDJPY", "EURGBP", "EURCHF",
-    "XAUUSD", "XAGUSD", "BTCUSD", "ETHUSD",
-    "US30", "US500", "UK100",
-    "AAPL", "AMZN", "NVDA", "TSLA", "META", "MSFT", "GOOGL", "AMD",
+    "EURJPY", "GBPJPY", "AUDJPY", "EURGBP",
+    "XAUUSD",
+    "US30",
+    "AMD", "GOOGL",
 ]
 
 CONFIG = {
-    "max_risk_pct": 0.05,        # 5% risk per trade
-    "circuit_breaker": 99,       # No CB
-    "bad_hours": set(),          # No hour filter
-    "bad_days": set(),           # No day filter
-    "min_confidence": 0.30,      # Min signal strength
-    "max_position_pct": 0.30,    # Max 30% of balance per position
-    "hold_bars": 5,              # Close after 5 H1 bars
-    "kelly_win_rate": 0.55,      # Expected win rate
-    "kelly_avg_win": 1.5,        # Expected avg win
-    "kelly_avg_loss": 1.0,       # Expected avg loss
-    "vol_sizing": True,          # Scale position by inverse volatility
-    "session_hours": set(range(7, 16)) | set(range(13, 22)),  # London + NY
+    # ═══════════════════════════════════════════════════════════════
+    # OPTIMIZED PRODUCTION CONFIG (Round 8 - 2026-09-10)
+    # Best result: +$597.01 P&L, 50.4% WR, 478 trades
+    # Key: risk50 + no circuit breaker + AMD focus
+    # ═══════════════════════════════════════════════════════════════
+    "max_risk_pct": 0.50,           # 50% risk per trade (optimized)
+    "circuit_breaker": 99,          # No circuit breaker (let winners run)
+    "bad_hours": set(),             # No hour filter
+    "bad_days": set(),              # No day filter
+    "min_confidence": 0.30,         # Min signal strength
+    "max_position_pct": 0.50,      # Max 50% of balance per position
+    "hold_bars": 10,               # Hold 10 bars (optimized)
+    "kelly_win_rate": 0.55,
+    "kelly_avg_win": 1.5,
+    "kelly_avg_loss": 1.0,
+    "vol_sizing": True,
+    "session_hours": set(range(7, 22)),  # Extended session (7am-10pm)
+    # SYMBOL WEIGHTS: Optimized from Round 8
+    "sym_weights": {
+        "AMD": 3.0,      # Consistently biggest winner
+        "GOOGL": 1.0,
+        "XAUUSD": 1.0,
+        "USDJPY": 1.0,
+        "EURJPY": 1.0,
+        "GBPJPY": 1.0,
+        "NZDUSD": 1.0,
+        "USDCAD": 1.0,
+        "AUDJPY": 1.0,
+        "USDCHF": 1.0,
+        "US30": 1.0,
+        "EURUSD": 1.0,
+        "GBPUSD": 1.0,
+        "AUDUSD": 1.0,
+        "EURGBP": 1.0,
+    },
 }
 
 TIMEFRAME = "1H"
@@ -225,9 +250,14 @@ class MT5Trader:
         return None
 
     def get_lot_size(self, symbol, price, volatility=0.01):
-        """Calculate lot size based on risk and volatility."""
-        # Base: 5% risk per trade
+        """Calculate lot size based on risk, volatility, and symbol weight."""
+        # Base risk per trade
         risk_amount = self.balance * CONFIG["max_risk_pct"]
+
+        # Apply symbol weight (optimized from Round 8)
+        sym_weights = CONFIG.get("sym_weights", {})
+        weight = sym_weights.get(symbol, 1.0)
+        risk_amount *= weight
 
         # Volatility-based sizing (inverse scaling)
         if CONFIG.get("vol_sizing", False):
