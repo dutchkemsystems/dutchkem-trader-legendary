@@ -12,6 +12,7 @@ import { GateStatusCard } from "@/components/dashboard/gate-status-card";
 import { DebateResultCard } from "@/components/dashboard/debate-result-card";
 import { MemoryContextCard } from "@/components/dashboard/memory-context-card";
 import { PaperTradingCard } from "@/components/dashboard/paper-trading-card";
+import { LiveTradingCard } from "@/components/dashboard/live-trading-card";
 import { PriceChart } from "@/components/charts/price-chart";
 import { Indicators } from "@/components/charts/indicators";
 import { ErrorBoundary } from "@/components/error-boundary";
@@ -78,6 +79,11 @@ export default function DashboardPage() {
       title="Dashboard"
       description="Overview of your trading intelligence"
     >
+      {/* Live Trading Engine - Full Width */}
+      <ErrorBoundary>
+        <LiveTradingCard />
+      </ErrorBoundary>
+
       {/* Top stats */}
       <ErrorBoundary>
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">

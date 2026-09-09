@@ -8,7 +8,7 @@ import time
 from fastapi import FastAPI, APIRouter
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
-from api.routes import market, analysts, consensus, scanner, legendary, trades, positions, auth, broker, backtesting, paper_trades
+from api.routes import market, analysts, consensus, scanner, legendary, trades, positions, auth, broker, backtesting, paper_trades, live_trading
 from api.websocket.handlers import market_websocket, trades_websocket, consensus_websocket
 
 app = FastAPI(title="Dutchkem Trader API", version="1.0.0")
@@ -32,6 +32,7 @@ app.include_router(auth.router, prefix="/api/v1/auth", tags=["auth"])
 app.include_router(broker.router, prefix="/api/v1/broker", tags=["broker"])
 app.include_router(backtesting.router, prefix="/api/v1/backtest", tags=["backtest"])
 app.include_router(paper_trades.router, prefix="/api/v1", tags=["paper-trades"])
+app.include_router(live_trading.router, prefix="/api/v1/live", tags=["live-trading"])
 
 
 _start_time = time.time()

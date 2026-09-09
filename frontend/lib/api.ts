@@ -210,4 +210,58 @@ export async function getPaperTradesStats(): Promise<{
   return res.data;
 }
 
+// ---------------------------------------------------------------------------
+// Live Trading API
+// ---------------------------------------------------------------------------
+
+export async function getMT5Setup() {
+  const res = await api.get("/live/setup");
+  return res.data;
+}
+
+export async function connectMT5(data: { login: number; password: string; server: string; mt5_path?: string }) {
+  const res = await api.post("/live/connect", data);
+  return res.data;
+}
+
+export async function getLiveTradingStatus() {
+  const res = await api.get("/live/status");
+  return res.data;
+}
+
+export async function getMT5Status() {
+  const res = await api.get("/live/mt5/status");
+  return res.data;
+}
+
+export async function getLiveAccount() {
+  const res = await api.get("/live/account");
+  return res.data;
+}
+
+export async function startLiveTrading() {
+  const res = await api.post("/live/start");
+  return res.data;
+}
+
+export async function stopLiveTrading() {
+  const res = await api.post("/live/stop");
+  return res.data;
+}
+
+export async function getLiveImprovements() {
+  const res = await api.get("/live/improvements");
+  return res.data;
+}
+
+export async function getLivePositions() {
+  const res = await api.get("/live/positions");
+  return res.data;
+}
+
+export async function getLiveTrades() {
+  const res = await api.get("/live/trades");
+  return res.data;
+}
+
 export default api;

@@ -13,11 +13,7 @@ export default function DashboardLayout({
   const { isAuthenticated } = useAuth();
 
   if (!isAuthenticated) {
-    return (
-      <div className="flex h-screen items-center justify-center">
-        <p className="text-muted-foreground">Redirecting to login...</p>
-      </div>
-    );
+    return null; // useAuth hook handles redirect to /login
   }
 
   return (
