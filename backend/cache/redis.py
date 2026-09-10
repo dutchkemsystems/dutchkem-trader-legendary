@@ -1,36 +1,84 @@
 import json
 import logging
-import redis
+import time
 from typing import Any, Optional
 from django.conf import settings
 
 logger = logging.getLogger(__name__)
 
 
+class InMemoryCache:
+    """In-memory fallback cache when Redis is unavailable."""
+    
+    def __init__(self):
+        self._store: dict[str, tuple[Any, float]] = {}
+    
+    def get(self, key: str) -> Optional[Any]:
+        entry = self._store.get(key)
+        if entry is None:
+            return None
+        value, expires_at = entry
+        if time.time() > expires_at:
+            self._store.pop(key, None)
+            return None
+        return value
+    
+    def set(self, key: str, value: Any, ttl: int = 60):
+        expires_at = time.time() + ttl
+        self._store[key] = (value, expires_at)
+    
+    def delete(self, key: str):
+        self._store.pop(key, None)
+
+
 class RedisCache:
     def __init__(self):
-        self.client = redis.from_url(settings.REDIS_URL, decode_responses=True)
-
+        self._use_redis = True
+        self._client = None
+        try:
+            import redis
+            self._client = redis.from_url(settings.REDIS_URL, decode_responses=True)
+            # Test connection
+            self._client.ping()
+            logger.info("Connected to Redis")
+        except Exception as e:
+            logger.warning(f"Redis not available, using in-memory cache: {e}")
+            self._use_redis = False
+            self._fallback = InMemoryCache()
+    
+    def _get_client(self):
+        if not self._use_redis:
+            return self._fallback
+        return self._client
+    
     def get(self, key: str) -> Optional[Any]:
         try:
-            value = self.client.get(key)
+            client = self._get_client()
+            value = client.get(key)
             if value:
-                return json.loads(value)
-        except (redis.RedisError, json.JSONDecodeError) as e:
-            logger.warning(f"Redis get failed for key {key}: {e}")
+                if self._use_redis:
+                    return json.loads(value)
+                return value  # Already parsed in memory cache
+        except Exception as e:
+            logger.warning(f"Cache get failed for key {key}: {e}")
         return None
 
     def set(self, key: str, value: Any, ttl: int = 60):
         try:
-            self.client.setex(key, ttl, json.dumps(value, default=str))
-        except (redis.RedisError, TypeError) as e:
-            logger.warning(f"Redis set failed for key {key}: {e}")
+            client = self._get_client()
+            if self._use_redis:
+                client.setex(key, ttl, json.dumps(value, default=str))
+            else:
+                client.set(key, value, ttl)
+        except Exception as e:
+            logger.warning(f"Cache set failed for key {key}: {e}")
 
     def delete(self, key: str):
         try:
-            self.client.delete(key)
-        except redis.RedisError as e:
-            logger.warning(f"Redis delete failed for key {key}: {e}")
+            client = self._get_client()
+            client.delete(key)
+        except Exception as e:
+            logger.warning(f"Cache delete failed for key {key}: {e}")
 
     def get_market_data(self, symbol: str, timeframe: str) -> Optional[dict]:
         return self.get(f'market:{symbol}:{timeframe}')

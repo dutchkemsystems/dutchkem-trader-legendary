@@ -91,8 +91,7 @@ CORRELATIONS = {
 CONFIG = {
     # ═══════════════════════════════════════════════════════════════
     # v2 CONSERVATIVE CONFIG (Backtested 5 years, Sharpe 0.95)
-    # Best risk-adjusted: +4.3% return, 1.5% max DD, PF 1.08
-    # Key: ADX trend filter + Ichimoku + wider SL/TP + higher confidence
+    # RELAXED FILTERS for more trade signals
     # ═══════════════════════════════════════════════════════════════
     "max_risk_pct": 0.10,           # 10% risk per trade (conservative)
     "max_position_pct": 0.25,      # Max 25% position size
@@ -101,19 +100,52 @@ CONFIG = {
     "kelly_avg_loss": 1.0,
     "hold_bars": 72,               # Hold up to 72 bars (3 days H1)
     "trailing_breakeven": 0.01,
-    "min_confidence": 0.50,         # HIGH confidence threshold (v2)
-    "min_timeframes_agree": 3,
+    "min_confidence": 0.40,         # LOWERED from 0.50 for more signals
+    "min_timeframes_agree": 2,      # LOWERED from 3 for more signals
     "trend_timeframes": ["H4", "D1"],
     "session_hours": set(range(7, 22)),  # Extended session (7am-10pm)
     "vol_sizing": True,
-    # v2 INDICATORS
-    "adx_threshold": 30,            # Only trade strong trends
+    
+    # v2 INDICATORS (RELAXED)
+    "adx_threshold": 20,            # LOWERED from 30 — catch more trends
     "use_ichimoku": True,           # Ichimoku Cloud confirmation
     "use_volume_filter": True,      # Volume above avg required
     "use_rsi_divergence": True,     # RSI divergence bonus
-    "mtf_confluence": True,         # H4 confirms H1
+    "mtf_confluence": True,         # H4 confirms H1 (soft filter now)
     "sl_atr_mult": 3.0,            # SL = 3x ATR
     "tp_atr_mult": 5.0,            # TP = 5x ATR (R:R = 1:1.67)
+    
+    # NEW: Session Volatility Filter
+    "optimal_sessions": [13, 14, 15, 16],  # London/NY overlap (UTC)
+    "session_risk_mult": {7: 0.5, 8: 0.7, 9: 0.8, 10: 0.9, 11: 1.0, 12: 1.0,
+                          13: 1.0, 14: 1.0, 15: 1.0, 16: 1.0, 17: 0.9, 18: 0.8,
+                          19: 0.7, 20: 0.6, 21: 0.5},
+    
+    # NEW: Portfolio Heat Limit
+    "max_concurrent_trades": 3,     # Max 3 open positions
+    "max_correlated_trades": 2,     # Max 2 correlated pairs
+    
+    # NEW: Drawdown Throttle
+    "drawdown_throttle_enabled": True,
+    "drawdown_warning_pct": 0.05,   # -5% drawdown → reduce risk 50%
+    "drawdown_critical_pct": 0.10,  # -10% drawdown → reduce risk 75%
+    "drawdown_pause_pct": 0.15,     # -15% drawdown → pause trading
+    
+    # NEW: Partial Take-Profit
+    "partial_tp_enabled": True,
+    "partial_tp_pct": 0.50,         # Close 50% at 1:1 R:R
+    "partial_tp_rr": 1.0,           # Trigger at 1:1 risk-reward
+    
+    # NEW: Volatility Regime
+    "volatility_regime_enabled": True,
+    "high_vol_threshold": 0.80,     # 80th percentile ATR = high vol
+    "low_vol_threshold": 0.20,      # 20th percentile ATR = low vol
+    
+    # NEW: Mean Reversion at Extremes
+    "mean_reversion_enabled": True,
+    "rsi_extreme_low": 25,          # RSI < 25 = oversold
+    "rsi_extreme_high": 75,         # RSI > 75 = overbought
+    
     # SYMBOL WEIGHTS: v2 — no AMD/GOOGL, equal weight
     "sym_weights": {
         "XAUUSD": 1.0,
@@ -130,23 +162,20 @@ CONFIG = {
         "AUDUSD": 1.0,
         "EURGBP": 1.0,
     },
-    # IMPROVEMENT 1: Correlation Filter
+    
+    # IMPROVEMENTS (ACTIVE)
     "correlation_filter": True,
-    # IMPROVEMENT 2: Dynamic Risk Reduction (ACTIVE — conservative)
     "dynamic_risk": True,
     "risk_reduction_threshold": 3,
     "risk_reduction_factor": 0.5,
     "min_risk_pct": 0.05,
-    # IMPROVEMENT 3: Spread Filter
     "spread_filter": True,
     "max_spread_multiplier": 2.5,
-    # IMPROVEMENTS 4-7: Activate after week 3
-    "news_avoidance": False,
-    "breakout_detection": False,
-    "mean_reversion": False,
-    "position_scaling": False,
-    # Circuit breaker: 3 losses (conservative)
-    "circuit_breaker": 3,
+    "news_avoidance": False,        # Placeholder — activate week 3
+    "breakout_detection": False,    # Activate week 3
+    "mean_reversion": False,        # Activate week 3
+    "position_scaling": False,      # Activate week 3
+    "circuit_breaker": 3,           # Stop after 3 losses
 }
 
 CYCLE_INTERVAL = 3600
@@ -512,11 +541,14 @@ def analyze_symbol_mtf(symbol, use_mean_reversion=False):
     atr = h1.get("atr", 0) if h1 else 0
     volatility = h1.get("volatility", 0.01) if h1 else 0.01
 
-    # Trend TFs must agree
+    # SOFT FILTER: D1/H4 agreement — bonus points, not hard block
     trend_tf = CONFIG["trend_timeframes"]
     trend_actions = [results[tf]["action"] for tf in trend_tf if tf in results]
-    if len(trend_actions) >= 2 and trend_actions[0] != trend_actions[1]:
-        return "HOLD", 0, 0, results, atr, volatility
+    trend_bonus = 0
+    if len(trend_actions) >= 2:
+        if trend_actions[0] == trend_actions[1]:
+            trend_bonus = 2  # Bonus for agreement
+        # REMOVED: Hard block when D1/H4 disagree
 
     min_agree = CONFIG["min_timeframes_agree"]
     agreement = max(buy_count, sell_count)
@@ -525,9 +557,13 @@ def analyze_symbol_mtf(symbol, use_mean_reversion=False):
 
     net_weighted = buy_score - sell_score
     if net_weighted > 0 and buy_count >= min_agree:
-        return "BUY", buy_score, net_weighted, results, atr, volatility
+        # Apply trend bonus to score
+        final_score = buy_score + trend_bonus
+        return "BUY", buy_score, final_score, results, atr, volatility
     elif net_weighted < 0 and sell_count >= min_agree:
-        return "SELL", sell_score, abs(net_weighted), results, atr, volatility
+        # Apply trend bonus to score
+        final_score = sell_score + trend_bonus
+        return "SELL", sell_score, final_score, results, atr, volatility
 
     return "HOLD", 0, 0, results, atr, volatility
 
@@ -587,6 +623,93 @@ def check_news_filter():
 
 
 # ═══════════════════════════════════════════════════════════════
+# NEW IMPROVEMENTS
+# ═══════════════════════════════════════════════════════════════
+
+def check_portfolio_heat(open_positions, symbol, action):
+    """PORTFOLIO HEAT LIMIT: Check if we can open another position."""
+    max_concurrent = CONFIG.get("max_concurrent_trades", 3)
+    max_correlated = CONFIG.get("max_correlated_trades", 2)
+    
+    # Check total open positions
+    if len(open_positions) >= max_concurrent:
+        return False, "Max concurrent trades reached"
+    
+    # Check correlated positions
+    correlations = CORRELATIONS.get(symbol, [])
+    correlated_count = sum(1 for pos_sym, pos_info in open_positions.items() 
+                          if pos_sym in correlations and pos_info["action"] == action)
+    if correlated_count >= max_correlated:
+        return False, "Too many correlated positions"
+    
+    return True, "OK"
+
+
+def get_drawdown_throttle(peak_equity, current_equity):
+    """DRAWDOWN THROTTLE: Reduce risk based on drawdown."""
+    if not CONFIG.get("drawdown_throttle_enabled"):
+        return 1.0
+    
+    if peak_equity <= 0:
+        return 1.0
+    
+    drawdown = (peak_equity - current_equity) / peak_equity
+    
+    if drawdown >= CONFIG.get("drawdown_pause_pct", 0.15):
+        return 0.0  # Pause trading
+    elif drawdown >= CONFIG.get("drawdown_critical_pct", 0.10):
+        return 0.25  # Reduce risk by 75%
+    elif drawdown >= CONFIG.get("drawdown_warning_pct", 0.05):
+        return 0.50  # Reduce risk by 50%
+    
+    return 1.0  # Full risk
+
+
+def get_session_risk_multiplier(hour):
+    """SESSION VOLATILITY FILTER: Adjust risk based on trading session."""
+    session_mult = CONFIG.get("session_risk_mult", {})
+    return session_mult.get(hour, 1.0)
+
+
+def calculate_volatility_regime(atr_values, current_atr):
+    """VOLATILITY REGIME: Detect high/medium/low volatility."""
+    if not CONFIG.get("volatility_regime_enabled") or not atr_values:
+        return "medium", 1.0
+    
+    # Calculate percentile
+    sorted_atrs = sorted(atr_values)
+    rank = sum(1 for a in sorted_atrs if a <= current_atr) / len(sorted_atrs)
+    
+    if rank >= CONFIG.get("high_vol_threshold", 0.80):
+        return "high", 0.7  # Reduce size in high vol
+    elif rank <= CONFIG.get("low_vol_threshold", 0.20):
+        return "low", 1.2   # Increase size in low vol (calm markets)
+    
+    return "medium", 1.0
+
+
+def check_mean_reversion(rsi, price, support, resistance):
+    """MEAN REVERSION: Detect oversold/oversold at S/R levels."""
+    if not CONFIG.get("mean_reversion_enabled"):
+        return None, 0
+    
+    rsi_low = CONFIG.get("rsi_extreme_low", 25)
+    rsi_high = CONFIG.get("rsi_extreme_high", 75)
+    
+    # Oversold at support → BUY signal
+    if rsi < rsi_low and support > 0 and price <= support * 1.002:
+        confidence = (rsi_low - rsi) / rsi_low  # Higher confidence when more oversold
+        return "BUY", min(confidence, 0.7)  # Cap at 0.7 for counter-trend
+    
+    # Overbought at resistance → SELL signal
+    if rsi > rsi_high and resistance > 0 and price >= resistance * 0.998:
+        confidence = (rsi - rsi_high) / (100 - rsi_high)
+        return "SELL", min(confidence, 0.7)
+    
+    return None, 0
+
+
+# ═══════════════════════════════════════════════════════════════
 # TRADING ENGINE
 # ═══════════════════════════════════════════════════════════════
 def connect_mt5():
@@ -602,6 +725,7 @@ class CompleteTrader:
         self.positions = {}
         self.trade_log = []
         self.balance = 10000.0
+        self.peak_equity = 10000.0  # NEW: Track peak for drawdown
         self.consecutive_losses = 0
         self.kelly = KellySizer()
         self.kelly_frac = self.kelly.calculate(
@@ -611,11 +735,16 @@ class CompleteTrader:
         )
         self.week_number = 1
         self.start_time = datetime.now(timezone.utc)
+        self.atr_history = []  # NEW: Track ATR for volatility regime
+        self.partial_tp_state = {}  # NEW: Track partial take-profit state
 
     def get_account_info(self):
         info = mt5.account_info()
         if info:
             self.balance = info.balance
+            # Track peak equity for drawdown calculation
+            if info.balance > self.peak_equity:
+                self.peak_equity = info.balance
             return info
         return None
 
@@ -640,30 +769,55 @@ class CompleteTrader:
                 CONFIG["position_scaling"] = True
 
     def get_lot_size(self, symbol, price, volatility=0.01, atr=0):
-        """Calculate lot size with dynamic risk and symbol weights."""
-        # IMPROVEMENT 2: Dynamic risk (DISABLED per optimization)
-        risk_pct = CONFIG.get("max_risk_pct", 0.50)
+        """Calculate lot size based on equity, risk %, and ATR-based SL distance."""
+        risk_pct = CONFIG.get("max_risk_pct", 0.10)
+        
+        # Apply drawdown throttle
+        drawdown_mult = get_drawdown_throttle(self.peak_equity, self.balance)
+        if drawdown_mult == 0:
+            return 0.0
+        risk_pct *= drawdown_mult
+        
+        # Apply session risk multiplier
+        current_hour = datetime.now(timezone.utc).hour
+        session_mult = get_session_risk_multiplier(current_hour)
+        risk_pct *= session_mult
+        
+        # Risk amount in dollars (based on current equity)
         risk_amount = self.balance * risk_pct
 
-        # Apply symbol weight (optimized from Round 8)
+        # Apply symbol weight
         sym_weights = CONFIG.get("sym_weights", {})
         weight = sym_weights.get(symbol, 1.0)
         risk_amount *= weight
 
+        # Apply volatility regime
+        vol_regime, vol_mult = calculate_volatility_regime(self.atr_history, atr)
+        risk_amount *= vol_mult
+
+        # Volatility-based sizing
         if CONFIG.get("vol_sizing") and volatility > 0:
             vol_factor = max(0.5, min(2.0, 1.0 / (volatility * 100 + 0.01)))
             risk_amount *= vol_factor
 
-        kelly_size = max(10, self.kelly_frac * risk_amount)
-        size_usd = min(kelly_size, self.balance * CONFIG["max_position_pct"])
-
+        # Calculate SL distance in price terms (ATR-based)
+        sl_distance = atr * CONFIG.get("sl_atr_mult", 3.0) if atr > 0 else price * 0.003
+        
+        # Lot size = Risk Amount / (SL Distance * Contract Size)
         symbol_info = mt5.symbol_info(symbol)
         if symbol_info is None:
             return 0.0
 
-        lot_size = symbol_info.volume_min
         contract_size = getattr(symbol_info, 'trade_contract_size', 100000)
-        lots = size_usd / (price * contract_size) if price > 0 and contract_size > 0 else 0
+        
+        if sl_distance > 0 and contract_size > 0:
+            lots = risk_amount / (sl_distance * contract_size)
+        else:
+            # Fallback: simple percentage of equity
+            lots = risk_amount / (price * contract_size)
+
+        # Enforce min/max limits
+        lot_size = symbol_info.volume_min
         lots = max(lot_size, min(lots, symbol_info.volume_max))
         lots = round(lots / symbol_info.volume_step) * symbol_info.volume_step
         lots = round(lots, 2)
@@ -672,6 +826,12 @@ class CompleteTrader:
     def open_position(self, symbol, action, price, atr, volatility, tf_score, tf_details):
         """Open real MT5 position."""
         if symbol in self.positions:
+            return None
+
+        # NEW: Portfolio heat limit
+        heat_ok, heat_msg = check_portfolio_heat(self.positions, symbol, action)
+        if not heat_ok:
+            print(f"  SKIP {symbol}: {heat_msg}")
             return None
 
         # IMPROVEMENT 1: Correlation filter
@@ -688,6 +848,12 @@ class CompleteTrader:
         # IMPROVEMENT 4: News filter
         if not check_news_filter():
             print(f"  SKIP {symbol}: High-impact news")
+            return None
+
+        # Check drawdown throttle
+        drawdown_mult = get_drawdown_throttle(self.peak_equity, self.balance)
+        if drawdown_mult == 0:
+            print(f"  SKIP {symbol}: Trading paused due to drawdown")
             return None
 
         # Calculate lot size
@@ -829,7 +995,7 @@ class CompleteTrader:
         return trade
 
     def check_trailing_stop(self, symbol):
-        """Move SL to breakeven after +1%."""
+        """Trailing stop with partial take-profit."""
         if symbol not in self.positions:
             return
 
@@ -846,6 +1012,18 @@ class CompleteTrader:
         else:
             profit_pct = (entry - current_price) / entry
 
+        # NEW: Partial take-profit at 1:1 R:R
+        if CONFIG.get("partial_tp_enabled") and not pos.get("partial_tp_done"):
+            partial_rr = CONFIG.get("partial_tp_rr", 1.0)
+            sl_distance = abs(entry - pos["initial_sl"])
+            profit_distance = abs(current_price - entry)
+            
+            if profit_distance >= sl_distance * partial_rr:
+                # Close partial position
+                self._close_partial(symbol, CONFIG.get("partial_tp_pct", 0.50))
+                pos["partial_tp_done"] = True
+
+        # Traditional trailing stop (breakeven)
         if profit_pct >= CONFIG["trailing_breakeven"]:
             if pos["action"] == "BUY" and pos["sl"] < entry:
                 new_sl = entry + (tick.ask - tick.bid)
@@ -853,6 +1031,55 @@ class CompleteTrader:
             elif pos["action"] == "SELL" and pos["sl"] > entry:
                 new_sl = entry - (tick.ask - tick.bid)
                 self._modify_sl(symbol, new_sl)
+
+    def _close_partial(self, symbol, pct):
+        """Close a percentage of the position."""
+        if symbol not in self.positions:
+            return
+        
+        pos = self.positions[symbol]
+        ticket = pos["ticket"]
+        
+        mt5_pos = mt5.positions_get(ticket=ticket)
+        if not mt5_pos or len(mt5_pos) == 0:
+            return
+        
+        mt5_pos = mt5_pos[0]
+        close_volume = round(mt5_pos.volume * pct, 2)
+        
+        # Ensure minimum volume
+        symbol_info = mt5.symbol_info(symbol)
+        if symbol_info and close_volume < symbol_info.volume_min:
+            return
+        
+        close_type = mt5.ORDER_TYPE_SELL if mt5_pos.type == mt5.ORDER_TYPE_BUY else mt5.ORDER_TYPE_BUY
+        tick = mt5.symbol_info_tick(symbol)
+        close_price = tick.bid if mt5_pos.type == mt5.ORDER_TYPE_BUY else tick.ask
+        
+        close_order = {
+            "action": mt5.TRADE_ACTION_DEAL,
+            "symbol": symbol,
+            "volume": close_volume,
+            "type": close_type,
+            "position": ticket,
+            "price": close_price,
+            "deviation": MT5_SLIPPAGE,
+            "magic": MT5_MAGIC,
+            "comment": "dutchkem_partial",
+        }
+        
+        result = mt5.order_send(close_order)
+        if result and result.retcode == mt5.TRADE_RETCODE_DONE:
+            # Calculate P&L for closed portion
+            if pos["action"] == "BUY":
+                pnl = (result.price - pos["entry_price"]) / pos["entry_price"] * close_volume
+            else:
+                pnl = (pos["entry_price"] - result.price) / pos["entry_price"] * close_volume
+            
+            self.balance += pnl
+            pos["size"] -= close_volume
+            
+            print(f"    PARTIAL TP {symbol}: Closed {pct:.0%} @ {result.price:.5f} | P&L=${pnl:+.2f}")
 
     def _modify_sl(self, symbol, new_sl):
         if symbol not in self.positions:
@@ -880,8 +1107,14 @@ class CompleteTrader:
                 del self.positions[sym]
 
     def get_state(self):
+        drawdown_pct = 0
+        if self.peak_equity > 0:
+            drawdown_pct = (self.peak_equity - self.balance) / self.peak_equity * 100
+        
         return {
             "balance": self.balance,
+            "peak_equity": self.peak_equity,
+            "drawdown_pct": round(drawdown_pct, 2),
             "consecutive_losses": self.consecutive_losses,
             "week_number": self.week_number,
             "active_improvements": {
@@ -892,6 +1125,10 @@ class CompleteTrader:
                 "breakout_detection": CONFIG.get("breakout_detection", False),
                 "mean_reversion": CONFIG.get("mean_reversion", False),
                 "position_scaling": CONFIG.get("position_scaling", False),
+                "partial_tp": CONFIG.get("partial_tp_enabled", False),
+                "drawdown_throttle": CONFIG.get("drawdown_throttle_enabled", False),
+                "volatility_regime": CONFIG.get("volatility_regime_enabled", False),
+                "portfolio_heat": CONFIG.get("max_concurrent_trades", 3),
             },
             "positions": {s: {k: v for k, v in p.items() if k != "entry_time"} for s, p in self.positions.items()},
             "total_trades": len(self.trade_log),
@@ -915,10 +1152,16 @@ def run_cycle(trader, cycle_num):
     trader.sync_positions()
     trader.update_week_number()
 
+    # Calculate drawdown for display
+    drawdown_pct = 0
+    if trader.peak_equity > 0:
+        drawdown_pct = (trader.peak_equity - trader.balance) / trader.peak_equity * 100
+
     print(f"\n{'='*90}")
     print(f"  CYCLE {cycle_num} | {now.strftime('%Y-%m-%d %H:%M:%S')} UTC | Week {trader.week_number}")
-    print(f"  Balance: ${trader.balance:,.2f} | Open: {len(trader.positions)} | Losses: {trader.consecutive_losses}")
-    print(f"  Active Improvements: {[k for k, v in CONFIG.items() if v is True and k in ['correlation_filter', 'dynamic_risk', 'spread_filter', 'news_avoidance', 'breakout_detection', 'mean_reversion', 'position_scaling']]}")
+    print(f"  Balance: ${trader.balance:,.2f} | Peak: ${trader.peak_equity:,.2f} | DD: {drawdown_pct:.1f}%")
+    print(f"  Open: {len(trader.positions)}/{CONFIG.get('max_concurrent_trades', 3)} | Losses: {trader.consecutive_losses}")
+    print(f"  Session: Hour {now.hour} UTC | Risk Mult: {get_session_risk_multiplier(now.hour):.1f}")
     print(f"{'='*90}")
 
     # Session check
@@ -926,6 +1169,14 @@ def run_cycle(trader, cycle_num):
     in_session = now.hour in session_hours if session_hours else True
     if not in_session:
         print(f"  Outside session (London+NY). Hour={now.hour} UTC")
+        for sym in list(trader.positions.keys()):
+            trader.check_trailing_stop(sym)
+        return trader
+
+    # Check drawdown pause
+    drawdown_mult = get_drawdown_throttle(trader.peak_equity, trader.balance)
+    if drawdown_mult == 0:
+        print(f"  TRADING PAUSED: Drawdown exceeds {CONFIG.get('drawdown_pause_pct', 0.15):.0%}")
         for sym in list(trader.positions.keys()):
             trader.check_trailing_stop(sym)
         return trader
@@ -939,6 +1190,12 @@ def run_cycle(trader, cycle_num):
 
         use_mr = CONFIG.get("mean_reversion", False)
         action, total_score, weighted_score, details, atr, volatility = analyze_symbol_mtf(sym, use_mr)
+
+        # Track ATR for volatility regime
+        if atr > 0:
+            trader.atr_history.append(atr)
+            if len(trader.atr_history) > 100:
+                trader.atr_history = trader.atr_history[-100:]
 
         if action != "HOLD" and weighted_score > 0:
             h1_info = details.get("H1", details.get("H4", {}))

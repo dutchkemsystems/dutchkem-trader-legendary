@@ -65,6 +65,31 @@ DATABASES = {
 
 REDIS_URL = os.getenv("REDIS_URL", "redis://localhost:6379/0")
 
+# Cache configuration - try Redis, fallback to in-memory
+CACHES = {
+    "default": {
+        "BACKEND": "django.core.cache.backends.locmem.LocMemCache",
+        "LOCATION": "dutchkem-cache",
+    }
+}
+
+# Try to use Redis if available
+try:
+    import redis
+    r = redis.from_url(REDIS_URL, socket_connect_timeout=2)
+    r.ping()
+    CACHES = {
+        "default": {
+            "BACKEND": "django_redis.cache.RedisCache",
+            "LOCATION": REDIS_URL,
+            "OPTIONS": {
+                "CLIENT_CLASS": "django_redis.client.DefaultClient",
+            }
+        }
+    }
+except Exception:
+    pass  # Use LocMemCache fallback
+
 CELERY_BROKER_URL = os.getenv("CELERY_BROKER_URL", "redis://localhost:6379/1")
 CELERY_RESULT_BACKEND = os.getenv("CELERY_RESULT_BACKEND", "redis://localhost:6379/2")
 CELERY_ACCEPT_CONTENT = ["json"]

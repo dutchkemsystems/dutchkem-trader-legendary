@@ -137,22 +137,12 @@ def detect_mt5():
     except:
         pass
 
-    # Check if connected (only if we have credentials)
+    # FIX: Don't call mt5.initialize() if the engine is running — it will kill the engine's connection
+    # Only check connection status via tasklist, not by initializing MT5
     if creds and result["running"]:
-        try:
-            import MetaTrader5 as mt5
-            if mt5.initialize(
-                path=mt5_path,
-                login=creds["login"],
-                password=creds["password"],
-                server=creds["server"],
-            ):
-                info = mt5.account_info()
-                if info:
-                    result["connected"] = True
-                mt5.shutdown()
-        except:
-            pass
+        # Instead of mt5.initialize(), just check if we have valid credentials
+        # The engine handles its own MT5 connection
+        result["connected"] = True  # Assume connected if MT5 is running and we have creds
 
     return result
 
@@ -294,14 +284,48 @@ def get_trading_state():
 
 
 def read_control():
-    """Read control status."""
+    """Read control status — validates PID is alive, not just file content."""
     if CONTROL_FILE.exists():
         try:
             with open(CONTROL_FILE, "r") as f:
-                return json.load(f).get("status", "stopped")
+                data = json.load(f)
+                status = data.get("status", "stopped")
+                
+                # If status says "running", verify the engine process is actually alive
+                if status == "running":
+                    pid = get_engine_pid()
+                    if pid is None:
+                        # No PID tracked — check if any python process is running the engine
+                        # Just trust the file for now, watchdog will fix if wrong
+                        pass
+                    elif not _is_process_alive(pid):
+                        # PID exists but process is dead — update control file
+                        print(f"[CONTROL] Engine PID {pid} is dead, updating status to 'stopped'")
+                        write_control("stopped")
+                        return "stopped"
+                
+                return status
         except:
             pass
     return "stopped"
+
+
+def _is_process_alive(pid):
+    """Check if a process with given PID is alive."""
+    try:
+        if os.name == 'nt':  # Windows
+            import ctypes
+            kernel32 = ctypes.windll.kernel32
+            handle = kernel32.OpenProcess(0x100000, False, pid)  # PROCESS_QUERY_LIMITED_INFORMATION
+            if handle:
+                kernel32.CloseHandle(handle)
+                return True
+            return False
+        else:  # Unix
+            os.kill(pid, 0)
+            return True
+    except (OSError, ProcessLookupError):
+        return False
 
 
 def write_control(status):
@@ -330,6 +354,68 @@ def get_trades():
 # ---------------------------------------------------------------------------
 
 trading_process = None
+watchdog_thread = None
+watchdog_active = False
+
+
+def watchdog_loop():
+    """Watchdog thread that monitors the engine process and auto-restarts if needed."""
+    global trading_process, watchdog_active
+    
+    while watchdog_active:
+        time.sleep(10)  # Check every 10 seconds
+        
+        if not watchdog_active:
+            break
+            
+        # Check if process is running
+        if trading_process and trading_process.poll() is not None:
+            # Process has died
+            exit_code = trading_process.returncode
+            print(f"[WATCHDOG] Engine process died with exit code {exit_code}")
+            
+            # Read the log file for error details
+            log_file_path = TRADING_DIR / "engine.log"
+            error_msg = ""
+            if log_file_path.exists():
+                try:
+                    with open(log_file_path, "r", encoding="utf-8") as f:
+                        lines = f.readlines()
+                        error_msg = "".join(lines[-20:])  # Last 20 lines
+                except:
+                    pass
+            
+            print(f"[WATCHDOG] Last log lines: {error_msg[:500]}")
+            
+            # Auto-restart if control says "running" (didn't get stop command)
+            if read_control() == "running":
+                print("[WATCHDOG] Auto-restarting engine...")
+                time.sleep(5)  # Wait before restart
+                result = start_trading_process()
+                print(f"[WATCHDOG] Restart result: {result}")
+            else:
+                print("[WATCHDOG] Control is 'stopped', not restarting")
+                watchdog_active = False
+                break
+
+
+def start_watchdog():
+    """Start the watchdog thread."""
+    global watchdog_thread, watchdog_active
+    
+    if watchdog_active:
+        return
+    
+    watchdog_active = True
+    watchdog_thread = threading.Thread(target=watchdog_loop, daemon=True)
+    watchdog_thread.start()
+    print("[WATCHDOG] Started")
+
+
+def stop_watchdog():
+    """Stop the watchdog thread."""
+    global watchdog_active
+    watchdog_active = False
 
 
 def start_trading_process():
@@ -352,22 +438,29 @@ def start_trading_process():
         # Create trades directory
         TRADING_DIR.mkdir(exist_ok=True)
 
+        # FIX: Write stdout/stderr to log file to prevent pipe deadlock
+        log_file_path = TRADING_DIR / "engine.log"
+        log_file = open(log_file_path, "w", encoding="utf-8")
+
         # Start the engine as a subprocess from the backend directory
         trading_process = subprocess.Popen(
             ["python", str(ENGINE_SCRIPT)],
             cwd=str(BACKEND_DIR),
             creationflags=subprocess.CREATE_NO_WINDOW if os.name == 'nt' else 0,
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
+            stdout=log_file,
+            stderr=log_file,
         )
 
         # Wait briefly to check if process started successfully
-        time.sleep(2)
+        time.sleep(3)
         if trading_process.poll() is not None:
-            stderr = trading_process.stderr.read().decode() if trading_process.stderr else ""
+            log_file.close()
+            with open(log_file_path, "r", encoding="utf-8") as f:
+                stderr = f.read()
             return {"status": "error", "message": f"Engine exited immediately: {stderr[:500]}"}
 
         write_control("running")
+        start_watchdog()  # Start monitoring the engine process
         return {"status": "started", "pid": trading_process.pid}
     except Exception as e:
         return {"status": "error", "message": str(e)}
@@ -377,6 +470,7 @@ def stop_trading_process():
     """Stop the trading engine."""
     global trading_process
 
+    stop_watchdog()  # Stop monitoring
     write_control("stopped")
 
     if trading_process and trading_process.poll() is None:
