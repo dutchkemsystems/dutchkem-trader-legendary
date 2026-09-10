@@ -27,16 +27,14 @@ AGENTS = {
 
 
 async def _fetch_market_data(symbol: str, n=200, timeframe="H1"):
-    """Fetch real market data from MT5. Falls back to random walk if MT5 unavailable."""
-    df = await async_fetch_mt5_candles(symbol, timeframe, n)
-    if df is not None and len(df) >= 30:
-        return df
-    logger.warning("MT5 unavailable for %s — using simulated data", symbol)
-    close = np.random.randn(n).cumsum() + 2350
-    high = close + np.abs(np.random.randn(n)) * 0.5
-    low = close - np.abs(np.random.randn(n)) * 0.5
-    volume = np.random.randint(100000, 1000000, n).astype(float)
-    return pd.DataFrame({'close': close, 'high': high, 'low': low, 'volume': volume})
+    """Fetch real market data from MT5. Returns None if MT5 unavailable."""
+    try:
+        df = await async_fetch_mt5_candles(symbol, timeframe, n)
+        if df is not None and len(df) >= 30:
+            return df
+    except Exception as e:
+        logger.error("MT5 fetch failed for %s: %s", symbol, e)
+    return None  # Caller must handle None
 
 
 # --- Original Legendary Modules ---
@@ -45,6 +43,8 @@ async def _fetch_market_data(symbol: str, n=200, timeframe="H1"):
 async def get_seykota(symbol: str):
     module = SeykotaTrendModule()
     data = await _fetch_market_data(symbol, 200)
+    if data is None:
+        return {"symbol": symbol, "error": "MT5 data unavailable", "signal": "HOLD", "confidence": 0.0}
     result = module.analyze_trend(data)
     return {"symbol": symbol, "data_source": "mt5", **result}
 
@@ -53,6 +53,8 @@ async def get_seykota(symbol: str):
 async def get_turtle_soup(symbol: str):
     module = TurtleSoupModule()
     data = await _fetch_market_data(symbol, 50)
+    if data is None:
+        return {"symbol": symbol, "error": "MT5 data unavailable", "result": {}}
     result = module.detect_false_breakout(data)
     return {"symbol": symbol, "data_source": "mt5", "result": result}
 
@@ -69,6 +71,8 @@ async def get_pyramiding(symbol: str):
 async def get_soros(symbol: str):
     agent = AGENTS["soros"]
     data = await _fetch_market_data(symbol, 200)
+    if data is None:
+        return {"symbol": symbol, "error": "MT5 data unavailable", "signal": "HOLD", "confidence": 0.0}
     result = agent.analyze(data, symbol)
     result["data_source"] = "mt5"
     return result
@@ -78,6 +82,8 @@ async def get_soros(symbol: str):
 async def get_buffett(symbol: str):
     agent = AGENTS["buffett"]
     data = await _fetch_market_data(symbol, 200)
+    if data is None:
+        return {"symbol": symbol, "error": "MT5 data unavailable", "signal": "HOLD", "confidence": 0.0}
     result = agent.analyze(data, symbol)
     result["data_source"] = "mt5"
     return result
@@ -87,6 +93,8 @@ async def get_buffett(symbol: str):
 async def get_druckenmiller(symbol: str):
     agent = AGENTS["druckenmiller"]
     data = await _fetch_market_data(symbol, 200)
+    if data is None:
+        return {"symbol": symbol, "error": "MT5 data unavailable", "signal": "HOLD", "confidence": 0.0}
     result = agent.analyze(data, symbol)
     result["data_source"] = "mt5"
     return result
@@ -96,6 +104,8 @@ async def get_druckenmiller(symbol: str):
 async def get_tudor_jones(symbol: str):
     agent = AGENTS["tudor_jones"]
     data = await _fetch_market_data(symbol, 200)
+    if data is None:
+        return {"symbol": symbol, "error": "MT5 data unavailable", "signal": "HOLD", "confidence": 0.0}
     result = agent.analyze(data, symbol)
     result["data_source"] = "mt5"
     return result
@@ -105,6 +115,8 @@ async def get_tudor_jones(symbol: str):
 async def get_lynch(symbol: str):
     agent = AGENTS["lynch"]
     data = await _fetch_market_data(symbol, 200)
+    if data is None:
+        return {"symbol": symbol, "error": "MT5 data unavailable", "signal": "HOLD", "confidence": 0.0}
     result = agent.analyze(data, symbol)
     result["data_source"] = "mt5"
     return result
@@ -116,6 +128,8 @@ async def get_lynch(symbol: str):
 async def analyze_all_agents(symbol: str):
     """Run all 5 persona agents on a symbol and return combined results"""
     data = await _fetch_market_data(symbol, 200)
+    if data is None:
+        return {"symbol": symbol, "error": "MT5 data unavailable", "consensus": "HOLD", "agents": {}}
     results = {}
     for name, agent in AGENTS.items():
         results[name] = agent.analyze(data, symbol)

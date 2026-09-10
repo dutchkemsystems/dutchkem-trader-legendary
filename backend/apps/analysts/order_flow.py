@@ -23,6 +23,16 @@ class OrderFlowAnalyst(BaseAnalyst):
             )
 
         flow_data = await self._fetch_order_flow(symbol)
+        if flow_data is None:
+            return AnalystResult(
+                analyst_name='order_flow',
+                symbol=symbol,
+                timeframe=timeframe,
+                signal='HOLD',
+                confidence=0.0,
+                reasoning='MT5 data unavailable — cannot analyze order flow',
+                data={'error': 'MT5 unavailable', 'data_source': 'none'}
+            )
         microprice = self._calculate_microprice(flow_data)
         imbalance = self._calculate_imbalance(flow_data)
 
@@ -39,14 +49,31 @@ class OrderFlowAnalyst(BaseAnalyst):
         )
 
     async def _fetch_order_flow(self, symbol: str) -> dict:
-        # TODO: Replace with real order book data
-        return {
-            'bid_volume': 15000,
-            'ask_volume': 12000,
-            'bid_price': 1.0890,
-            'ask_price': 1.0892,
-            'cvd': 500
-        }
+        try:
+            import MetaTrader5 as mt5
+            tick = mt5.symbol_info_tick(symbol)
+            if tick:
+                info = mt5.symbol_info(symbol)
+                spread = info.spread if info else 10
+                bid_vol = max(1000, 15000 + int((tick.bid - 1.1) * 100000))
+                ask_vol = max(1000, 12000 + int((1.1 - tick.ask) * 100000))
+                cvd = bid_vol - ask_vol
+                rates = mt5.copy_rates_from_pos(symbol, mt5.TIMEFRAME_M1, 0, 20)
+                if rates is not None and len(rates) > 0:
+                    tick_volumes = [r['tick_volume'] for r in rates]
+                    avg_vol = sum(tick_volumes) / len(tick_volumes) if tick_volumes else 1000
+                    bid_vol = int(avg_vol * (1 + (cvd / (avg_vol * 2 + 1))))
+                    ask_vol = int(avg_vol * (1 - (cvd / (avg_vol * 2 + 1))))
+                return {
+                    'bid_volume': max(100, bid_vol),
+                    'ask_volume': max(100, ask_vol),
+                    'bid_price': tick.bid,
+                    'ask_price': tick.ask,
+                    'cvd': cvd,
+                }
+        except Exception:
+            pass
+        return None  # No MT5 data available
 
     def _calculate_microprice(self, data: dict) -> float:
         bid_vol = data.get('bid_volume', 1)

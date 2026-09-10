@@ -23,6 +23,16 @@ class NewsAnalyst(BaseAnalyst):
             )
 
         news_data = await self._fetch_news(symbol)
+        if not news_data:
+            return AnalystResult(
+                analyst_name='news',
+                symbol=symbol,
+                timeframe=timeframe,
+                signal='HOLD',
+                confidence=0.0,
+                reasoning='No news API configured — cannot analyze news sentiment',
+                data={'error': 'no_news_api', 'data_source': 'none'}
+            )
         sentiment_score = self._analyze_sentiment(news_data)
         keywords = self._extract_keywords(news_data)
 
@@ -47,8 +57,8 @@ class NewsAnalyst(BaseAnalyst):
         )
 
     async def _fetch_news(self, symbol: str) -> list:
-        # TODO: Replace with real News API
-        return [{'title': f'News about {symbol}', 'content': 'Sample content', 'sentiment': 0.1}]
+        """Return empty — no news API configured. Requires NewsAPI, GNews, or similar."""
+        return []
 
     def _analyze_sentiment(self, news: list) -> float:
         if not news:

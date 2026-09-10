@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dutchkem Ventures — Sign In</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --blue:#0066FF;--green:#00CC88;--gold:#FFB800;
+  --blue-dark:#0052CC;--green-dark:#00A86B;
+  --bg:#F8FAFF;--card:#FFFFFF;--text:#1A1A2E;--muted:#6B7280;--border:#E5E7EB;
+}
+html,body{height:100%;overflow:hidden;font-family:'Inter',sans-serif;color:var(--text);background:var(--bg)}
+
+.login-wrap{display:flex;height:100vh;width:100%}
+
+/* ── LEFT PANEL ── */
+.left-panel{
+  flex:1.1;display:flex;flex-direction:column;position:relative;overflow:hidden;
+  background:linear-gradient(135deg,#0a0a1a 0%,#0d1b3e 30%,#0a2a1a 60%,#1a0a2a 100%);
+  animation:gradShift 12s ease infinite;background-size:300% 300%;
+}
+@keyframes gradShift{
+  0%{background-position:0% 50%}
+  50%{background-position:100% 50%}
+  100%{background-position:0% 50%}
+}
+
+/* Floating currency symbols */
+.currency-float{position:absolute;inset:0;pointer-events:none;overflow:hidden;z-index:0}
+.currency-float span{
+  position:absolute;font-weight:800;opacity:.04;color:#fff;
+  animation:floatUp linear infinite;will-change:transform;
+}
+@keyframes floatUp{
+  0%{transform:translateY(110vh) rotate(0deg);opacity:.0}
+  10%{opacity:.06}
+  90%{opacity:.06}
+  100%{transform:translateY(-10vh) rotate(360deg);opacity:0}
+}
+
+.left-content{
+  position:relative;z-index:2;display:flex;flex-direction:column;
+  justify-content:center;padding:60px 56px;color:#fff;flex:1;
+}
+
+/* Logo */
+.logo{
+  font-family:'Space Grotesk',sans-serif;font-size:2rem;font-weight:700;
+  letter-spacing:3px;margin-bottom:48px;
+  background:linear-gradient(135deg,var(--blue),var(--green),var(--gold));
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+  background-clip:text;
+}
+.logo .sub{display:block;font-size:.65rem;letter-spacing:6px;font-weight:400;
+  -webkit-text-fill-color:rgba(255,255,255,.45);margin-top:4px;}
+
+/* Headline */
+.left-content h1{
+  font-family:'Space Grotesk',sans-serif;font-size:clamp(1.8rem,3vw,2.6rem);
+  font-weight:800;line-height:1.15;margin-bottom:16px;
+}
+.left-content h1 .hl{
+  background:linear-gradient(90deg,var(--green),var(--blue));
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+}
+.left-content .tagline{font-size:.95rem;color:rgba(255,255,255,.55);line-height:1.6;max-width:400px;margin-bottom:40px}
+
+/* Feature bullets */
+.features{display:flex;flex-direction:column;gap:18px}
+.feat{
+  display:flex;align-items:center;gap:14px;
+  background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.08);
+  border-radius:14px;padding:16px 20px;
+  backdrop-filter:blur(10px);transition:transform .25s,background .25s;
+}
+.feat:hover{transform:translateX(6px);background:rgba(255,255,255,.1)}
+.feat-icon{
+  width:44px;height:44px;border-radius:12px;display:grid;place-items:center;
+  font-size:1.3rem;flex-shrink:0;
+}
+.feat-icon.ai{background:linear-gradient(135deg,rgba(0,102,255,.35),rgba(0,204,136,.25))}
+.feat-icon.sym{background:linear-gradient(135deg,rgba(255,184,0,.35),rgba(0,204,136,.2))}
+.feat-icon.risk{background:linear-gradient(135deg,rgba(0,204,136,.35),rgba(0,102,255,.2))}
+.feat-text strong{display:block;font-size:.88rem;font-weight:600;letter-spacing:.3px}
+.feat-text span{font-size:.75rem;color:rgba(255,255,255,.45)}
+
+/* Decorative orbs */
+.orb{position:absolute;border-radius:50%;filter:blur(80px);opacity:.18;z-index:0}
+.orb-1{width:320px;height:320px;background:var(--blue);top:-80px;left:-60px}
+.orb-2{width:260px;height:260px;background:var(--green);bottom:-60px;right:-40px}
+.orb-3{width:180px;height:180px;background:var(--gold);bottom:30%;left:20%;opacity:.1}
+
+/* ── RIGHT PANEL ── */
+.right-panel{
+  flex:1;display:flex;align-items:center;justify-content:center;
+  background:var(--bg);position:relative;
+}
+.right-panel::before{
+  content:'';position:absolute;width:400px;height:400px;border-radius:50%;
+  background:radial-gradient(circle,rgba(0,102,255,.06),transparent 70%);
+  top:-100px;right:-100px;
+}
+
+.login-card{
+  width:100%;max-width:420px;padding:48px 40px;
+  background:var(--card);border-radius:24px;
+  box-shadow:0 4px 40px rgba(0,0,0,.06),0 0 0 1px rgba(0,0,0,.03);
+  position:relative;z-index:1;
+}
+
+.login-card h2{
+  font-family:'Space Grotesk',sans-serif;font-size:1.55rem;font-weight:700;
+  margin-bottom:6px;
+}
+.login-card .subtitle{font-size:.85rem;color:var(--muted);margin-bottom:32px}
+
+.form-group{margin-bottom:20px;position:relative}
+.form-group label{display:block;font-size:.78rem;font-weight:600;margin-bottom:6px;color:#374151;letter-spacing:.3px}
+.input-wrap{
+  position:relative;display:flex;align-items:center;
+  border:2px solid var(--border);border-radius:12px;
+  transition:border-color .3s,box-shadow .3s;background:#fff;
+}
+.input-wrap:focus-within{border-color:var(--blue);box-shadow:0 0 0 4px rgba(0,102,255,.1)}
+.input-wrap .icon{position:absolute;left:14px;font-size:1rem;color:#9CA3AF;pointer-events:none;z-index:1}
+.input-wrap input{
+  width:100%;border:none;outline:none;padding:14px 44px 14px 42px;
+  font-size:.9rem;font-family:inherit;background:transparent;color:var(--text);
+}
+.input-wrap input::placeholder{color:#C4C9D4}
+.pw-toggle{
+  position:absolute;right:12px;background:none;border:none;cursor:pointer;
+  font-size:1rem;color:#9CA3AF;padding:4px;transition:color .2s;
+}
+.pw-toggle:hover{color:var(--blue)}
+
+.form-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:28px}
+.remember{display:flex;align-items:center;gap:7px;cursor:pointer;font-size:.8rem;color:var(--muted)}
+.remember input[type=checkbox]{
+  width:16px;height:16px;border-radius:5px;border:2px solid var(--border);
+  accent-color:var(--blue);cursor:pointer;
+}
+.forgot{font-size:.8rem;color:var(--blue);text-decoration:none;font-weight:500;transition:color .2s}
+.forgot:hover{color:var(--blue-dark);text-decoration:underline}
+
+/* Submit button */
+.btn-submit{
+  width:100%;padding:15px;border:none;border-radius:12px;
+  font-size:.95rem;font-weight:700;font-family:inherit;cursor:pointer;
+  color:#fff;background:linear-gradient(135deg,var(--blue),var(--green));
+  background-size:200% 200%;position:relative;overflow:hidden;
+  transition:transform .2s,box-shadow .3s;
+  box-shadow:0 4px 20px rgba(0,102,255,.3);
+}
+.btn-submit::before{
+  content:'';position:absolute;inset:0;
+  background:linear-gradient(135deg,var(--green),var(--blue));
+  background-size:200% 200%;opacity:0;transition:opacity .3s;
+}
+.btn-submit:hover{transform:translateY(-2px);box-shadow:0 8px 30px rgba(0,102,255,.4)}
+.btn-submit:hover::before{opacity:1}
+.btn-submit span{position:relative;z-index:1;display:flex;align-items:center;justify-content:center;gap:8px}
+.btn-submit:active{transform:translateY(0) scale(.98)}
+.btn-submit .spinner{
+  display:none;width:18px;height:18px;border:2.5px solid rgba(255,255,255,.3);
+  border-top-color:#fff;border-radius:50%;animation:spin .6s linear infinite;
+}
+.btn-submit.loading .btn-text{display:none}
+.btn-submit.loading .spinner{display:inline-block}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* Error */
+.error-box{
+  display:none;margin-bottom:20px;padding:12px 16px;border-radius:10px;
+  background:#FEF2F2;border:1px solid #FECACA;color:#B91C1C;
+  font-size:.82rem;font-weight:500;align-items:center;gap:8px;
+}
+.error-box.show{display:flex;animation:shake .5s ease}
+@keyframes shake{
+  0%,100%{transform:translateX(0)}
+  10%,50%,90%{transform:translateX(-6px)}
+  30%,70%{transform:translateX(6px)}
+}
+
+.login-footer{
+  text-align:center;margin-top:28px;font-size:.75rem;color:var(--muted);
+  opacity:.6;
+}
+.login-footer strong{color:var(--text);font-weight:600;opacity:1}
+
+/* ── RESPONSIVE ── */
+@media(max-width:900px){
+  .login-wrap{flex-direction:column;overflow-y:auto}
+  .left-panel{min-height:45vh;flex:none;padding:0}
+  .left-content{padding:36px 28px;justify-content:flex-end}
+  .logo{font-size:1.5rem;margin-bottom:24px}
+  .left-content h1{font-size:1.5rem}
+  .features{gap:10px}
+  .feat{padding:12px 14px}
+  .feat-icon{width:36px;height:36px;font-size:1rem}
+  .right-panel{flex:1;padding:32px 20px}
+  .login-card{padding:32px 24px;border-radius:20px}
+}
+</style>
+</head>
+<body>
+
+<div class="login-wrap">
+  <!-- LEFT PANEL -->
+  <div class="left-panel">
+    <div class="orb orb-1"></div>
+    <div class="orb orb-2"></div>
+    <div class="orb orb-3"></div>
+    <div class="currency-float" id="currencyFloat"></div>
+    <div class="left-content">
+      <div class="logo" id="logo">DUTCHKEM<span class="sub">VENTURES</span></div>
+      <h1 id="headline">Welcome to<br><span class="hl">Legendary Intelligence</span></h1>
+      <p class="tagline" id="tagline">Professional-grade Forex trading powered by artificial intelligence, multi-symbol diversification, and real-time risk management.</p>
+      <div class="features">
+        <div class="feat" id="f1">
+          <div class="feat-icon ai">🧠</div>
+          <div class="feat-text"><strong>AI-Powered Analysis</strong><span>Deep learning models scan 10 pairs 24/7</span></div>
+        </div>
+        <div class="feat" id="f2">
+          <div class="feat-icon sym">📊</div>
+          <div class="feat-text"><strong>10 Symbol Diversification</strong><span>Tiered risk across major &amp; cross pairs</span></div>
+        </div>
+        <div class="feat" id="f3">
+          <div class="feat-icon risk">🛡️</div>
+          <div class="feat-text"><strong>Real-Time Risk Management</strong><span>Dynamic stops, hedging &amp; drawdown protection</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- RIGHT PANEL -->
+  <div class="right-panel">
+    <div class="login-card" id="loginCard">
+      <h2>Sign In to Your Account</h2>
+      <p class="subtitle">Enter your credentials to access the trading dashboard</p>
+
+      <div class="error-box" id="errorBox">
+        <span>⚠️</span><span id="errorMsg">Invalid credentials</span>
+      </div>
+
+      <form id="loginForm" autocomplete="on" novalidate>
+        <div class="form-group">
+          <label for="username">Username</label>
+          <div class="input-wrap">
+            <span class="icon">👤</span>
+            <input type="text" id="username" name="username" placeholder="Enter your username" autocomplete="username" required>
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="password">Password</label>
+          <div class="input-wrap">
+            <span class="icon">🔒</span>
+            <input type="password" id="password" name="password" placeholder="Enter your password" autocomplete="current-password" required>
+            <button type="button" class="pw-toggle" id="pwToggle" aria-label="Show password">👁️</button>
+          </div>
+        </div>
+        <div class="form-row">
+          <label class="remember"><input type="checkbox" id="rememberMe"> Remember me</label>
+          <a href="#" class="forgot" onclick="event.preventDefault()">Forgot password?</a>
+        </div>
+        <button type="submit" class="btn-submit" id="submitBtn">
+          <span>
+            <span class="btn-text">Sign In</span>
+            <span class="spinner"></span>
+          </span>
+        </button>
+      </form>
+
+      <p class="login-footer">Built by <strong>Dutchkem Ventures</strong></p>
+    </div>
+  </div>
+</div>
+
+<script>
+(function(){
+  /* ── Floating currency symbols ── */
+  const symbols = ['$','€','£','¥','₣','₿','AUD','CHF','JPY','GBP','EUR','USD','NZD','CAD'];
+  const container = document.getElementById('currencyFloat');
+  for(let i = 0; i < 22; i++){
+    const s = document.createElement('span');
+    s.textContent = symbols[Math.floor(Math.random()*symbols.length)];
+    s.style.left = Math.random()*100+'%';
+    s.style.fontSize = (1 + Math.random()*2.5)+'rem';
+    s.style.animationDuration = (14 + Math.random()*20)+'s';
+    s.style.animationDelay = -(Math.random()*24)+'s';
+    container.appendChild(s);
+  }
+
+  /* ── Password toggle ── */
+  const pwInput = document.getElementById('password');
+  const pwBtn = document.getElementById('pwToggle');
+  pwBtn.addEventListener('click',()=>{
+    const show = pwInput.type === 'text';
+    pwInput.type = show ? 'password' : 'text';
+    pwBtn.textContent = show ? '👁️' : '🙈';
+  });
+
+  /* ── GSAP entrance ── */
+  gsap.set(['#logo','#headline','#tagline','#f1','#f2','#f3','#loginCard'],{opacity:0,y:30});
+  const tl = gsap.timeline({defaults:{ease:'power3.out'}});
+  tl.to('#logo',{opacity:1,y:0,duration:.6},0.1)
+    .to('#headline',{opacity:1,y:0,duration:.6},0.25)
+    .to('#tagline',{opacity:1,y:0,duration:.5},0.4)
+    .to('#f1',{opacity:1,y:0,duration:.5},0.55)
+    .to('#f2',{opacity:1,y:0,duration:.5},0.65)
+    .to('#f3',{opacity:1,y:0,duration:.5},0.75)
+    .to('#loginCard',{opacity:1,y:0,duration:.7},0.4);
+
+  /* ── Login ── */
+  const form = document.getElementById('loginForm');
+  const errBox = document.getElementById('errorBox');
+  const errMsg = document.getElementById('errorMsg');
+  const submitBtn = document.getElementById('submitBtn');
+
+  function showError(msg){
+    errMsg.textContent = msg;
+    errBox.classList.remove('show');
+    void errBox.offsetWidth;
+    errBox.classList.add('show');
+  }
+  function hideError(){errBox.classList.remove('show')}
+
+  form.addEventListener('submit', async function(e){
+    e.preventDefault();
+    hideError();
+    const username = document.getElementById('username').value.trim();
+    const password = pwInput.value;
+    if(!username || !password){showError('Please fill in all fields');return}
+
+    submitBtn.classList.add('loading');
+    submitBtn.disabled = true;
+
+    try{
+      const res = await fetch('http://localhost:8888/api/v1/auth/login',{
+        method:'POST',
+        headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({username,password})
+      });
+      const data = await res.json();
+
+      if(res.ok && (data.access_token || data.token)){
+        localStorage.setItem('dutchkem_token', data.access_token || data.token);
+        if(data.user) localStorage.setItem('dutchkem_user',JSON.stringify(data.user));
+        document.body.style.transition='opacity .4s';
+        document.body.style.opacity='0';
+        setTimeout(()=>{window.location.href='/dashboard'},350);
+      } else {
+        throw new Error(data.detail || data.message || 'Invalid credentials');
+      }
+    }catch(err){
+      submitBtn.classList.remove('loading');
+      submitBtn.disabled = false;
+      showError(err.message || 'Connection failed — is the server running?');
+    }
+  });
+
+  /* Keyboard shortcut: focus username on load */
+  setTimeout(()=>document.getElementById('username').focus(),900);
+})();
+</script>
+</body>
+</html>

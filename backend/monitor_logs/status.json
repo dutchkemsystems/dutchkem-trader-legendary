@@ -1,0 +1,106 @@
+{
+  "timestamp": "2026-09-10T15:53:46.636948+00:00",
+  "cycle": 5,
+  "account": {
+    "balance": 9275.17,
+    "equity": 9274.92,
+    "free_margin": 9260.26,
+    "margin": 14.66,
+    "profit": -0.25
+  },
+  "positions": [
+    {
+      "ticket": 3209097327,
+      "symbol": "GBPJPY",
+      "action": "BUY",
+      "lots": 0.01,
+      "entry": 208.587,
+      "current": 208.424,
+      "sl": 207.744,
+      "tp": 209.991,
+      "profit": -1.06,
+      "swap": 0.0,
+      "time": "2026-09-10T11:25:04+00:00"
+    },
+    {
+      "ticket": 3211289829,
+      "symbol": "EURUSD",
+      "action": "SELL",
+      "lots": 0.01,
+      "entry": 1.1629,
+      "current": 1.16292,
+      "sl": 0.0,
+      "tp": 0.0,
+      "profit": -0.02,
+      "swap": 0.0,
+      "time": "2026-09-10T14:59:59+00:00"
+    },
+    {
+      "ticket": 3211289849,
+      "symbol": "NZDUSD",
+      "action": "SELL",
+      "lots": 0.01,
+      "entry": 0.58095,
+      "current": 0.58094,
+      "sl": 0.0,
+      "tp": 0.0,
+      "profit": 0.01,
+      "swap": 0.0,
+      "time": "2026-09-10T14:59:59+00:00"
+    },
+    {
+      "ticket": 3211289856,
+      "symbol": "GBPJPY",
+      "action": "BUY",
+      "lots": 0.01,
+      "entry": 208.231,
+      "current": 208.424,
+      "sl": 0.0,
+      "tp": 0.0,
+      "profit": 1.25,
+      "swap": 0.0,
+      "time": "2026-09-10T15:00:00+00:00"
+    },
+    {
+      "ticket": 3211463181,
+      "symbol": "EURGBP",
+      "action": "BUY",
+      "lots": 0.01,
+      "entry": 0.8594,
+      "current": 0.8593,
+      "sl": 0.85808,
+      "tp": 0.86161,
+      "profit": -0.14,
+      "swap": 0.0,
+      "time": "2026-09-10T15:27:43+00:00"
+    },
+    {
+      "ticket": 3211463207,
+      "symbol": "USDCHF",
+      "action": "BUY",
+      "lots": 0.01,
+      "entry": 0.81132,
+      "current": 0.81118,
+      "sl": 0.80795,
+      "tp": 0.81694,
+      "profit": -0.17,
+      "swap": 0.0,
+      "time": "2026-09-10T15:27:44+00:00"
+    },
+    {
+      "ticket": 3211463308,
+      "symbol": "AUDJPY",
+      "action": "SELL",
+      "lots": 0.01,
+      "entry": 110.434,
+      "current": 110.453,
+      "sl": 110.994,
+      "tp": 109.502,
+      "profit": -0.12,
+      "swap": 0.0,
+      "time": "2026-09-10T15:27:45+00:00"
+    }
+  ],
+  "position_count": 7,
+  "total_pnl": -0.25
+}

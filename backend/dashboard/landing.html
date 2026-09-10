@@ -1,0 +1,601 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dutchkem Ventures — AI-Powered Forex Trading Intelligence</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --blue:#0066FF;--emerald:#00CC88;--gold:#FFB800;--coral:#FF6B6B;
+  --dark:#1a1a2e;--text:#2d2d3a;--muted:#6b7280;--bg:#ffffff;
+  --card-bg:#f8fafc;--border:#e5e7eb;
+}
+html{scroll-behavior:smooth;overflow-x:hidden}
+body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);overflow-x:hidden;line-height:1.6}
+h1,h2,h3,h4{font-family:'Space Grotesk',sans-serif}
+
+/* ─── NAVBAR ─── */
+.navbar{position:fixed;top:0;left:0;right:0;z-index:1000;padding:1rem 2rem;display:flex;align-items:center;justify-content:space-between;background:rgba(255,255,255,0.85);backdrop-filter:blur(20px);border-bottom:1px solid rgba(229,231,235,0.6);transition:all 0.3s}
+.navbar.scrolled{box-shadow:0 4px 30px rgba(0,102,255,0.08)}
+.nav-logo{font-family:'Space Grotesk',sans-serif;font-weight:800;font-size:1.6rem;letter-spacing:-0.03em;background:linear-gradient(135deg,var(--blue),var(--emerald));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.nav-logo span{font-size:0.75rem;font-weight:500;display:block;letter-spacing:0.15em;text-transform:uppercase;background:linear-gradient(135deg,var(--emerald),var(--gold));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-top:-4px}
+.nav-links{display:flex;align-items:center;gap:1.5rem}
+.nav-links a{text-decoration:none;color:var(--muted);font-size:0.9rem;font-weight:500;transition:color 0.2s}
+.nav-links a:hover{color:var(--blue)}
+.btn-login{background:linear-gradient(135deg,var(--blue),#0052cc);color:#fff!important;padding:0.6rem 1.6rem;border-radius:50px;font-weight:600;box-shadow:0 4px 15px rgba(0,102,255,0.3);transition:all 0.3s}
+.btn-login:hover{transform:translateY(-2px);box-shadow:0 6px 25px rgba(0,102,255,0.4)}
+.mobile-toggle{display:none;background:none;border:none;font-size:1.5rem;cursor:pointer;color:var(--text)}
+
+/* ─── HERO ─── */
+.hero{min-height:100vh;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden;padding:8rem 2rem 4rem;background:linear-gradient(135deg,#f0f7ff 0%,#e8faf0 50%,#fff8eb 100%)}
+.hero::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at 20% 50%,rgba(0,102,255,0.06) 0%,transparent 50%),radial-gradient(ellipse at 80% 20%,rgba(0,204,136,0.06) 0%,transparent 50%),radial-gradient(ellipse at 60% 80%,rgba(255,184,0,0.04) 0%,transparent 50%)}
+.hero-content{position:relative;z-index:2;text-align:center;max-width:900px}
+.hero-badge{display:inline-flex;align-items:center;gap:0.5rem;background:rgba(0,102,255,0.08);border:1px solid rgba(0,102,255,0.15);border-radius:50px;padding:0.5rem 1.2rem;font-size:0.8rem;font-weight:600;color:var(--blue);margin-bottom:2rem}
+.hero-badge::before{content:'';width:8px;height:8px;border-radius:50%;background:var(--emerald);animation:pulse-dot 2s infinite}
+@keyframes pulse-dot{0%,100%{opacity:1;transform:scale(1)}50%{opacity:0.5;transform:scale(1.4)}}
+.hero h1{font-size:clamp(2.8rem,6vw,5rem);font-weight:900;line-height:1.05;letter-spacing:-0.04em;margin-bottom:1.5rem;color:var(--dark)}
+.hero h1 .gradient-text{background:linear-gradient(135deg,var(--blue),var(--emerald),var(--gold));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;background-size:200% 200%;animation:gradientShift 4s ease infinite}
+@keyframes gradientShift{0%,100%{background-position:0% 50%}50%{background-position:100% 50%}}
+.hero-sub{font-size:1.2rem;color:var(--muted);max-width:600px;margin:0 auto 2.5rem;line-height:1.7}
+.hero-ctas{display:flex;gap:1rem;justify-content:center;flex-wrap:wrap}
+.btn-primary{display:inline-flex;align-items:center;gap:0.5rem;background:linear-gradient(135deg,var(--blue),#0052cc);color:#fff;padding:1rem 2.4rem;border-radius:50px;font-size:1.05rem;font-weight:700;text-decoration:none;box-shadow:0 8px 30px rgba(0,102,255,0.35);transition:all 0.3s;position:relative;overflow:hidden}
+.btn-primary::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,#0052cc,var(--emerald));opacity:0;transition:opacity 0.3s}
+.btn-primary:hover{transform:translateY(-3px);box-shadow:0 12px 40px rgba(0,102,255,0.45)}
+.btn-primary:hover::before{opacity:1}
+.btn-primary span{position:relative;z-index:1}
+.btn-secondary{display:inline-flex;align-items:center;gap:0.5rem;background:rgba(255,255,255,0.8);border:2px solid var(--border);color:var(--text);padding:1rem 2.4rem;border-radius:50px;font-size:1.05rem;font-weight:600;text-decoration:none;transition:all 0.3s;backdrop-filter:blur(10px)}
+.btn-secondary:hover{border-color:var(--blue);color:var(--blue);transform:translateY(-3px);box-shadow:0 8px 25px rgba(0,102,255,0.1)}
+
+/* Hero chart canvas */
+.hero-chart{position:absolute;inset:0;z-index:1;opacity:0.12}
+
+/* Floating currency symbols */
+.currency-float{position:absolute;font-size:2rem;font-weight:700;opacity:0.07;pointer-events:none;z-index:0;font-family:'Space Grotesk',sans-serif}
+
+/* ─── TICKER ─── */
+.ticker-wrap{overflow:hidden;background:linear-gradient(90deg,var(--blue),var(--emerald),var(--gold),var(--coral),var(--blue));background-size:300% 100%;animation:tickerGradient 8s linear infinite;padding:0.75rem 0;position:relative}
+@keyframes tickerGradient{0%{background-position:0% 50%}100%{background-position:300% 50%}}
+.ticker{display:flex;width:max-content;animation:ticker 30s linear infinite}
+.ticker-item{white-space:nowrap;padding:0 3rem;color:#fff;font-weight:700;font-size:0.9rem;letter-spacing:0.05em;display:flex;align-items:center;gap:0.5rem}
+.ticker-item .up{color:#d1fae5}
+.ticker-item .down{color:#fee2e2}
+@keyframes ticker{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}
+
+/* ─── SECTION COMMONS ─── */
+section{padding:6rem 2rem}
+.section-header{text-align:center;max-width:700px;margin:0 auto 4rem}
+.section-label{font-size:0.8rem;font-weight:700;text-transform:uppercase;letter-spacing:0.15em;color:var(--blue);margin-bottom:0.75rem;display:block}
+.section-title{font-size:clamp(2rem,4vw,3rem);font-weight:800;letter-spacing:-0.03em;margin-bottom:1rem;color:var(--dark)}
+.section-desc{font-size:1.05rem;color:var(--muted);line-height:1.7}
+.container{max-width:1200px;margin:0 auto}
+
+/* ─── FEATURES ─── */
+.features{background:linear-gradient(180deg,#fff 0%,#f0f7ff 100%)}
+.features-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:1.5rem}
+.feature-card{background:#fff;border:1px solid var(--border);border-radius:20px;padding:2.5rem;transition:all 0.4s cubic-bezier(0.25,0.46,0.45,0.94);position:relative;overflow:hidden}
+.feature-card::before{content:'';position:absolute;top:0;left:0;right:0;height:4px;background:linear-gradient(90deg,var(--blue),var(--emerald));transform:scaleX(0);transform-origin:left;transition:transform 0.4s}
+.feature-card:hover{transform:translateY(-8px);box-shadow:0 20px 60px rgba(0,102,255,0.1);border-color:transparent}
+.feature-card:hover::before{transform:scaleX(1)}
+.feature-icon{width:56px;height:56px;border-radius:16px;display:flex;align-items:center;justify-content:center;font-size:1.6rem;margin-bottom:1.5rem;transition:transform 0.3s}
+.feature-card:hover .feature-icon{transform:scale(1.1) rotate(-5deg)}
+.fi-blue{background:linear-gradient(135deg,rgba(0,102,255,0.1),rgba(0,102,255,0.05))}
+.fi-green{background:linear-gradient(135deg,rgba(0,204,136,0.1),rgba(0,204,136,0.05))}
+.fi-gold{background:linear-gradient(135deg,rgba(255,184,0,0.1),rgba(255,184,0,0.05))}
+.fi-coral{background:linear-gradient(135deg,rgba(255,107,107,0.1),rgba(255,107,107,0.05))}
+.fi-purple{background:linear-gradient(135deg,rgba(139,92,246,0.1),rgba(139,92,246,0.05))}
+.fi-teal{background:linear-gradient(135deg,rgba(20,184,166,0.1),rgba(20,184,166,0.05))}
+.feature-card h3{font-size:1.25rem;font-weight:700;margin-bottom:0.75rem;color:var(--dark)}
+.feature-card p{color:var(--muted);font-size:0.95rem;line-height:1.65}
+
+/* ─── STATS ─── */
+.stats{background:linear-gradient(135deg,var(--dark) 0%,#16213e 100%);position:relative;overflow:hidden}
+.stats::before{content:'';position:absolute;inset:0;background:radial-gradient(circle at 30% 50%,rgba(0,102,255,0.15) 0%,transparent 50%),radial-gradient(circle at 70% 50%,rgba(0,204,136,0.1) 0%,transparent 50%)}
+.stats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:2rem;position:relative;z-index:1}
+.stat-item{text-align:center;padding:2rem}
+.stat-number{font-family:'Space Grotesk',sans-serif;font-size:clamp(2.5rem,5vw,3.5rem);font-weight:800;background:linear-gradient(135deg,var(--blue),var(--emerald));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:0.5rem;line-height:1.1}
+.stat-label{color:rgba(255,255,255,0.6);font-size:0.95rem;font-weight:500}
+.stat-sub{color:rgba(255,255,255,0.35);font-size:0.8rem;margin-top:0.25rem}
+
+/* ─── HOW IT WORKS ─── */
+.how-it-works{background:#fff}
+.steps{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:2rem;position:relative}
+.step{text-align:center;padding:3rem 2rem;position:relative}
+.step-number{width:72px;height:72px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:'Space Grotesk',sans-serif;font-weight:800;font-size:1.5rem;margin:0 auto 1.5rem;position:relative;z-index:1}
+.step:nth-child(1) .step-number{background:linear-gradient(135deg,rgba(0,102,255,0.1),rgba(0,102,255,0.05));color:var(--blue)}
+.step:nth-child(2) .step-number{background:linear-gradient(135deg,rgba(0,204,136,0.1),rgba(0,204,136,0.05));color:var(--emerald)}
+.step:nth-child(3) .step-number{background:linear-gradient(135deg,rgba(255,184,0,0.1),rgba(255,184,0,0.05));color:var(--gold)}
+.step h3{font-size:1.3rem;font-weight:700;margin-bottom:0.75rem;color:var(--dark)}
+.step p{color:var(--muted);font-size:0.95rem;line-height:1.65;max-width:300px;margin:0 auto}
+.step-connector{position:absolute;top:3.5rem;width:calc(100% - 280px);left:calc(50% + 80px);height:2px;z-index:0}
+.step-connector::after{content:'';display:block;width:100%;height:100%;background:repeating-linear-gradient(90deg,var(--border) 0,var(--border) 8px,transparent 8px,transparent 16px);animation:dashMove 1.5s linear infinite}
+@keyframes dashMove{to{background-position:32px 0}}
+.step:nth-child(3) .step-connector{display:none}
+
+/* ─── PROOF ─── */
+.proof{background:linear-gradient(135deg,#f0f7ff 0%,#e8faf0 100%);position:relative;overflow:hidden}
+.proof::before{content:'';position:absolute;top:-50%;right:-20%;width:500px;height:500px;border-radius:50%;background:radial-gradient(circle,rgba(0,204,136,0.08) 0%,transparent 70%)}
+.proof-card{max-width:800px;margin:0 auto;text-align:center;background:#fff;border-radius:24px;padding:4rem 3rem;border:1px solid var(--border);position:relative;z-index:1;box-shadow:0 20px 60px rgba(0,0,0,0.04)}
+.proof-card .big-number{font-family:'Space Grotesk',sans-serif;font-size:clamp(3rem,8vw,5rem);font-weight:900;background:linear-gradient(135deg,var(--emerald),var(--blue));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;line-height:1;margin-bottom:1rem}
+.proof-card h3{font-size:1.5rem;font-weight:700;color:var(--dark);margin-bottom:1rem}
+.proof-card p{color:var(--muted);font-size:1.05rem;line-height:1.7;max-width:550px;margin:0 auto 2rem}
+.proof-details{display:flex;justify-content:center;gap:3rem;flex-wrap:wrap;margin-top:2rem;padding-top:2rem;border-top:1px solid var(--border)}
+.proof-detail{text-align:center}
+.proof-detail strong{display:block;font-family:'Space Grotesk',sans-serif;font-size:1.5rem;font-weight:800;color:var(--dark)}
+.proof-detail span{font-size:0.85rem;color:var(--muted)}
+
+/* ─── CTA ─── */
+.cta-section{background:linear-gradient(135deg,var(--blue) 0%,#0052cc 50%,var(--emerald) 100%);position:relative;overflow:hidden;text-align:center;padding:6rem 2rem}
+.cta-section::before{content:'';position:absolute;inset:0;background:url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.04'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")}
+.cta-section h2{font-size:clamp(2rem,4vw,3rem);font-weight:800;color:#fff;margin-bottom:1rem;position:relative;z-index:1}
+.cta-section p{color:rgba(255,255,255,0.8);font-size:1.15rem;margin-bottom:2.5rem;position:relative;z-index:1}
+.btn-cta{display:inline-flex;align-items:center;gap:0.5rem;background:#fff;color:var(--blue);padding:1.1rem 2.8rem;border-radius:50px;font-size:1.1rem;font-weight:700;text-decoration:none;box-shadow:0 8px 30px rgba(0,0,0,0.15);transition:all 0.3s;position:relative;z-index:1;animation:ctaPulse 3s ease-in-out infinite}
+@keyframes ctaPulse{0%,100%{box-shadow:0 8px 30px rgba(0,0,0,0.15),0 0 0 0 rgba(255,255,255,0.3)}50%{box-shadow:0 8px 30px rgba(0,0,0,0.15),0 0 0 12px rgba(255,255,255,0)}}
+.btn-cta:hover{transform:translateY(-3px) scale(1.03);box-shadow:0 12px 40px rgba(0,0,0,0.2)}
+
+/* ─── FOOTER ─── */
+footer{background:var(--dark);color:rgba(255,255,255,0.5);text-align:center;padding:3rem 2rem}
+footer .footer-logo{font-family:'Space Grotesk',sans-serif;font-weight:800;font-size:1.3rem;background:linear-gradient(135deg,var(--blue),var(--emerald));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:0.5rem}
+footer p{font-size:0.85rem}
+footer .footer-links{display:flex;justify-content:center;gap:1.5rem;margin-top:1rem;flex-wrap:wrap}
+footer .footer-links a{color:rgba(255,255,255,0.4);text-decoration:none;font-size:0.85rem;transition:color 0.2s}
+footer .footer-links a:hover{color:var(--emerald)}
+
+/* ─── PARTICLES ─── */
+.particle{position:absolute;border-radius:50%;pointer-events:none;opacity:0.15}
+@keyframes floatParticle{0%,100%{transform:translateY(0) translateX(0)}25%{transform:translateY(-20px) translateX(10px)}50%{transform:translateY(-10px) translateX(-15px)}75%{transform:translateY(-25px) translateX(5px)}}
+
+/* ─── RESPONSIVE ─── */
+@media(max-width:768px){
+  .nav-links{display:none}
+  .nav-links.active{display:flex;flex-direction:column;position:absolute;top:100%;left:0;right:0;background:#fff;padding:1.5rem 2rem;gap:1rem;border-bottom:1px solid var(--border);box-shadow:0 10px 30px rgba(0,0,0,0.08)}
+  .mobile-toggle{display:block}
+  .hero{padding:7rem 1.5rem 3rem}
+  .features-grid{grid-template-columns:1fr}
+  .steps{grid-template-columns:1fr}
+  .step-connector{display:none!important}
+  .proof-card{padding:2.5rem 1.5rem}
+  .proof-details{gap:1.5rem}
+  section{padding:4rem 1.2rem}
+}
+@media(max-width:480px){
+  .hero h1{font-size:2.2rem}
+  .hero-sub{font-size:1rem}
+  .hero-ctas{flex-direction:column;align-items:center}
+  .btn-primary,.btn-secondary{width:100%;justify-content:center}
+}
+</style>
+</head>
+<body>
+
+<!-- ═══ NAVBAR ═══ -->
+<nav class="navbar" id="navbar">
+  <div class="nav-logo">DUTCHKEM<span>Ventures</span></div>
+  <div class="nav-links" id="navLinks">
+    <a href="#features">Features</a>
+    <a href="#how-it-works">How It Works</a>
+    <a href="#proof">Results</a>
+    <a href="/login" class="btn-login">Login</a>
+  </div>
+  <button class="mobile-toggle" id="mobileToggle" aria-label="Menu">☰</button>
+</nav>
+
+<!-- ═══ HERO ═══ -->
+<section class="hero" id="hero">
+  <div class="hero-chart" id="heroChart"></div>
+  <!-- Floating currency symbols -->
+  <div class="currency-float" style="top:12%;left:8%;font-size:3rem;color:var(--blue)">€</div>
+  <div class="currency-float" style="top:20%;right:12%;font-size:2.5rem;color:var(--emerald)">$</div>
+  <div class="currency-float" style="bottom:25%;left:15%;font-size:2.8rem;color:var(--gold)">£</div>
+  <div class="currency-float" style="top:60%;right:8%;font-size:2.2rem;color:var(--coral)">¥</div>
+  <div class="currency-float" style="top:35%;left:5%;font-size:2rem;color:var(--emerald)">CHF</div>
+  <div class="currency-float" style="bottom:15%;right:20%;font-size:2.4rem;color:var(--blue)">AUD</div>
+  <div class="currency-float" style="top:8%;right:30%;font-size:1.8rem;color:var(--gold)">NZD</div>
+  <div class="currency-float" style="bottom:35%;left:30%;font-size:2.1rem;color:var(--coral)">CAD</div>
+
+  <div class="hero-content">
+    <div class="hero-badge"><span></span> AI-Powered Trading Intelligence</div>
+    <h1>DOMINATE THE<br><span class="gradient-text">FOREX MARKETS</span><br>WITH AI</h1>
+    <p class="hero-sub">10 symbols. Regime-aware intelligence. Genetic-optimized strategies. Dutchkem's AI engine analyzes 50+ indicators in real time to find high-probability trades across the most liquid currency pairs on the planet.</p>
+    <div class="hero-ctas">
+      <a href="/login" class="btn-primary"><span>⚡ Start Trading</span></a>
+      <a href="#features" class="btn-secondary">Explore Features ↓</a>
+    </div>
+  </div>
+
+  <!-- Particles -->
+  <div class="particle" style="width:6px;height:6px;background:var(--blue);top:20%;left:20%;animation:floatParticle 6s ease-in-out infinite"></div>
+  <div class="particle" style="width:4px;height:4px;background:var(--emerald);top:70%;left:75%;animation:floatParticle 8s ease-in-out infinite 1s"></div>
+  <div class="particle" style="width:8px;height:8px;background:var(--gold);top:40%;left:85%;animation:floatParticle 7s ease-in-out infinite 2s"></div>
+  <div class="particle" style="width:5px;height:5px;background:var(--coral);top:80%;left:30%;animation:floatParticle 9s ease-in-out infinite 0.5s"></div>
+  <div class="particle" style="width:3px;height:3px;background:var(--blue);top:15%;left:60%;animation:floatParticle 5s ease-in-out infinite 3s"></div>
+  <div class="particle" style="width:7px;height:7px;background:var(--emerald);top:55%;left:10%;animation:floatParticle 10s ease-in-out infinite 1.5s"></div>
+</section>
+
+<!-- ═══ TICKER ═══ -->
+<div class="ticker-wrap">
+  <div class="ticker" id="ticker">
+    <div class="ticker-item">EURUSD <span class="up">▲ +0.34%</span></div>
+    <div class="ticker-item">GBPUSD <span class="up">▲ +0.21%</span></div>
+    <div class="ticker-item">USDJPY <span class="down">▼ -0.12%</span></div>
+    <div class="ticker-item">USDCHF <span class="up">▲ +0.18%</span></div>
+    <div class="ticker-item">AUDUSD <span class="up">▲ +0.45%</span></div>
+    <div class="ticker-item">NZDUSD <span class="down">▼ -0.08%</span></div>
+    <div class="ticker-item">USDCAD <span class="down">▼ -0.15%</span></div>
+    <div class="ticker-item">EURGBP <span class="up">▲ +0.11%</span></div>
+    <div class="ticker-item">EURJPY <span class="up">▲ +0.27%</span></div>
+    <div class="ticker-item">GBPJPY <span class="down">▼ -0.09%</span></div>
+    <div class="ticker-item">EURUSD <span class="up">▲ +0.34%</span></div>
+    <div class="ticker-item">GBPUSD <span class="up">▲ +0.21%</span></div>
+    <div class="ticker-item">USDJPY <span class="down">▼ -0.12%</span></div>
+    <div class="ticker-item">USDCHF <span class="up">▲ +0.18%</span></div>
+    <div class="ticker-item">AUDUSD <span class="up">▲ +0.45%</span></div>
+    <div class="ticker-item">NZDUSD <span class="down">▼ -0.08%</span></div>
+    <div class="ticker-item">USDCAD <span class="down">▼ -0.15%</span></div>
+    <div class="ticker-item">EURGBP <span class="up">▲ +0.11%</span></div>
+    <div class="ticker-item">EURJPY <span class="up">▲ +0.27%</span></div>
+    <div class="ticker-item">GBPJPY <span class="down">▼ -0.09%</span></div>
+  </div>
+</div>
+
+<!-- ═══ FEATURES ═══ -->
+<section class="features" id="features">
+  <div class="container">
+    <div class="section-header">
+      <span class="section-label">Core Intelligence</span>
+      <h2 class="section-title">Six Engines of<br>Market Intelligence</h2>
+      <p class="section-desc">Every signal is validated through six independent AI systems before it reaches your portfolio. No guesswork. No gambles. Just probability-weighted decisions backed by data.</p>
+    </div>
+    <div class="features-grid">
+      <div class="feature-card">
+        <div class="feature-icon fi-blue">🧠</div>
+        <h3>Regime Detection</h3>
+        <p>Our neural network classifies market conditions in real time — trending, mean-reverting, volatile, or calm. Strategies automatically adapt to the current regime, so you're never caught using a trend-following system in a ranging market.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon fi-green">💬</div>
+        <h3>Sentiment Analysis</h3>
+        <p>Natural language processing scans central bank statements, financial news, and social media sentiment across 12 languages. We quantify the crowd's bias so you can trade with the wind at your back — or fade it when conviction is extreme.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon fi-gold">📊</div>
+        <h3>ML Price Prediction</h3>
+        <p>Gradient-boosted ensembles generate directional forecasts with calibrated confidence scores. Every prediction includes a time horizon and confidence interval, giving you not just "buy" but "how sure we are and for how long."</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon fi-coral">⚖️</div>
+        <h3>Risk Parity Engine</h3>
+        <p>Capital is allocated across 10 currency pairs using risk parity — not equal weights. Volatility-adjusted sizing ensures no single pair dominates your risk. Correlation filters prevent stacked exposures that blow up accounts.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon fi-purple">📅</div>
+        <h3>Economic Calendar</h3>
+        <p>18 high-impact events tracked automatically. The engine enters blackout mode before ECB, FOMC, NFP, and CPI releases — flattening exposure and resuming only after volatility subsides. News events become edge, not danger.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon fi-teal">🧬</div>
+        <h3>Genetic Optimization</h3>
+        <p>Strategies evolve through genetic algorithms that test thousands of parameter combinations against historical data. The fittest survive. The system self-optimizes weekly, adapting to changing market structure without human intervention.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ STATS ═══ -->
+<section class="stats" id="stats">
+  <div class="container">
+    <div class="stats-grid">
+      <div class="stat-item">
+        <div class="stat-number" data-target="59.2" data-suffix="%">0%</div>
+        <div class="stat-label">Win Rate</div>
+        <div class="stat-sub">Across 2,400+ backtested trades</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-number" data-target="1.81" data-suffix="+" data-prefix="">0</div>
+        <div class="stat-label">Profit Factor</div>
+        <div class="stat-sub">Best: EURUSD at 1.81 PF</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-number" data-target="10" data-suffix="" data-prefix="">0</div>
+        <div class="stat-label">Active Symbols</div>
+        <div class="stat-sub">Diversified across 3 tiers</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-number" data-target="127" data-suffix="%" data-prefix="">0%</div>
+        <div class="stat-label">Avg Return (180d)</div>
+        <div class="stat-sub">Backtested portfolio performance</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ HOW IT WORKS ═══ -->
+<section class="how-it-works" id="how-it-works">
+  <div class="container">
+    <div class="section-header">
+      <span class="section-label">The Process</span>
+      <h2 class="section-title">From Signal to Execution<br>in Three Steps</h2>
+      <p class="section-desc">No manual charting. No emotional decisions. Just a disciplined pipeline that turns market data into profitable trades.</p>
+    </div>
+    <div class="steps">
+      <div class="step">
+        <div class="step-number">01</div>
+        <h3>Analyze</h3>
+        <p>Six AI engines continuously scan 10 currency pairs, processing price action, sentiment, macro data, and volatility in real time. Every data point feeds the intelligence layer.</p>
+        <div class="step-connector"></div>
+      </div>
+      <div class="step">
+        <div class="step-number">02</div>
+        <h3>Decide</h3>
+        <p>The regime classifier determines market state. Risk parity weights optimal position sizes. The ML ensemble scores directional probability. Only high-conviction setups pass all filters.</p>
+        <div class="step-connector"></div>
+      </div>
+      <div class="step">
+        <div class="step-number">03</div>
+        <h3>Execute</h3>
+        <p>Trades are placed with tier-based lot sizing, trailing stops at 1:1R breakeven, partial profit-taking at targets, and automatic drawdown protection. You manage strategy — the engine manages risk.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ PROOF ═══ -->
+<section class="proof" id="proof">
+  <div class="container">
+    <div class="proof-card">
+      <div class="big-number">127%</div>
+      <h3>Average Portfolio Return in 180 Days</h3>
+      <p>Backtested across 10 symbols with tier-based risk management. Every symbol profitable. Every tier contributing. No survivorship bias — these are the results of the full diversified portfolio running the complete AI pipeline.</p>
+      <div class="proof-details">
+        <div class="proof-detail">
+          <strong>10/10</strong>
+          <span>Symbols Profitable</span>
+        </div>
+        <div class="proof-detail">
+          <strong>180</strong>
+          <span>Days Backtested</span>
+        </div>
+        <div class="proof-detail">
+          <strong>3</strong>
+          <span>Risk Tiers Active</span>
+        </div>
+        <div class="proof-detail">
+          <strong>15%</strong>
+          <span>Max Drawdown Cap</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ CTA ═══ -->
+<section class="cta-section">
+  <h2>Ready to Trade Smarter?</h2>
+  <p>Join Dutchkem Ventures and let AI handle the analysis while you focus on the results.</p>
+  <a href="/login" class="btn-cta">⚡ Launch Trading Engine</a>
+</section>
+
+<!-- ═══ FOOTER ═══ -->
+<footer>
+  <div class="footer-logo">DUTCHKEM</div>
+  <p>Built by Dutchkem Ventures</p>
+  <p style="margin-top:0.5rem">© 2026 Dutchkem Ventures. All rights reserved.</p>
+  <div class="footer-links">
+    <a href="/login">Login</a>
+    <a href="#features">Features</a>
+    <a href="#how-it-works">How It Works</a>
+    <a href="#proof">Results</a>
+  </div>
+</footer>
+
+<!-- ═══ GSAP CDN ═══ -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+<script>
+/* ─── NAVBAR ─── */
+const navbar = document.getElementById('navbar');
+window.addEventListener('scroll', () => {
+  navbar.classList.toggle('scrolled', window.scrollY > 50);
+});
+
+/* ─── MOBILE TOGGLE ─── */
+document.getElementById('mobileToggle').addEventListener('click', () => {
+  document.getElementById('navLinks').classList.toggle('active');
+});
+
+/* ─── HERO CANVAS: CSS Candlestick Chart ─── */
+(function drawChart() {
+  const container = document.getElementById('heroChart');
+  if (!container) return;
+  const svgNS = 'http://www.w3.org/2000/svg';
+  const svg = document.createElementNS(svgNS, 'svg');
+  svg.setAttribute('width', '100%');
+  svg.setAttribute('height', '100%');
+  svg.setAttribute('viewBox', '0 0 1200 600');
+  svg.style.position = 'absolute';
+  svg.style.inset = '0';
+
+  const colors = ['#0066FF', '#00CC88'];
+  let x = 60;
+  const seed = 42;
+  let rng = seed;
+  function rand() { rng = (rng * 16807 + 0) % 2147483647; return rng / 2147483647; }
+
+  for (let i = 0; i < 50; i++) {
+    const open = 200 + rand() * 200;
+    const close = open + (rand() - 0.45) * 80;
+    const high = Math.max(open, close) + rand() * 40;
+    const low = Math.min(open, close) - rand() * 40;
+    const bullish = close >= open;
+    const color = bullish ? colors[1] : '#FF6B6B';
+
+    // Wick
+    const wick = document.createElementNS(svgNS, 'line');
+    wick.setAttribute('x1', x); wick.setAttribute('x2', x);
+    wick.setAttribute('y1', high); wick.setAttribute('y2', low);
+    wick.setAttribute('stroke', color);
+    wick.setAttribute('stroke-width', '1.5');
+    wick.setAttribute('opacity', '0.6');
+    svg.appendChild(wick);
+
+    // Body
+    const body = document.createElementNS(svgNS, 'rect');
+    const bodyTop = Math.min(open, close);
+    const bodyH = Math.abs(close - open) || 4;
+    body.setAttribute('x', x - 8);
+    body.setAttribute('y', bodyTop);
+    body.setAttribute('width', 16);
+    body.setAttribute('height', bodyH);
+    body.setAttribute('rx', 3);
+    body.setAttribute('fill', color);
+    body.setAttribute('opacity', '0.5');
+    svg.appendChild(body);
+
+    x += 22;
+  }
+
+  container.appendChild(svg);
+})();
+
+/* ─── GSAP ANIMATIONS ─── */
+gsap.registerPlugin(ScrollTrigger);
+
+// Hero entrance
+gsap.timeline({ delay: 0.3 })
+  .from('.hero-badge', { opacity: 0, y: 30, duration: 0.6, ease: 'power3.out' })
+  .from('.hero h1', { opacity: 0, y: 50, duration: 0.8, ease: 'power3.out' }, '-=0.3')
+  .from('.hero-sub', { opacity: 0, y: 30, duration: 0.6, ease: 'power3.out' }, '-=0.4')
+  .from('.hero-ctas', { opacity: 0, y: 30, duration: 0.6, ease: 'power3.out' }, '-=0.3')
+  .from('.currency-float', { opacity: 0, scale: 0, duration: 0.5, stagger: 0.08, ease: 'back.out(2)' }, '-=0.6');
+
+// Float currency symbols
+gsap.utils.toArray('.currency-float').forEach((el, i) => {
+  gsap.to(el, {
+    y: `random(-30, 30)`,
+    x: `random(-15, 15)`,
+    rotation: `random(-10, 10)`,
+    duration: `random(4, 7)`,
+    repeat: -1,
+    yoyo: true,
+    ease: 'sine.inOut',
+    delay: i * 0.3
+  });
+});
+
+// Feature cards stagger
+gsap.from('.feature-card', {
+  scrollTrigger: {
+    trigger: '.features-grid',
+    start: 'top 80%',
+  },
+  opacity: 0,
+  y: 60,
+  duration: 0.7,
+  stagger: 0.12,
+  ease: 'power3.out'
+});
+
+// Stats counter animation
+gsap.from('.stat-item', {
+  scrollTrigger: {
+    trigger: '.stats',
+    start: 'top 80%',
+  },
+  opacity: 0,
+  y: 40,
+  duration: 0.6,
+  stagger: 0.1,
+  ease: 'power3.out',
+  onComplete: animateCounters
+});
+
+let countersAnimated = false;
+function animateCounters() {
+  if (countersAnimated) return;
+  countersAnimated = true;
+  document.querySelectorAll('.stat-number').forEach(el => {
+    const target = parseFloat(el.dataset.target);
+    const suffix = el.dataset.suffix || '';
+    const prefix = el.dataset.prefix || '';
+    const isFloat = target % 1 !== 0;
+    const duration = 2000;
+    const start = performance.now();
+    function update(now) {
+      const progress = Math.min((now - start) / duration, 1);
+      const eased = 1 - Math.pow(1 - progress, 3);
+      const current = eased * target;
+      el.textContent = prefix + (isFloat ? current.toFixed(1) : Math.round(current)) + suffix;
+      if (progress < 1) requestAnimationFrame(update);
+    }
+    requestAnimationFrame(update);
+  });
+}
+
+// Steps
+gsap.from('.step', {
+  scrollTrigger: {
+    trigger: '.steps',
+    start: 'top 80%',
+  },
+  opacity: 0,
+  y: 50,
+  duration: 0.7,
+  stagger: 0.2,
+  ease: 'power3.out'
+});
+
+// Proof card
+gsap.from('.proof-card', {
+  scrollTrigger: {
+    trigger: '.proof',
+    start: 'top 80%',
+  },
+  opacity: 0,
+  y: 60,
+  scale: 0.95,
+  duration: 0.8,
+  ease: 'power3.out'
+});
+
+// Parallax on hero elements
+gsap.to('.hero-chart', {
+  scrollTrigger: {
+    trigger: '.hero',
+    start: 'top top',
+    end: 'bottom top',
+    scrub: 1,
+  },
+  y: 100,
+  ease: 'none'
+});
+
+gsap.to('.hero-content', {
+  scrollTrigger: {
+    trigger: '.hero',
+    start: 'top top',
+    end: 'bottom top',
+    scrub: 1,
+  },
+  y: 60,
+  opacity: 0.3,
+  ease: 'none'
+});
+
+// CTA section
+gsap.from('.cta-section h2', {
+  scrollTrigger: { trigger: '.cta-section', start: 'top 80%' },
+  opacity: 0, y: 40, duration: 0.7, ease: 'power3.out'
+});
+gsap.from('.cta-section p', {
+  scrollTrigger: { trigger: '.cta-section', start: 'top 80%' },
+  opacity: 0, y: 30, duration: 0.6, delay: 0.15, ease: 'power3.out'
+});
+gsap.from('.btn-cta', {
+  scrollTrigger: { trigger: '.cta-section', start: 'top 80%' },
+  opacity: 0, y: 20, scale: 0.9, duration: 0.6, delay: 0.3, ease: 'back.out(2)'
+});
+</script>
+</body>
+</html>

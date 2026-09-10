@@ -23,6 +23,17 @@ class ComplianceAnalyst(BaseAnalyst):
             )
 
         compliance_data = await self._fetch_compliance_data(symbol)
+        if compliance_data is None:
+            return AnalystResult(
+                analyst_name='compliance',
+                symbol=symbol,
+                timeframe=timeframe,
+                signal='HOLD',
+                confidence=0.0,
+                reasoning='MT5 data unavailable — cannot check compliance',
+                data={'error': 'MT5 unavailable', 'data_source': 'none'}
+            )
+
         regulatory_ok = compliance_data.get('regulatory_checks_passed', True)
         within_position = compliance_data.get('within_position_limits', True)
         within_exposure = compliance_data.get('within_exposure_limits', True)
@@ -41,16 +52,45 @@ class ComplianceAnalyst(BaseAnalyst):
         )
 
     async def _fetch_compliance_data(self, symbol: str) -> dict:
-        # TODO: Replace with real compliance checks
-        return {
-            'regulatory_checks_passed': True,
-            'within_position_limits': True,
-            'within_exposure_limits': True,
-            'violations': [],
-            'max_position_size': 100000,
-            'current_exposure': 45000,
-            'regulatory_framework': 'MiFID II',
-        }
+        """Check real MT5 positions against limits."""
+        try:
+            import MetaTrader5 as mt5
+            info = mt5.account_info()
+            if not info:
+                return None
+
+            positions = mt5.positions_get()
+            open_count = len(positions) if positions else 0
+            total_exposure = sum(p.volume for p in positions) if positions else 0
+            max_position = 10.0  # Max lots per position
+            max_total_exposure = info.equity * 0.5  # 50% of equity
+
+            violations = []
+            within_position = True
+            within_exposure = True
+
+            if positions:
+                for p in positions:
+                    if p.volume > max_position:
+                        violations.append(f"{p.symbol}: {p.volume} lots exceeds max {max_position}")
+                        within_position = False
+
+            if total_exposure > max_total_exposure:
+                violations.append(f"Total exposure {total_exposure:.2f} lots exceeds {max_total_exposure:.2f}")
+                within_exposure = False
+
+            return {
+                'regulatory_checks_passed': True,  # No regulatory data available
+                'within_position_limits': within_position,
+                'within_exposure_limits': within_exposure,
+                'violations': violations,
+                'max_position_size': max_position,
+                'current_exposure': round(total_exposure, 2),
+                'open_positions': open_count,
+                'equity': info.equity,
+            }
+        except Exception:
+            return None
 
     def _evaluate_compliance(self, regulatory_ok: bool, position_ok: bool, exposure_ok: bool, violations: list) -> tuple:
         if not regulatory_ok or len(violations) > 0:

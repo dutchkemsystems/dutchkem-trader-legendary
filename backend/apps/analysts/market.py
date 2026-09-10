@@ -27,6 +27,16 @@ class MarketAnalyst(BaseAnalyst):
             )
 
         data = await self._fetch_market_data(symbol, timeframe)
+        if data is None:
+            return AnalystResult(
+                analyst_name='market',
+                symbol=symbol,
+                timeframe=timeframe,
+                signal='HOLD',
+                confidence=0.0,
+                reasoning='MT5 data unavailable — cannot analyze',
+                data={'error': 'MT5 unavailable', 'data_source': 'none'}
+            )
 
         signals = []
 
@@ -83,12 +93,26 @@ class MarketAnalyst(BaseAnalyst):
                 'low': pd.Series([c.low for c in candles]),
                 'volume': pd.Series([c.volume for c in candles]),
             }
-        return {
-            'close': pd.Series(np.random.randn(100).cumsum() + 100),
-            'high': pd.Series(np.random.randn(100).cumsum() + 101),
-            'low': pd.Series(np.random.randn(100).cumsum() + 99),
-            'volume': pd.Series(np.random.randint(1000, 10000, 100))
-        }
+        try:
+            import MetaTrader5 as mt5
+            tf_map = {
+                'M1': mt5.TIMEFRAME_M1, 'M5': mt5.TIMEFRAME_M5, 'M15': mt5.TIMEFRAME_M15,
+                'M30': mt5.TIMEFRAME_M30, 'H1': mt5.TIMEFRAME_H1, 'H4': mt5.TIMEFRAME_H4,
+                'D1': mt5.TIMEFRAME_D1, 'W1': mt5.TIMEFRAME_W1, 'MN1': mt5.TIMEFRAME_MN1,
+            }
+            mt5_tf = tf_map.get(timeframe.upper(), mt5.TIMEFRAME_H1)
+            rates = mt5.copy_rates_from_pos(symbol, mt5_tf, 0, 200)
+            if rates is not None and len(rates) > 0:
+                df = pd.DataFrame(rates)
+                return {
+                    'close': pd.Series(df['close']),
+                    'high': pd.Series(df['high']),
+                    'low': pd.Series(df['low']),
+                    'volume': pd.Series(df['tick_volume']),
+                }
+        except Exception:
+            pass
+        return None  # No data available
 
     def _calculate_rsi(self, prices: pd.Series, period: int = 14) -> float:
         delta = prices.diff()
