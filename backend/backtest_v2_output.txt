@@ -1,0 +1,259 @@
+
+================================================================================
+  DUTCHKEM TRADER - REDESIGNED 5-YEAR BACKTEST (v2)
+  New indicators: ADX + Ichimoku + RSI Divergence + Volume + MTF
+  Symbols: 13 (AMD/GOOGL removed) | SL: 3x ATR | TP: 5x ATR
+================================================================================
+  Connecting to MT5...
+  EURUSD     H1=12801 bars | H4=3051 bars | 2024-08-19 to 2026-09-10
+  GBPUSD     H1=12801 bars | H4=3051 bars | 2024-08-19 to 2026-09-10
+  USDJPY     H1=12801 bars | H4=3051 bars | 2024-08-19 to 2026-09-10
+  AUDUSD     H1=12801 bars | H4=3051 bars | 2024-08-19 to 2026-09-10
+  USDCAD     H1=12801 bars | H4=3051 bars | 2024-08-19 to 2026-09-10
+  USDCHF     H1=12801 bars | H4=3051 bars | 2024-08-19 to 2026-09-10
+  NZDUSD     H1=12801 bars | H4=3051 bars | 2024-08-19 to 2026-09-10
+  EURJPY     H1=12801 bars | H4=3051 bars | 2024-08-19 to 2026-09-10
+  GBPJPY     H1=12801 bars | H4=3051 bars | 2024-08-19 to 2026-09-10
+  AUDJPY     H1=12801 bars | H4=3051 bars | 2024-08-19 to 2026-09-10
+  EURGBP     H1=12801 bars | H4=3051 bars | 2024-08-19 to 2026-09-10
+  XAUUSD     H1=12801 bars | H4=3051 bars | 2024-07-11 to 2026-09-10
+  US30       H1=12801 bars | H4=3051 bars | 2024-07-08 to 2026-09-10
+
+  Loaded 13 symbols
+
+  Testing: v2_MTF_ADX
+
+================================================================================
+  BACKTEST REPORT: v2_MTF_ADX
+================================================================================
+
+  PERFORMANCE SUMMARY
+  --------------------------------------------------
+  Initial:       $ 10,000.00
+  Final:         $ 10,090.59
+  P&L:           $    +90.59 (+0.9%)
+  Max Drawdown:  $    463.64 (4.6%)
+  Sharpe:              0.10
+  Profit Factor:       1.01
+
+  TRADE STATS
+  --------------------------------------------------
+  Trades:  4897 | Wins: 1854 (37.9%) | Losses: 3043
+  Avg Win: $7.15 | Avg Loss: $4.33 | Expectancy: $0.02
+  TP: 875 (18%) | SL: 4000 (82%) | TIME: 22
+
+  PER-SYMBOL
+  --------------------------------------------------
+  XAUUSD      383 trades | WR=43% | P&L=$+668.25
+  EURJPY      349 trades | WR=41% | P&L=$+130.12
+  AUDJPY      354 trades | WR=40% | P&L=$+115.15
+  USDJPY      348 trades | WR=44% | P&L=$+74.25
+  NZDUSD      354 trades | WR=37% | P&L=$+9.60
+  USDCHF      373 trades | WR=37% | P&L=$-19.69
+  USDCAD      366 trades | WR=39% | P&L=$-30.17
+  GBPUSD      376 trades | WR=36% | P&L=$-72.37
+  GBPJPY      368 trades | WR=37% | P&L=$-129.63
+  US30        466 trades | WR=38% | P&L=$-144.90
+  AUDUSD      367 trades | WR=38% | P&L=$-165.07
+  EURUSD      385 trades | WR=33% | P&L=$-170.04
+  EURGBP      408 trades | WR=31% | P&L=$-174.90
+
+  YEARLY
+  --------------------------------------------------
+  2024:  $ -200.66 (-2.0%)
+  2025:  $+  412.25 (+4.1%)
+  2026:  $ -121.00 (-1.2%)
+
+  VERDICT: NOT PROFITABLE
+================================================================================
+
+  Testing: v2_MTF_ADX_risk20
+
+================================================================================
+  BACKTEST REPORT: v2_MTF_ADX_risk20
+================================================================================
+
+  PERFORMANCE SUMMARY
+  --------------------------------------------------
+  Initial:       $ 10,000.00
+  Final:         $ 10,114.33
+  P&L:           $   +114.33 (+1.1%)
+  Max Drawdown:  $    615.00 (6.1%)
+  Sharpe:              0.09
+  Profit Factor:       1.01
+
+  TRADE STATS
+  --------------------------------------------------
+  Trades:  4897 | Wins: 1854 (37.9%) | Losses: 3043
+  Avg Win: $9.47 | Avg Loss: $5.73 | Expectancy: $0.02
+  TP: 875 (18%) | SL: 4000 (82%) | TIME: 22
+
+  PER-SYMBOL
+  --------------------------------------------------
+  XAUUSD      383 trades | WR=43% | P&L=$+885.23
+  EURJPY      349 trades | WR=41% | P&L=$+171.38
+  AUDJPY      354 trades | WR=40% | P&L=$+151.38
+  USDJPY      348 trades | WR=44% | P&L=$+97.94
+  NZDUSD      354 trades | WR=37% | P&L=$+12.21
+  USDCHF      373 trades | WR=37% | P&L=$-26.16
+  USDCAD      366 trades | WR=39% | P&L=$-39.87
+  GBPUSD      376 trades | WR=36% | P&L=$-96.09
+  GBPJPY      368 trades | WR=37% | P&L=$-171.33
+  US30        466 trades | WR=38% | P&L=$-194.93
+  AUDUSD      367 trades | WR=38% | P&L=$-218.63
+  EURUSD      385 trades | WR=33% | P&L=$-226.31
+  EURGBP      408 trades | WR=31% | P&L=$-230.49
+
+  YEARLY
+  --------------------------------------------------
+  2024:  $ -267.50 (-2.7%)
+  2025:  $+  543.15 (+5.4%)
+  2026:  $ -161.33 (-1.6%)
+
+  VERDICT: NOT PROFITABLE
+================================================================================
+
+  Testing: v2_ADX_only
+
+================================================================================
+  BACKTEST REPORT: v2_ADX_only
+================================================================================
+
+  PERFORMANCE SUMMARY
+  --------------------------------------------------
+  Initial:       $ 10,000.00
+  Final:         $  9,916.39
+  P&L:           $    -83.61 (-0.8%)
+  Max Drawdown:  $    674.24 (6.7%)
+  Sharpe:             -0.08
+  Profit Factor:       0.99
+
+  TRADE STATS
+  --------------------------------------------------
+  Trades:  5063 | Wins: 1901 (37.5%) | Losses: 3162
+  Avg Win: $7.03 | Avg Loss: $4.25 | Expectancy: $-0.02
+  TP: 891 (18%) | SL: 4151 (82%) | TIME: 21
+
+  PER-SYMBOL
+  --------------------------------------------------
+  XAUUSD      390 trades | WR=45% | P&L=$+623.65
+  EURJPY      361 trades | WR=41% | P&L=$+77.65
+  AUDJPY      364 trades | WR=38% | P&L=$+44.49
+  USDCAD      385 trades | WR=41% | P&L=$+32.58
+  USDJPY      344 trades | WR=40% | P&L=$+1.00
+  GBPJPY      370 trades | WR=38% | P&L=$-6.02
+  US30        455 trades | WR=40% | P&L=$-33.02
+  USDCHF      388 trades | WR=35% | P&L=$-60.79
+  GBPUSD      411 trades | WR=35% | P&L=$-68.33
+  NZDUSD      366 trades | WR=36% | P&L=$-146.56
+  AUDUSD      377 trades | WR=37% | P&L=$-165.18
+  EURGBP      435 trades | WR=31% | P&L=$-191.00
+  EURUSD      417 trades | WR=33% | P&L=$-192.09
+
+  YEARLY
+  --------------------------------------------------
+  2024:  $ -325.59 (-3.3%)
+  2025:  $+  274.90 (+2.7%)
+  2026:  $  -32.92 (-0.3%)
+
+  VERDICT: NOT PROFITABLE
+================================================================================
+
+  Testing: v2_Wide_SL
+
+================================================================================
+  BACKTEST REPORT: v2_Wide_SL
+================================================================================
+
+  PERFORMANCE SUMMARY
+  --------------------------------------------------
+  Initial:       $ 10,000.00
+  Final:         $ 10,833.49
+  P&L:           $   +833.49 (+8.3%)
+  Max Drawdown:  $    338.12 (3.4%)
+  Sharpe:              0.71
+  Profit Factor:       1.07
+
+  TRADE STATS
+  --------------------------------------------------
+  Trades:  3418 | Wins: 1290 (37.7%) | Losses: 2128
+  Avg Win: $9.98 | Avg Loss: $5.66 | Expectancy: $0.24
+  TP: 563 (16%) | SL: 2816 (82%) | TIME: 39
+
+  PER-SYMBOL
+  --------------------------------------------------
+  XAUUSD      272 trades | WR=42% | P&L=$+921.75
+  AUDJPY      248 trades | WR=44% | P&L=$+159.89
+  EURJPY      241 trades | WR=44% | P&L=$+144.10
+  USDJPY      246 trades | WR=42% | P&L=$+70.04
+  USDCAD      260 trades | WR=39% | P&L=$+21.86
+  GBPJPY      245 trades | WR=41% | P&L=$+10.07
+  GBPUSD      257 trades | WR=33% | P&L=$-27.48
+  USDCHF      254 trades | WR=36% | P&L=$-30.66
+  US30        346 trades | WR=37% | P&L=$-42.23
+  EURUSD      265 trades | WR=34% | P&L=$-79.28
+  AUDUSD      255 trades | WR=36% | P&L=$-99.32
+  NZDUSD      241 trades | WR=34% | P&L=$-106.22
+  EURGBP      288 trades | WR=31% | P&L=$-109.03
+
+  YEARLY
+  --------------------------------------------------
+  2024:  $ -136.31 (-1.4%)
+  2025:  $+  631.76 (+6.3%)
+  2026:  $+  338.04 (+3.4%)
+
+  VERDICT: NOT PROFITABLE
+================================================================================
+
+  Testing: v2_Conservative
+
+================================================================================
+  BACKTEST REPORT: v2_Conservative
+================================================================================
+
+  PERFORMANCE SUMMARY
+  --------------------------------------------------
+  Initial:       $ 10,000.00
+  Final:         $ 10,427.33
+  P&L:           $   +427.33 (+4.3%)
+  Max Drawdown:  $    152.32 (1.5%)
+  Sharpe:              0.95
+  Profit Factor:       1.08
+
+  TRADE STATS
+  --------------------------------------------------
+  Trades:  2899 | Wins: 1107 (38.2%) | Losses: 1792
+  Avg Win: $5.11 | Avg Loss: $2.92 | Expectancy: $0.15
+  TP: 562 (19%) | SL: 2322 (80%) | TIME: 15
+
+  PER-SYMBOL
+  --------------------------------------------------
+  XAUUSD      261 trades | WR=46% | P&L=$+547.99
+  EURJPY      238 trades | WR=42% | P&L=$+85.81
+  USDJPY      215 trades | WR=44% | P&L=$+45.93
+  AUDJPY      232 trades | WR=37% | P&L=$+26.13
+  GBPUSD      200 trades | WR=36% | P&L=$+20.06
+  USDCAD      213 trades | WR=44% | P&L=$-7.45
+  USDCHF      219 trades | WR=37% | P&L=$-19.23
+  EURUSD      205 trades | WR=35% | P&L=$-23.02
+  AUDUSD      209 trades | WR=34% | P&L=$-33.24
+  EURGBP      197 trades | WR=32% | P&L=$-39.47
+  GBPJPY      226 trades | WR=36% | P&L=$-47.78
+  NZDUSD      172 trades | WR=33% | P&L=$-51.02
+  US30        312 trades | WR=37% | P&L=$-77.39
+
+  YEARLY
+  --------------------------------------------------
+  2024:  $+   15.38 (+0.2%)
+  2025:  $+  406.94 (+4.1%)
+  2026:  $+    5.00 (+0.1%)
+
+  VERDICT: NOT PROFITABLE
+================================================================================
+
+================================================================================
+  BEST CONFIG: v2_Wide_SL
+  P&L: $+833.49
+================================================================================
+
+  Saved to paper_trades\backtest_v2_5yr_20260910_015630.json

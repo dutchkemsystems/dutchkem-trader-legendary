@@ -1,7 +1,29 @@
 {
-  "balance": 9999.94,
+  "balance": 9275.17,
   "consecutive_losses": 0,
-  "positions": {},
+  "positions": {
+    "EURUSD": {
+      "ticket": 3211289829,
+      "action": "SELL",
+      "entry_price": 1.1629,
+      "entry_bar": 151,
+      "size": 0.01
+    },
+    "NZDUSD": {
+      "ticket": 3211289849,
+      "action": "SELL",
+      "entry_price": 0.58095,
+      "entry_bar": 151,
+      "size": 0.01
+    },
+    "GBPJPY": {
+      "ticket": 3211289856,
+      "action": "BUY",
+      "entry_price": 208.231,
+      "entry_bar": 151,
+      "size": 0.01
+    }
+  },
   "total_trades": 0,
   "total_pnl": 0,
   "wins": 0,

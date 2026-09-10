@@ -1,0 +1,1651 @@
+
+==========================================================================================
+  DUTCHKEM TRADER - COMPLETE LIVE TRADING ENGINE
+  27 Instruments x 7 Timeframes | All Improvements
+==========================================================================================
+
+  Account: 476963617 | Exness-MT5Trial9
+  Balance: $8,870.12 | Free: $7,953.64
+  Leverage: 1:500
+  Duration: 21 days
+
+==========================================================================================
+  CYCLE 1 | 2026-09-10 09:24:08 UTC | Week 1
+  Balance: $8,870.12 | Peak: $10,000.00 | DD: 11.3%
+  Open: 0/3 | Losses: 0
+  Session: Hour 9 UTC | Risk Mult: 0.8
+==========================================================================================
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: divide by zero encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: invalid value encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:370: RuntimeWarning: invalid value encountered in divide
+  dx = np.where((plus_di + minus_di) > 0, 100 * np.abs(plus_di - minus_di) / (plus_di + minus_di), 0)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: invalid value encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:370: RuntimeWarning: invalid value encountered in divide
+  dx = np.where((plus_di + minus_di) > 0, 100 * np.abs(plus_di - minus_di) / (plus_di + minus_di), 0)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: divide by zero encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: invalid value encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:370: RuntimeWarning: invalid value encountered in divide
+  dx = np.where((plus_di + minus_di) > 0, 100 * np.abs(plus_di - minus_di) / (plus_di + minus_di), 0)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: invalid value encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:370: RuntimeWarning: invalid value encountered in divide
+  dx = np.where((plus_di + minus_di) > 0, 100 * np.abs(plus_di - minus_di) / (plus_di + minus_di), 0)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: invalid value encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:370: RuntimeWarning: invalid value encountered in divide
+  dx = np.where((plus_di + minus_di) > 0, 100 * np.abs(plus_di - minus_di) / (plus_di + minus_di), 0)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: invalid value encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:370: RuntimeWarning: invalid value encountered in divide
+  dx = np.where((plus_di + minus_di) > 0, 100 * np.abs(plus_di - minus_di) / (plus_di + minus_di), 0)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: invalid value encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:370: RuntimeWarning: invalid value encountered in divide
+  dx = np.where((plus_di + minus_di) > 0, 100 * np.abs(plus_di - minus_di) / (plus_di + minus_di), 0)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: divide by zero encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: invalid value encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:370: RuntimeWarning: invalid value encountered in divide
+  dx = np.where((plus_di + minus_di) > 0, 100 * np.abs(plus_di - minus_di) / (plus_di + minus_di), 0)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: invalid value encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:370: RuntimeWarning: invalid value encountered in divide
+  dx = np.where((plus_di + minus_di) > 0, 100 * np.abs(plus_di - minus_di) / (plus_di + minus_di), 0)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: divide by zero encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: invalid value encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:370: RuntimeWarning: invalid value encountered in divide
+  dx = np.where((plus_di + minus_di) > 0, 100 * np.abs(plus_di - minus_di) / (plus_di + minus_di), 0)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: invalid value encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:370: RuntimeWarning: invalid value encountered in divide
+  dx = np.where((plus_di + minus_di) > 0, 100 * np.abs(plus_di - minus_di) / (plus_di + minus_di), 0)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: invalid value encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:370: RuntimeWarning: invalid value encountered in divide
+  dx = np.where((plus_di + minus_di) > 0, 100 * np.abs(plus_di - minus_di) / (plus_di + minus_di), 0)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: invalid value encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:370: RuntimeWarning: invalid value encountered in divide
+  dx = np.where((plus_di + minus_di) > 0, 100 * np.abs(plus_di - minus_di) / (plus_di + minus_di), 0)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: divide by zero encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: invalid value encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:370: RuntimeWarning: invalid value encountered in divide
+  dx = np.where((plus_di + minus_di) > 0, 100 * np.abs(plus_di - minus_di) / (plus_di + minus_di), 0)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: invalid value encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:370: RuntimeWarning: invalid value encountered in divide
+  dx = np.where((plus_di + minus_di) > 0, 100 * np.abs(plus_di - minus_di) / (plus_di + minus_di), 0)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: divide by zero encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: invalid value encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:370: RuntimeWarning: invalid value encountered in divide
+  dx = np.where((plus_di + minus_di) > 0, 100 * np.abs(plus_di - minus_di) / (plus_di + minus_di), 0)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: divide by zero encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: invalid value encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:370: RuntimeWarning: invalid value encountered in divide
+  dx = np.where((plus_di + minus_di) > 0, 100 * np.abs(plus_di - minus_di) / (plus_di + minus_di), 0)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: invalid value encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:370: RuntimeWarning: invalid value encountered in divide
+  dx = np.where((plus_di + minus_di) > 0, 100 * np.abs(plus_di - minus_di) / (plus_di + minus_di), 0)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: divide by zero encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: invalid value encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:370: RuntimeWarning: invalid value encountered in divide
+  dx = np.where((plus_di + minus_di) > 0, 100 * np.abs(plus_di - minus_di) / (plus_di + minus_di), 0)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: invalid value encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:370: RuntimeWarning: invalid value encountered in divide
+  dx = np.where((plus_di + minus_di) > 0, 100 * np.abs(plus_di - minus_di) / (plus_di + minus_di), 0)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: divide by zero encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: invalid value encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:370: RuntimeWarning: invalid value encountered in divide
+  dx = np.where((plus_di + minus_di) > 0, 100 * np.abs(plus_di - minus_di) / (plus_di + minus_di), 0)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: divide by zero encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: invalid value encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:370: RuntimeWarning: invalid value encountered in divide
+  dx = np.where((plus_di + minus_di) > 0, 100 * np.abs(plus_di - minus_di) / (plus_di + minus_di), 0)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: divide by zero encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: invalid value encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:370: RuntimeWarning: invalid value encountered in divide
+  dx = np.where((plus_di + minus_di) > 0, 100 * np.abs(plus_di - minus_di) / (plus_di + minus_di), 0)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: divide by zero encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: invalid value encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:370: RuntimeWarning: invalid value encountered in divide
+  dx = np.where((plus_di + minus_di) > 0, 100 * np.abs(plus_di - minus_di) / (plus_di + minus_di), 0)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: invalid value encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:370: RuntimeWarning: invalid value encountered in divide
+  dx = np.where((plus_di + minus_di) > 0, 100 * np.abs(plus_di - minus_di) / (plus_di + minus_di), 0)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: invalid value encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:370: RuntimeWarning: invalid value encountered in divide
+  dx = np.where((plus_di + minus_di) > 0, 100 * np.abs(plus_di - minus_di) / (plus_di + minus_di), 0)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: divide by zero encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: invalid value encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:370: RuntimeWarning: invalid value encountered in divide
+  dx = np.where((plus_di + minus_di) > 0, 100 * np.abs(plus_di - minus_di) / (plus_di + minus_di), 0)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: divide by zero encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: invalid value encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:370: RuntimeWarning: invalid value encountered in divide
+  dx = np.where((plus_di + minus_di) > 0, 100 * np.abs(plus_di - minus_di) / (plus_di + minus_di), 0)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: invalid value encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:370: RuntimeWarning: invalid value encountered in divide
+  dx = np.where((plus_di + minus_di) > 0, 100 * np.abs(plus_di - minus_di) / (plus_di + minus_di), 0)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: invalid value encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:370: RuntimeWarning: invalid value encountered in divide
+  dx = np.where((plus_di + minus_di) > 0, 100 * np.abs(plus_di - minus_di) / (plus_di + minus_di), 0)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: invalid value encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:370: RuntimeWarning: invalid value encountered in divide
+  dx = np.where((plus_di + minus_di) > 0, 100 * np.abs(plus_di - minus_di) / (plus_di + minus_di), 0)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: divide by zero encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: invalid value encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:370: RuntimeWarning: invalid value encountered in divide
+  dx = np.where((plus_di + minus_di) > 0, 100 * np.abs(plus_di - minus_di) / (plus_di + minus_di), 0)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: divide by zero encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: invalid value encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:370: RuntimeWarning: invalid value encountered in divide
+  dx = np.where((plus_di + minus_di) > 0, 100 * np.abs(plus_di - minus_di) / (plus_di + minus_di), 0)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: invalid value encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:370: RuntimeWarning: invalid value encountered in divide
+  dx = np.where((plus_di + minus_di) > 0, 100 * np.abs(plus_di - minus_di) / (plus_di + minus_di), 0)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: invalid value encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:370: RuntimeWarning: invalid value encountered in divide
+  dx = np.where((plus_di + minus_di) > 0, 100 * np.abs(plus_di - minus_di) / (plus_di + minus_di), 0)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: invalid value encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:370: RuntimeWarning: invalid value encountered in divide
+  dx = np.where((plus_di + minus_di) > 0, 100 * np.abs(plus_di - minus_di) / (plus_di + minus_di), 0)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: divide by zero encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: invalid value encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:370: RuntimeWarning: invalid value encountered in divide
+  dx = np.where((plus_di + minus_di) > 0, 100 * np.abs(plus_di - minus_di) / (plus_di + minus_di), 0)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: invalid value encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:370: RuntimeWarning: invalid value encountered in divide
+  dx = np.where((plus_di + minus_di) > 0, 100 * np.abs(plus_di - minus_di) / (plus_di + minus_di), 0)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: divide by zero encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: invalid value encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:370: RuntimeWarning: invalid value encountered in divide
+  dx = np.where((plus_di + minus_di) > 0, 100 * np.abs(plus_di - minus_di) / (plus_di + minus_di), 0)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: divide by zero encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: invalid value encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:370: RuntimeWarning: invalid value encountered in divide
+  dx = np.where((plus_di + minus_di) > 0, 100 * np.abs(plus_di - minus_di) / (plus_di + minus_di), 0)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: invalid value encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:370: RuntimeWarning: invalid value encountered in divide
+  dx = np.where((plus_di + minus_di) > 0, 100 * np.abs(plus_di - minus_di) / (plus_di + minus_di), 0)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: divide by zero encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: invalid value encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:370: RuntimeWarning: invalid value encountered in divide
+  dx = np.where((plus_di + minus_di) > 0, 100 * np.abs(plus_di - minus_di) / (plus_di + minus_di), 0)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: divide by zero encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: invalid value encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:370: RuntimeWarning: invalid value encountered in divide
+  dx = np.where((plus_di + minus_di) > 0, 100 * np.abs(plus_di - minus_di) / (plus_di + minus_di), 0)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: divide by zero encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: invalid value encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:370: RuntimeWarning: invalid value encountered in divide
+  dx = np.where((plus_di + minus_di) > 0, 100 * np.abs(plus_di - minus_di) / (plus_di + minus_di), 0)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: divide by zero encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: invalid value encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:370: RuntimeWarning: invalid value encountered in divide
+  dx = np.where((plus_di + minus_di) > 0, 100 * np.abs(plus_di - minus_di) / (plus_di + minus_di), 0)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: invalid value encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:370: RuntimeWarning: invalid value encountered in divide
+  dx = np.where((plus_di + minus_di) > 0, 100 * np.abs(plus_di - minus_di) / (plus_di + minus_di), 0)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: invalid value encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:370: RuntimeWarning: invalid value encountered in divide
+  dx = np.where((plus_di + minus_di) > 0, 100 * np.abs(plus_di - minus_di) / (plus_di + minus_di), 0)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: invalid value encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:370: RuntimeWarning: invalid value encountered in divide
+  dx = np.where((plus_di + minus_di) > 0, 100 * np.abs(plus_di - minus_di) / (plus_di + minus_di), 0)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: divide by zero encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: invalid value encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:370: RuntimeWarning: invalid value encountered in divide
+  dx = np.where((plus_di + minus_di) > 0, 100 * np.abs(plus_di - minus_di) / (plus_di + minus_di), 0)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: invalid value encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:370: RuntimeWarning: invalid value encountered in divide
+  dx = np.where((plus_di + minus_di) > 0, 100 * np.abs(plus_di - minus_di) / (plus_di + minus_di), 0)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: divide by zero encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: invalid value encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:370: RuntimeWarning: invalid value encountered in divide
+  dx = np.where((plus_di + minus_di) > 0, 100 * np.abs(plus_di - minus_di) / (plus_di + minus_di), 0)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: divide by zero encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: invalid value encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:370: RuntimeWarning: invalid value encountered in divide
+  dx = np.where((plus_di + minus_di) > 0, 100 * np.abs(plus_di - minus_di) / (plus_di + minus_di), 0)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: invalid value encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:370: RuntimeWarning: invalid value encountered in divide
+  dx = np.where((plus_di + minus_di) > 0, 100 * np.abs(plus_di - minus_di) / (plus_di + minus_di), 0)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: divide by zero encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: invalid value encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:370: RuntimeWarning: invalid value encountered in divide
+  dx = np.where((plus_di + minus_di) > 0, 100 * np.abs(plus_di - minus_di) / (plus_di + minus_di), 0)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: invalid value encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:370: RuntimeWarning: invalid value encountered in divide
+  dx = np.where((plus_di + minus_di) > 0, 100 * np.abs(plus_di - minus_di) / (plus_di + minus_di), 0)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: divide by zero encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: invalid value encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:370: RuntimeWarning: invalid value encountered in divide
+  dx = np.where((plus_di + minus_di) > 0, 100 * np.abs(plus_di - minus_di) / (plus_di + minus_di), 0)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: invalid value encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:370: RuntimeWarning: invalid value encountered in divide
+  dx = np.where((plus_di + minus_di) > 0, 100 * np.abs(plus_di - minus_di) / (plus_di + minus_di), 0)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: invalid value encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:370: RuntimeWarning: invalid value encountered in divide
+  dx = np.where((plus_di + minus_di) > 0, 100 * np.abs(plus_di - minus_di) / (plus_di + minus_di), 0)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: divide by zero encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: invalid value encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:370: RuntimeWarning: invalid value encountered in divide
+  dx = np.where((plus_di + minus_di) > 0, 100 * np.abs(plus_di - minus_di) / (plus_di + minus_di), 0)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: invalid value encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:370: RuntimeWarning: invalid value encountered in divide
+  dx = np.where((plus_di + minus_di) > 0, 100 * np.abs(plus_di - minus_di) / (plus_di + minus_di), 0)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: divide by zero encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: invalid value encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:370: RuntimeWarning: invalid value encountered in divide
+  dx = np.where((plus_di + minus_di) > 0, 100 * np.abs(plus_di - minus_di) / (plus_di + minus_di), 0)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: divide by zero encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: invalid value encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:370: RuntimeWarning: invalid value encountered in divide
+  dx = np.where((plus_di + minus_di) > 0, 100 * np.abs(plus_di - minus_di) / (plus_di + minus_di), 0)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: divide by zero encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: invalid value encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:370: RuntimeWarning: invalid value encountered in divide
+  dx = np.where((plus_di + minus_di) > 0, 100 * np.abs(plus_di - minus_di) / (plus_di + minus_di), 0)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: invalid value encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:370: RuntimeWarning: invalid value encountered in divide
+  dx = np.where((plus_di + minus_di) > 0, 100 * np.abs(plus_di - minus_di) / (plus_di + minus_di), 0)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: divide by zero encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: invalid value encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:370: RuntimeWarning: invalid value encountered in divide
+  dx = np.where((plus_di + minus_di) > 0, 100 * np.abs(plus_di - minus_di) / (plus_di + minus_di), 0)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: divide by zero encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: invalid value encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:370: RuntimeWarning: invalid value encountered in divide
+  dx = np.where((plus_di + minus_di) > 0, 100 * np.abs(plus_di - minus_di) / (plus_di + minus_di), 0)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: invalid value encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:370: RuntimeWarning: invalid value encountered in divide
+  dx = np.where((plus_di + minus_di) > 0, 100 * np.abs(plus_di - minus_di) / (plus_di + minus_di), 0)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: divide by zero encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: invalid value encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:370: RuntimeWarning: invalid value encountered in divide
+  dx = np.where((plus_di + minus_di) > 0, 100 * np.abs(plus_di - minus_di) / (plus_di + minus_di), 0)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: invalid value encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:370: RuntimeWarning: invalid value encountered in divide
+  dx = np.where((plus_di + minus_di) > 0, 100 * np.abs(plus_di - minus_di) / (plus_di + minus_di), 0)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: divide by zero encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: invalid value encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:370: RuntimeWarning: invalid value encountered in divide
+  dx = np.where((plus_di + minus_di) > 0, 100 * np.abs(plus_di - minus_di) / (plus_di + minus_di), 0)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: invalid value encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:370: RuntimeWarning: invalid value encountered in divide
+  dx = np.where((plus_di + minus_di) > 0, 100 * np.abs(plus_di - minus_di) / (plus_di + minus_di), 0)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: divide by zero encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: invalid value encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:370: RuntimeWarning: invalid value encountered in divide
+  dx = np.where((plus_di + minus_di) > 0, 100 * np.abs(plus_di - minus_di) / (plus_di + minus_di), 0)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: divide by zero encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: invalid value encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:370: RuntimeWarning: invalid value encountered in divide
+  dx = np.where((plus_di + minus_di) > 0, 100 * np.abs(plus_di - minus_di) / (plus_di + minus_di), 0)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: invalid value encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:370: RuntimeWarning: invalid value encountered in divide
+  dx = np.where((plus_di + minus_di) > 0, 100 * np.abs(plus_di - minus_di) / (plus_di + minus_di), 0)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: invalid value encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:370: RuntimeWarning: invalid value encountered in divide
+  dx = np.where((plus_di + minus_di) > 0, 100 * np.abs(plus_di - minus_di) / (plus_di + minus_di), 0)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: divide by zero encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: invalid value encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:370: RuntimeWarning: invalid value encountered in divide
+  dx = np.where((plus_di + minus_di) > 0, 100 * np.abs(plus_di - minus_di) / (plus_di + minus_di), 0)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: invalid value encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:370: RuntimeWarning: invalid value encountered in divide
+  dx = np.where((plus_di + minus_di) > 0, 100 * np.abs(plus_di - minus_di) / (plus_di + minus_di), 0)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: divide by zero encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: invalid value encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:370: RuntimeWarning: invalid value encountered in divide
+  dx = np.where((plus_di + minus_di) > 0, 100 * np.abs(plus_di - minus_di) / (plus_di + minus_di), 0)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: divide by zero encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: invalid value encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:370: RuntimeWarning: invalid value encountered in divide
+  dx = np.where((plus_di + minus_di) > 0, 100 * np.abs(plus_di - minus_di) / (plus_di + minus_di), 0)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: invalid value encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:370: RuntimeWarning: invalid value encountered in divide
+  dx = np.where((plus_di + minus_di) > 0, 100 * np.abs(plus_di - minus_di) / (plus_di + minus_di), 0)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: invalid value encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:370: RuntimeWarning: invalid value encountered in divide
+  dx = np.where((plus_di + minus_di) > 0, 100 * np.abs(plus_di - minus_di) / (plus_di + minus_di), 0)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: divide by zero encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: invalid value encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:370: RuntimeWarning: invalid value encountered in divide
+  dx = np.where((plus_di + minus_di) > 0, 100 * np.abs(plus_di - minus_di) / (plus_di + minus_di), 0)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: invalid value encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:370: RuntimeWarning: invalid value encountered in divide
+  dx = np.where((plus_di + minus_di) > 0, 100 * np.abs(plus_di - minus_di) / (plus_di + minus_di), 0)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: invalid value encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:370: RuntimeWarning: invalid value encountered in divide
+  dx = np.where((plus_di + minus_di) > 0, 100 * np.abs(plus_di - minus_di) / (plus_di + minus_di), 0)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: divide by zero encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: invalid value encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:370: RuntimeWarning: invalid value encountered in divide
+  dx = np.where((plus_di + minus_di) > 0, 100 * np.abs(plus_di - minus_di) / (plus_di + minus_di), 0)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: divide by zero encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: invalid value encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:370: RuntimeWarning: invalid value encountered in divide
+  dx = np.where((plus_di + minus_di) > 0, 100 * np.abs(plus_di - minus_di) / (plus_di + minus_di), 0)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: invalid value encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:370: RuntimeWarning: invalid value encountered in divide
+  dx = np.where((plus_di + minus_di) > 0, 100 * np.abs(plus_di - minus_di) / (plus_di + minus_di), 0)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: invalid value encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:370: RuntimeWarning: invalid value encountered in divide
+  dx = np.where((plus_di + minus_di) > 0, 100 * np.abs(plus_di - minus_di) / (plus_di + minus_di), 0)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: divide by zero encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: invalid value encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:370: RuntimeWarning: invalid value encountered in divide
+  dx = np.where((plus_di + minus_di) > 0, 100 * np.abs(plus_di - minus_di) / (plus_di + minus_di), 0)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: invalid value encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:370: RuntimeWarning: invalid value encountered in divide
+  dx = np.where((plus_di + minus_di) > 0, 100 * np.abs(plus_di - minus_di) / (plus_di + minus_di), 0)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: invalid value encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:370: RuntimeWarning: invalid value encountered in divide
+  dx = np.where((plus_di + minus_di) > 0, 100 * np.abs(plus_di - minus_di) / (plus_di + minus_di), 0)
+
+  SIGNALS: 9
+    EURGBP     BUY    score=8.35 TFs=5/7
+    EURUSD     BUY    score=7.30 TFs=4/7
+    USDCHF     BUY    score=6.40 TFs=5/7
+    USDJPY     BUY    score=6.10 TFs=5/7
+    GBPUSD     BUY    score=5.90 TFs=4/7
+  OPENED EURGBP     BUY  #3208415619 1.65 lots @ 0.85872
+    SL=0.85810 TP=0.85976 | Risk=10.0% | TFs: D1(+9) H4(+6) H1(+8) M30(+6) M15(+4)
+  OPENED EURUSD     BUY  #3208415624 1.02 lots @ 1.16373
+    SL=1.16217 TP=1.16634 | Risk=10.0% | TFs: D1(+8) H4(+9) H1(+5) M15(+5)
+  OPENED USDCHF     BUY  #3208415628 1.46 lots @ 0.81046
+    SL=0.80839 TP=0.81391 | Risk=10.0% | TFs: H1(+9) M30(+6) M15(+9) M10(+8) M5(+8)
+  SKIP USDJPY: Max concurrent trades reached
+  SKIP GBPUSD: Max concurrent trades reached
+
+  SUMMARY: 3 open | 0 closed | WR=0.0% | P&L=$+0.00
+  Signals: 9 found | 3 executed
+
+==========================================================================================
+  CYCLE 2 | 2026-09-10 10:24:25 UTC | Week 1
+  Balance: $8,870.12 | Peak: $10,000.00 | DD: 11.3%
+  Open: 3/3 | Losses: 0
+  Session: Hour 10 UTC | Risk Mult: 0.9
+==========================================================================================
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: divide by zero encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: invalid value encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:370: RuntimeWarning: invalid value encountered in divide
+  dx = np.where((plus_di + minus_di) > 0, 100 * np.abs(plus_di - minus_di) / (plus_di + minus_di), 0)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: invalid value encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:370: RuntimeWarning: invalid value encountered in divide
+  dx = np.where((plus_di + minus_di) > 0, 100 * np.abs(plus_di - minus_di) / (plus_di + minus_di), 0)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: divide by zero encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: invalid value encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:370: RuntimeWarning: invalid value encountered in divide
+  dx = np.where((plus_di + minus_di) > 0, 100 * np.abs(plus_di - minus_di) / (plus_di + minus_di), 0)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: divide by zero encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: invalid value encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:370: RuntimeWarning: invalid value encountered in divide
+  dx = np.where((plus_di + minus_di) > 0, 100 * np.abs(plus_di - minus_di) / (plus_di + minus_di), 0)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: divide by zero encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: invalid value encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:370: RuntimeWarning: invalid value encountered in divide
+  dx = np.where((plus_di + minus_di) > 0, 100 * np.abs(plus_di - minus_di) / (plus_di + minus_di), 0)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: invalid value encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:370: RuntimeWarning: invalid value encountered in divide
+  dx = np.where((plus_di + minus_di) > 0, 100 * np.abs(plus_di - minus_di) / (plus_di + minus_di), 0)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: invalid value encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:370: RuntimeWarning: invalid value encountered in divide
+  dx = np.where((plus_di + minus_di) > 0, 100 * np.abs(plus_di - minus_di) / (plus_di + minus_di), 0)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: invalid value encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:370: RuntimeWarning: invalid value encountered in divide
+  dx = np.where((plus_di + minus_di) > 0, 100 * np.abs(plus_di - minus_di) / (plus_di + minus_di), 0)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: divide by zero encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: invalid value encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:370: RuntimeWarning: invalid value encountered in divide
+  dx = np.where((plus_di + minus_di) > 0, 100 * np.abs(plus_di - minus_di) / (plus_di + minus_di), 0)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: divide by zero encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: invalid value encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:370: RuntimeWarning: invalid value encountered in divide
+  dx = np.where((plus_di + minus_di) > 0, 100 * np.abs(plus_di - minus_di) / (plus_di + minus_di), 0)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: invalid value encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:370: RuntimeWarning: invalid value encountered in divide
+  dx = np.where((plus_di + minus_di) > 0, 100 * np.abs(plus_di - minus_di) / (plus_di + minus_di), 0)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: invalid value encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:370: RuntimeWarning: invalid value encountered in divide
+  dx = np.where((plus_di + minus_di) > 0, 100 * np.abs(plus_di - minus_di) / (plus_di + minus_di), 0)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: invalid value encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:370: RuntimeWarning: invalid value encountered in divide
+  dx = np.where((plus_di + minus_di) > 0, 100 * np.abs(plus_di - minus_di) / (plus_di + minus_di), 0)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: invalid value encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:370: RuntimeWarning: invalid value encountered in divide
+  dx = np.where((plus_di + minus_di) > 0, 100 * np.abs(plus_di - minus_di) / (plus_di + minus_di), 0)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: divide by zero encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: invalid value encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:370: RuntimeWarning: invalid value encountered in divide
+  dx = np.where((plus_di + minus_di) > 0, 100 * np.abs(plus_di - minus_di) / (plus_di + minus_di), 0)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: divide by zero encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: invalid value encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:370: RuntimeWarning: invalid value encountered in divide
+  dx = np.where((plus_di + minus_di) > 0, 100 * np.abs(plus_di - minus_di) / (plus_di + minus_di), 0)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: divide by zero encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: invalid value encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:370: RuntimeWarning: invalid value encountered in divide
+  dx = np.where((plus_di + minus_di) > 0, 100 * np.abs(plus_di - minus_di) / (plus_di + minus_di), 0)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: divide by zero encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: invalid value encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:370: RuntimeWarning: invalid value encountered in divide
+  dx = np.where((plus_di + minus_di) > 0, 100 * np.abs(plus_di - minus_di) / (plus_di + minus_di), 0)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: divide by zero encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: invalid value encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:370: RuntimeWarning: invalid value encountered in divide
+  dx = np.where((plus_di + minus_di) > 0, 100 * np.abs(plus_di - minus_di) / (plus_di + minus_di), 0)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: divide by zero encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: invalid value encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:370: RuntimeWarning: invalid value encountered in divide
+  dx = np.where((plus_di + minus_di) > 0, 100 * np.abs(plus_di - minus_di) / (plus_di + minus_di), 0)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: invalid value encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:370: RuntimeWarning: invalid value encountered in divide
+  dx = np.where((plus_di + minus_di) > 0, 100 * np.abs(plus_di - minus_di) / (plus_di + minus_di), 0)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: invalid value encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:370: RuntimeWarning: invalid value encountered in divide
+  dx = np.where((plus_di + minus_di) > 0, 100 * np.abs(plus_di - minus_di) / (plus_di + minus_di), 0)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: invalid value encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:370: RuntimeWarning: invalid value encountered in divide
+  dx = np.where((plus_di + minus_di) > 0, 100 * np.abs(plus_di - minus_di) / (plus_di + minus_di), 0)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: divide by zero encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: invalid value encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:370: RuntimeWarning: invalid value encountered in divide
+  dx = np.where((plus_di + minus_di) > 0, 100 * np.abs(plus_di - minus_di) / (plus_di + minus_di), 0)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: invalid value encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:370: RuntimeWarning: invalid value encountered in divide
+  dx = np.where((plus_di + minus_di) > 0, 100 * np.abs(plus_di - minus_di) / (plus_di + minus_di), 0)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: invalid value encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:370: RuntimeWarning: invalid value encountered in divide
+  dx = np.where((plus_di + minus_di) > 0, 100 * np.abs(plus_di - minus_di) / (plus_di + minus_di), 0)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: divide by zero encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: invalid value encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:370: RuntimeWarning: invalid value encountered in divide
+  dx = np.where((plus_di + minus_di) > 0, 100 * np.abs(plus_di - minus_di) / (plus_di + minus_di), 0)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: divide by zero encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: invalid value encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:370: RuntimeWarning: invalid value encountered in divide
+  dx = np.where((plus_di + minus_di) > 0, 100 * np.abs(plus_di - minus_di) / (plus_di + minus_di), 0)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: divide by zero encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: invalid value encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:370: RuntimeWarning: invalid value encountered in divide
+  dx = np.where((plus_di + minus_di) > 0, 100 * np.abs(plus_di - minus_di) / (plus_di + minus_di), 0)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: divide by zero encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: invalid value encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:370: RuntimeWarning: invalid value encountered in divide
+  dx = np.where((plus_di + minus_di) > 0, 100 * np.abs(plus_di - minus_di) / (plus_di + minus_di), 0)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: invalid value encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:370: RuntimeWarning: invalid value encountered in divide
+  dx = np.where((plus_di + minus_di) > 0, 100 * np.abs(plus_di - minus_di) / (plus_di + minus_di), 0)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: divide by zero encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: invalid value encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:370: RuntimeWarning: invalid value encountered in divide
+  dx = np.where((plus_di + minus_di) > 0, 100 * np.abs(plus_di - minus_di) / (plus_di + minus_di), 0)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: divide by zero encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: invalid value encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:370: RuntimeWarning: invalid value encountered in divide
+  dx = np.where((plus_di + minus_di) > 0, 100 * np.abs(plus_di - minus_di) / (plus_di + minus_di), 0)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: invalid value encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:370: RuntimeWarning: invalid value encountered in divide
+  dx = np.where((plus_di + minus_di) > 0, 100 * np.abs(plus_di - minus_di) / (plus_di + minus_di), 0)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: invalid value encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:370: RuntimeWarning: invalid value encountered in divide
+  dx = np.where((plus_di + minus_di) > 0, 100 * np.abs(plus_di - minus_di) / (plus_di + minus_di), 0)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: invalid value encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:370: RuntimeWarning: invalid value encountered in divide
+  dx = np.where((plus_di + minus_di) > 0, 100 * np.abs(plus_di - minus_di) / (plus_di + minus_di), 0)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: divide by zero encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: invalid value encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:370: RuntimeWarning: invalid value encountered in divide
+  dx = np.where((plus_di + minus_di) > 0, 100 * np.abs(plus_di - minus_di) / (plus_di + minus_di), 0)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: divide by zero encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: invalid value encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:370: RuntimeWarning: invalid value encountered in divide
+  dx = np.where((plus_di + minus_di) > 0, 100 * np.abs(plus_di - minus_di) / (plus_di + minus_di), 0)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: invalid value encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:370: RuntimeWarning: invalid value encountered in divide
+  dx = np.where((plus_di + minus_di) > 0, 100 * np.abs(plus_di - minus_di) / (plus_di + minus_di), 0)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: invalid value encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:370: RuntimeWarning: invalid value encountered in divide
+  dx = np.where((plus_di + minus_di) > 0, 100 * np.abs(plus_di - minus_di) / (plus_di + minus_di), 0)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: divide by zero encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: invalid value encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:370: RuntimeWarning: invalid value encountered in divide
+  dx = np.where((plus_di + minus_di) > 0, 100 * np.abs(plus_di - minus_di) / (plus_di + minus_di), 0)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: divide by zero encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: invalid value encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:370: RuntimeWarning: invalid value encountered in divide
+  dx = np.where((plus_di + minus_di) > 0, 100 * np.abs(plus_di - minus_di) / (plus_di + minus_di), 0)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: invalid value encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:370: RuntimeWarning: invalid value encountered in divide
+  dx = np.where((plus_di + minus_di) > 0, 100 * np.abs(plus_di - minus_di) / (plus_di + minus_di), 0)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: invalid value encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:370: RuntimeWarning: invalid value encountered in divide
+  dx = np.where((plus_di + minus_di) > 0, 100 * np.abs(plus_di - minus_di) / (plus_di + minus_di), 0)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: divide by zero encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: invalid value encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:370: RuntimeWarning: invalid value encountered in divide
+  dx = np.where((plus_di + minus_di) > 0, 100 * np.abs(plus_di - minus_di) / (plus_di + minus_di), 0)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: invalid value encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:370: RuntimeWarning: invalid value encountered in divide
+  dx = np.where((plus_di + minus_di) > 0, 100 * np.abs(plus_di - minus_di) / (plus_di + minus_di), 0)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: invalid value encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:370: RuntimeWarning: invalid value encountered in divide
+  dx = np.where((plus_di + minus_di) > 0, 100 * np.abs(plus_di - minus_di) / (plus_di + minus_di), 0)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: divide by zero encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: invalid value encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:370: RuntimeWarning: invalid value encountered in divide
+  dx = np.where((plus_di + minus_di) > 0, 100 * np.abs(plus_di - minus_di) / (plus_di + minus_di), 0)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: invalid value encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:370: RuntimeWarning: invalid value encountered in divide
+  dx = np.where((plus_di + minus_di) > 0, 100 * np.abs(plus_di - minus_di) / (plus_di + minus_di), 0)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: invalid value encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:370: RuntimeWarning: invalid value encountered in divide
+  dx = np.where((plus_di + minus_di) > 0, 100 * np.abs(plus_di - minus_di) / (plus_di + minus_di), 0)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: divide by zero encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: invalid value encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:370: RuntimeWarning: invalid value encountered in divide
+  dx = np.where((plus_di + minus_di) > 0, 100 * np.abs(plus_di - minus_di) / (plus_di + minus_di), 0)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: divide by zero encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: invalid value encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:370: RuntimeWarning: invalid value encountered in divide
+  dx = np.where((plus_di + minus_di) > 0, 100 * np.abs(plus_di - minus_di) / (plus_di + minus_di), 0)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: divide by zero encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: invalid value encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:370: RuntimeWarning: invalid value encountered in divide
+  dx = np.where((plus_di + minus_di) > 0, 100 * np.abs(plus_di - minus_di) / (plus_di + minus_di), 0)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: invalid value encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:370: RuntimeWarning: invalid value encountered in divide
+  dx = np.where((plus_di + minus_di) > 0, 100 * np.abs(plus_di - minus_di) / (plus_di + minus_di), 0)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: divide by zero encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: invalid value encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:370: RuntimeWarning: invalid value encountered in divide
+  dx = np.where((plus_di + minus_di) > 0, 100 * np.abs(plus_di - minus_di) / (plus_di + minus_di), 0)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: invalid value encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:370: RuntimeWarning: invalid value encountered in divide
+  dx = np.where((plus_di + minus_di) > 0, 100 * np.abs(plus_di - minus_di) / (plus_di + minus_di), 0)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: divide by zero encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: invalid value encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:370: RuntimeWarning: invalid value encountered in divide
+  dx = np.where((plus_di + minus_di) > 0, 100 * np.abs(plus_di - minus_di) / (plus_di + minus_di), 0)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: divide by zero encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: invalid value encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:370: RuntimeWarning: invalid value encountered in divide
+  dx = np.where((plus_di + minus_di) > 0, 100 * np.abs(plus_di - minus_di) / (plus_di + minus_di), 0)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: divide by zero encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: invalid value encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:370: RuntimeWarning: invalid value encountered in divide
+  dx = np.where((plus_di + minus_di) > 0, 100 * np.abs(plus_di - minus_di) / (plus_di + minus_di), 0)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: invalid value encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:370: RuntimeWarning: invalid value encountered in divide
+  dx = np.where((plus_di + minus_di) > 0, 100 * np.abs(plus_di - minus_di) / (plus_di + minus_di), 0)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: divide by zero encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: invalid value encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:370: RuntimeWarning: invalid value encountered in divide
+  dx = np.where((plus_di + minus_di) > 0, 100 * np.abs(plus_di - minus_di) / (plus_di + minus_di), 0)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: divide by zero encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: invalid value encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:370: RuntimeWarning: invalid value encountered in divide
+  dx = np.where((plus_di + minus_di) > 0, 100 * np.abs(plus_di - minus_di) / (plus_di + minus_di), 0)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: divide by zero encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: invalid value encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:370: RuntimeWarning: invalid value encountered in divide
+  dx = np.where((plus_di + minus_di) > 0, 100 * np.abs(plus_di - minus_di) / (plus_di + minus_di), 0)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: divide by zero encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: invalid value encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:370: RuntimeWarning: invalid value encountered in divide
+  dx = np.where((plus_di + minus_di) > 0, 100 * np.abs(plus_di - minus_di) / (plus_di + minus_di), 0)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: divide by zero encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: invalid value encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:370: RuntimeWarning: invalid value encountered in divide
+  dx = np.where((plus_di + minus_di) > 0, 100 * np.abs(plus_di - minus_di) / (plus_di + minus_di), 0)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: invalid value encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:370: RuntimeWarning: invalid value encountered in divide
+  dx = np.where((plus_di + minus_di) > 0, 100 * np.abs(plus_di - minus_di) / (plus_di + minus_di), 0)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: invalid value encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:370: RuntimeWarning: invalid value encountered in divide
+  dx = np.where((plus_di + minus_di) > 0, 100 * np.abs(plus_di - minus_di) / (plus_di + minus_di), 0)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: invalid value encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:370: RuntimeWarning: invalid value encountered in divide
+  dx = np.where((plus_di + minus_di) > 0, 100 * np.abs(plus_di - minus_di) / (plus_di + minus_di), 0)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: divide by zero encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: invalid value encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:370: RuntimeWarning: invalid value encountered in divide
+  dx = np.where((plus_di + minus_di) > 0, 100 * np.abs(plus_di - minus_di) / (plus_di + minus_di), 0)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: invalid value encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:370: RuntimeWarning: invalid value encountered in divide
+  dx = np.where((plus_di + minus_di) > 0, 100 * np.abs(plus_di - minus_di) / (plus_di + minus_di), 0)
+
+  SIGNALS: 5
+    USDJPY     BUY    score=6.00 TFs=5/7
+    USDCAD     BUY    score=4.85 TFs=6/7
+    EURJPY     BUY    score=4.70 TFs=5/7
+    GBPJPY     BUY    score=4.20 TFs=5/7
+    AUDJPY     BUY    score=3.45 TFs=5/7
+  SKIP USDJPY: Max concurrent trades reached
+  SKIP USDCAD: Max concurrent trades reached
+  SKIP EURJPY: Max concurrent trades reached
+  SKIP GBPJPY: Max concurrent trades reached
+  SKIP AUDJPY: Max concurrent trades reached
+
+  SUMMARY: 3 open | 0 closed | WR=0.0% | P&L=$+0.00
+  Signals: 5 found | 0 executed
+
+==========================================================================================
+  CYCLE 3 | 2026-09-10 11:24:48 UTC | Week 1
+  Balance: $8,549.92 | Peak: $10,000.00 | DD: 14.5%
+  Open: 2/3 | Losses: 0
+  Session: Hour 11 UTC | Risk Mult: 1.0
+==========================================================================================
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: divide by zero encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: invalid value encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:370: RuntimeWarning: invalid value encountered in divide
+  dx = np.where((plus_di + minus_di) > 0, 100 * np.abs(plus_di - minus_di) / (plus_di + minus_di), 0)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: invalid value encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:370: RuntimeWarning: invalid value encountered in divide
+  dx = np.where((plus_di + minus_di) > 0, 100 * np.abs(plus_di - minus_di) / (plus_di + minus_di), 0)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: invalid value encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:370: RuntimeWarning: invalid value encountered in divide
+  dx = np.where((plus_di + minus_di) > 0, 100 * np.abs(plus_di - minus_di) / (plus_di + minus_di), 0)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: invalid value encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:370: RuntimeWarning: invalid value encountered in divide
+  dx = np.where((plus_di + minus_di) > 0, 100 * np.abs(plus_di - minus_di) / (plus_di + minus_di), 0)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: invalid value encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:370: RuntimeWarning: invalid value encountered in divide
+  dx = np.where((plus_di + minus_di) > 0, 100 * np.abs(plus_di - minus_di) / (plus_di + minus_di), 0)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: divide by zero encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: invalid value encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:370: RuntimeWarning: invalid value encountered in divide
+  dx = np.where((plus_di + minus_di) > 0, 100 * np.abs(plus_di - minus_di) / (plus_di + minus_di), 0)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: divide by zero encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: invalid value encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:370: RuntimeWarning: invalid value encountered in divide
+  dx = np.where((plus_di + minus_di) > 0, 100 * np.abs(plus_di - minus_di) / (plus_di + minus_di), 0)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: divide by zero encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: invalid value encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:370: RuntimeWarning: invalid value encountered in divide
+  dx = np.where((plus_di + minus_di) > 0, 100 * np.abs(plus_di - minus_di) / (plus_di + minus_di), 0)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: invalid value encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:370: RuntimeWarning: invalid value encountered in divide
+  dx = np.where((plus_di + minus_di) > 0, 100 * np.abs(plus_di - minus_di) / (plus_di + minus_di), 0)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: invalid value encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:370: RuntimeWarning: invalid value encountered in divide
+  dx = np.where((plus_di + minus_di) > 0, 100 * np.abs(plus_di - minus_di) / (plus_di + minus_di), 0)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: divide by zero encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: invalid value encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:370: RuntimeWarning: invalid value encountered in divide
+  dx = np.where((plus_di + minus_di) > 0, 100 * np.abs(plus_di - minus_di) / (plus_di + minus_di), 0)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: divide by zero encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: invalid value encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:370: RuntimeWarning: invalid value encountered in divide
+  dx = np.where((plus_di + minus_di) > 0, 100 * np.abs(plus_di - minus_di) / (plus_di + minus_di), 0)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: invalid value encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:370: RuntimeWarning: invalid value encountered in divide
+  dx = np.where((plus_di + minus_di) > 0, 100 * np.abs(plus_di - minus_di) / (plus_di + minus_di), 0)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: divide by zero encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: invalid value encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:370: RuntimeWarning: invalid value encountered in divide
+  dx = np.where((plus_di + minus_di) > 0, 100 * np.abs(plus_di - minus_di) / (plus_di + minus_di), 0)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: invalid value encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:370: RuntimeWarning: invalid value encountered in divide
+  dx = np.where((plus_di + minus_di) > 0, 100 * np.abs(plus_di - minus_di) / (plus_di + minus_di), 0)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: divide by zero encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: invalid value encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:370: RuntimeWarning: invalid value encountered in divide
+  dx = np.where((plus_di + minus_di) > 0, 100 * np.abs(plus_di - minus_di) / (plus_di + minus_di), 0)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: divide by zero encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: invalid value encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:370: RuntimeWarning: invalid value encountered in divide
+  dx = np.where((plus_di + minus_di) > 0, 100 * np.abs(plus_di - minus_di) / (plus_di + minus_di), 0)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: invalid value encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:370: RuntimeWarning: invalid value encountered in divide
+  dx = np.where((plus_di + minus_di) > 0, 100 * np.abs(plus_di - minus_di) / (plus_di + minus_di), 0)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: divide by zero encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: invalid value encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:370: RuntimeWarning: invalid value encountered in divide
+  dx = np.where((plus_di + minus_di) > 0, 100 * np.abs(plus_di - minus_di) / (plus_di + minus_di), 0)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: invalid value encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:370: RuntimeWarning: invalid value encountered in divide
+  dx = np.where((plus_di + minus_di) > 0, 100 * np.abs(plus_di - minus_di) / (plus_di + minus_di), 0)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: invalid value encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:370: RuntimeWarning: invalid value encountered in divide
+  dx = np.where((plus_di + minus_di) > 0, 100 * np.abs(plus_di - minus_di) / (plus_di + minus_di), 0)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: divide by zero encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: invalid value encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:370: RuntimeWarning: invalid value encountered in divide
+  dx = np.where((plus_di + minus_di) > 0, 100 * np.abs(plus_di - minus_di) / (plus_di + minus_di), 0)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: divide by zero encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: invalid value encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:370: RuntimeWarning: invalid value encountered in divide
+  dx = np.where((plus_di + minus_di) > 0, 100 * np.abs(plus_di - minus_di) / (plus_di + minus_di), 0)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: invalid value encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:370: RuntimeWarning: invalid value encountered in divide
+  dx = np.where((plus_di + minus_di) > 0, 100 * np.abs(plus_di - minus_di) / (plus_di + minus_di), 0)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: divide by zero encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: invalid value encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:370: RuntimeWarning: invalid value encountered in divide
+  dx = np.where((plus_di + minus_di) > 0, 100 * np.abs(plus_di - minus_di) / (plus_di + minus_di), 0)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: invalid value encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:370: RuntimeWarning: invalid value encountered in divide
+  dx = np.where((plus_di + minus_di) > 0, 100 * np.abs(plus_di - minus_di) / (plus_di + minus_di), 0)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: divide by zero encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: invalid value encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:370: RuntimeWarning: invalid value encountered in divide
+  dx = np.where((plus_di + minus_di) > 0, 100 * np.abs(plus_di - minus_di) / (plus_di + minus_di), 0)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: divide by zero encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: invalid value encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:370: RuntimeWarning: invalid value encountered in divide
+  dx = np.where((plus_di + minus_di) > 0, 100 * np.abs(plus_di - minus_di) / (plus_di + minus_di), 0)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: invalid value encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:370: RuntimeWarning: invalid value encountered in divide
+  dx = np.where((plus_di + minus_di) > 0, 100 * np.abs(plus_di - minus_di) / (plus_di + minus_di), 0)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: invalid value encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:370: RuntimeWarning: invalid value encountered in divide
+  dx = np.where((plus_di + minus_di) > 0, 100 * np.abs(plus_di - minus_di) / (plus_di + minus_di), 0)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: divide by zero encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: invalid value encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:370: RuntimeWarning: invalid value encountered in divide
+  dx = np.where((plus_di + minus_di) > 0, 100 * np.abs(plus_di - minus_di) / (plus_di + minus_di), 0)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: divide by zero encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: invalid value encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:370: RuntimeWarning: invalid value encountered in divide
+  dx = np.where((plus_di + minus_di) > 0, 100 * np.abs(plus_di - minus_di) / (plus_di + minus_di), 0)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: divide by zero encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: invalid value encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:370: RuntimeWarning: invalid value encountered in divide
+  dx = np.where((plus_di + minus_di) > 0, 100 * np.abs(plus_di - minus_di) / (plus_di + minus_di), 0)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: invalid value encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:370: RuntimeWarning: invalid value encountered in divide
+  dx = np.where((plus_di + minus_di) > 0, 100 * np.abs(plus_di - minus_di) / (plus_di + minus_di), 0)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: invalid value encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:370: RuntimeWarning: invalid value encountered in divide
+  dx = np.where((plus_di + minus_di) > 0, 100 * np.abs(plus_di - minus_di) / (plus_di + minus_di), 0)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: divide by zero encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: invalid value encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:370: RuntimeWarning: invalid value encountered in divide
+  dx = np.where((plus_di + minus_di) > 0, 100 * np.abs(plus_di - minus_di) / (plus_di + minus_di), 0)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: divide by zero encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: invalid value encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:370: RuntimeWarning: invalid value encountered in divide
+  dx = np.where((plus_di + minus_di) > 0, 100 * np.abs(plus_di - minus_di) / (plus_di + minus_di), 0)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: invalid value encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:370: RuntimeWarning: invalid value encountered in divide
+  dx = np.where((plus_di + minus_di) > 0, 100 * np.abs(plus_di - minus_di) / (plus_di + minus_di), 0)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: divide by zero encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: invalid value encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:370: RuntimeWarning: invalid value encountered in divide
+  dx = np.where((plus_di + minus_di) > 0, 100 * np.abs(plus_di - minus_di) / (plus_di + minus_di), 0)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: invalid value encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:370: RuntimeWarning: invalid value encountered in divide
+  dx = np.where((plus_di + minus_di) > 0, 100 * np.abs(plus_di - minus_di) / (plus_di + minus_di), 0)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: divide by zero encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: invalid value encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:370: RuntimeWarning: invalid value encountered in divide
+  dx = np.where((plus_di + minus_di) > 0, 100 * np.abs(plus_di - minus_di) / (plus_di + minus_di), 0)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: divide by zero encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: invalid value encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:370: RuntimeWarning: invalid value encountered in divide
+  dx = np.where((plus_di + minus_di) > 0, 100 * np.abs(plus_di - minus_di) / (plus_di + minus_di), 0)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: invalid value encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:370: RuntimeWarning: invalid value encountered in divide
+  dx = np.where((plus_di + minus_di) > 0, 100 * np.abs(plus_di - minus_di) / (plus_di + minus_di), 0)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: divide by zero encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: invalid value encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:370: RuntimeWarning: invalid value encountered in divide
+  dx = np.where((plus_di + minus_di) > 0, 100 * np.abs(plus_di - minus_di) / (plus_di + minus_di), 0)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: divide by zero encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: invalid value encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:370: RuntimeWarning: invalid value encountered in divide
+  dx = np.where((plus_di + minus_di) > 0, 100 * np.abs(plus_di - minus_di) / (plus_di + minus_di), 0)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: invalid value encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:370: RuntimeWarning: invalid value encountered in divide
+  dx = np.where((plus_di + minus_di) > 0, 100 * np.abs(plus_di - minus_di) / (plus_di + minus_di), 0)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: invalid value encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:370: RuntimeWarning: invalid value encountered in divide
+  dx = np.where((plus_di + minus_di) > 0, 100 * np.abs(plus_di - minus_di) / (plus_di + minus_di), 0)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: invalid value encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:370: RuntimeWarning: invalid value encountered in divide
+  dx = np.where((plus_di + minus_di) > 0, 100 * np.abs(plus_di - minus_di) / (plus_di + minus_di), 0)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: invalid value encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:370: RuntimeWarning: invalid value encountered in divide
+  dx = np.where((plus_di + minus_di) > 0, 100 * np.abs(plus_di - minus_di) / (plus_di + minus_di), 0)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: invalid value encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:370: RuntimeWarning: invalid value encountered in divide
+  dx = np.where((plus_di + minus_di) > 0, 100 * np.abs(plus_di - minus_di) / (plus_di + minus_di), 0)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: invalid value encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:370: RuntimeWarning: invalid value encountered in divide
+  dx = np.where((plus_di + minus_di) > 0, 100 * np.abs(plus_di - minus_di) / (plus_di + minus_di), 0)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: invalid value encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:370: RuntimeWarning: invalid value encountered in divide
+  dx = np.where((plus_di + minus_di) > 0, 100 * np.abs(plus_di - minus_di) / (plus_di + minus_di), 0)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: invalid value encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:370: RuntimeWarning: invalid value encountered in divide
+  dx = np.where((plus_di + minus_di) > 0, 100 * np.abs(plus_di - minus_di) / (plus_di + minus_di), 0)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: divide by zero encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: invalid value encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:370: RuntimeWarning: invalid value encountered in divide
+  dx = np.where((plus_di + minus_di) > 0, 100 * np.abs(plus_di - minus_di) / (plus_di + minus_di), 0)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: divide by zero encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: invalid value encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:370: RuntimeWarning: invalid value encountered in divide
+  dx = np.where((plus_di + minus_di) > 0, 100 * np.abs(plus_di - minus_di) / (plus_di + minus_di), 0)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: invalid value encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:370: RuntimeWarning: invalid value encountered in divide
+  dx = np.where((plus_di + minus_di) > 0, 100 * np.abs(plus_di - minus_di) / (plus_di + minus_di), 0)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: invalid value encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:370: RuntimeWarning: invalid value encountered in divide
+  dx = np.where((plus_di + minus_di) > 0, 100 * np.abs(plus_di - minus_di) / (plus_di + minus_di), 0)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: divide by zero encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: invalid value encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:370: RuntimeWarning: invalid value encountered in divide
+  dx = np.where((plus_di + minus_di) > 0, 100 * np.abs(plus_di - minus_di) / (plus_di + minus_di), 0)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: invalid value encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:370: RuntimeWarning: invalid value encountered in divide
+  dx = np.where((plus_di + minus_di) > 0, 100 * np.abs(plus_di - minus_di) / (plus_di + minus_di), 0)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: invalid value encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:370: RuntimeWarning: invalid value encountered in divide
+  dx = np.where((plus_di + minus_di) > 0, 100 * np.abs(plus_di - minus_di) / (plus_di + minus_di), 0)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: divide by zero encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: invalid value encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:370: RuntimeWarning: invalid value encountered in divide
+  dx = np.where((plus_di + minus_di) > 0, 100 * np.abs(plus_di - minus_di) / (plus_di + minus_di), 0)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: invalid value encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:370: RuntimeWarning: invalid value encountered in divide
+  dx = np.where((plus_di + minus_di) > 0, 100 * np.abs(plus_di - minus_di) / (plus_di + minus_di), 0)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: invalid value encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:370: RuntimeWarning: invalid value encountered in divide
+  dx = np.where((plus_di + minus_di) > 0, 100 * np.abs(plus_di - minus_di) / (plus_di + minus_di), 0)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: divide by zero encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: invalid value encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:370: RuntimeWarning: invalid value encountered in divide
+  dx = np.where((plus_di + minus_di) > 0, 100 * np.abs(plus_di - minus_di) / (plus_di + minus_di), 0)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: divide by zero encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: invalid value encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:370: RuntimeWarning: invalid value encountered in divide
+  dx = np.where((plus_di + minus_di) > 0, 100 * np.abs(plus_di - minus_di) / (plus_di + minus_di), 0)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: invalid value encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:370: RuntimeWarning: invalid value encountered in divide
+  dx = np.where((plus_di + minus_di) > 0, 100 * np.abs(plus_di - minus_di) / (plus_di + minus_di), 0)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: divide by zero encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: invalid value encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:370: RuntimeWarning: invalid value encountered in divide
+  dx = np.where((plus_di + minus_di) > 0, 100 * np.abs(plus_di - minus_di) / (plus_di + minus_di), 0)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: divide by zero encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: invalid value encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:370: RuntimeWarning: invalid value encountered in divide
+  dx = np.where((plus_di + minus_di) > 0, 100 * np.abs(plus_di - minus_di) / (plus_di + minus_di), 0)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: invalid value encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:370: RuntimeWarning: invalid value encountered in divide
+  dx = np.where((plus_di + minus_di) > 0, 100 * np.abs(plus_di - minus_di) / (plus_di + minus_di), 0)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: divide by zero encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: invalid value encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:370: RuntimeWarning: invalid value encountered in divide
+  dx = np.where((plus_di + minus_di) > 0, 100 * np.abs(plus_di - minus_di) / (plus_di + minus_di), 0)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: divide by zero encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: invalid value encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:370: RuntimeWarning: invalid value encountered in divide
+  dx = np.where((plus_di + minus_di) > 0, 100 * np.abs(plus_di - minus_di) / (plus_di + minus_di), 0)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: divide by zero encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: invalid value encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:370: RuntimeWarning: invalid value encountered in divide
+  dx = np.where((plus_di + minus_di) > 0, 100 * np.abs(plus_di - minus_di) / (plus_di + minus_di), 0)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: divide by zero encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: invalid value encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:370: RuntimeWarning: invalid value encountered in divide
+  dx = np.where((plus_di + minus_di) > 0, 100 * np.abs(plus_di - minus_di) / (plus_di + minus_di), 0)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: divide by zero encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: invalid value encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:370: RuntimeWarning: invalid value encountered in divide
+  dx = np.where((plus_di + minus_di) > 0, 100 * np.abs(plus_di - minus_di) / (plus_di + minus_di), 0)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: invalid value encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:370: RuntimeWarning: invalid value encountered in divide
+  dx = np.where((plus_di + minus_di) > 0, 100 * np.abs(plus_di - minus_di) / (plus_di + minus_di), 0)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: invalid value encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:370: RuntimeWarning: invalid value encountered in divide
+  dx = np.where((plus_di + minus_di) > 0, 100 * np.abs(plus_di - minus_di) / (plus_di + minus_di), 0)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: invalid value encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:370: RuntimeWarning: invalid value encountered in divide
+  dx = np.where((plus_di + minus_di) > 0, 100 * np.abs(plus_di - minus_di) / (plus_di + minus_di), 0)
+
+  SIGNALS: 5
+    USDJPY     BUY    score=6.25 TFs=5/7
+    USDCAD     BUY    score=5.60 TFs=6/7
+    GBPJPY     BUY    score=4.80 TFs=5/7
+    EURJPY     BUY    score=4.45 TFs=5/7
+    AUDJPY     BUY    score=3.90 TFs=5/7
+  SKIP USDJPY: Correlated with existing position
+  SKIP USDCAD: Correlated with existing position
+  OPENED GBPJPY     BUY  #3209097327 0.01 lots @ 208.58700
+    SL=207.74443 TP=209.99129 | Risk=10.0% | TFs: H1(+9) M30(+8) M15(+9) M10(+8) M5(+10)
+  SKIP EURJPY: Max concurrent trades reached
+  SKIP AUDJPY: Max concurrent trades reached
+
+  SUMMARY: 3 open | 0 closed | WR=0.0% | P&L=$+0.00
+  Signals: 5 found | 1 executed
+
+==========================================================================================
+  CYCLE 4 | 2026-09-10 12:25:04 UTC | Week 1
+  Balance: $8,850.48 | Peak: $10,000.00 | DD: 11.5%
+  Open: 3/3 | Losses: 0
+  Session: Hour 12 UTC | Risk Mult: 1.0
+==========================================================================================
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: divide by zero encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: invalid value encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:370: RuntimeWarning: invalid value encountered in divide
+  dx = np.where((plus_di + minus_di) > 0, 100 * np.abs(plus_di - minus_di) / (plus_di + minus_di), 0)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: invalid value encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:370: RuntimeWarning: invalid value encountered in divide
+  dx = np.where((plus_di + minus_di) > 0, 100 * np.abs(plus_di - minus_di) / (plus_di + minus_di), 0)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: invalid value encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:370: RuntimeWarning: invalid value encountered in divide
+  dx = np.where((plus_di + minus_di) > 0, 100 * np.abs(plus_di - minus_di) / (plus_di + minus_di), 0)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: divide by zero encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: invalid value encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:370: RuntimeWarning: invalid value encountered in divide
+  dx = np.where((plus_di + minus_di) > 0, 100 * np.abs(plus_di - minus_di) / (plus_di + minus_di), 0)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: invalid value encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:370: RuntimeWarning: invalid value encountered in divide
+  dx = np.where((plus_di + minus_di) > 0, 100 * np.abs(plus_di - minus_di) / (plus_di + minus_di), 0)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: divide by zero encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: invalid value encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:370: RuntimeWarning: invalid value encountered in divide
+  dx = np.where((plus_di + minus_di) > 0, 100 * np.abs(plus_di - minus_di) / (plus_di + minus_di), 0)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: invalid value encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:370: RuntimeWarning: invalid value encountered in divide
+  dx = np.where((plus_di + minus_di) > 0, 100 * np.abs(plus_di - minus_di) / (plus_di + minus_di), 0)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: divide by zero encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: invalid value encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:370: RuntimeWarning: invalid value encountered in divide
+  dx = np.where((plus_di + minus_di) > 0, 100 * np.abs(plus_di - minus_di) / (plus_di + minus_di), 0)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: invalid value encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:370: RuntimeWarning: invalid value encountered in divide
+  dx = np.where((plus_di + minus_di) > 0, 100 * np.abs(plus_di - minus_di) / (plus_di + minus_di), 0)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: invalid value encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:370: RuntimeWarning: invalid value encountered in divide
+  dx = np.where((plus_di + minus_di) > 0, 100 * np.abs(plus_di - minus_di) / (plus_di + minus_di), 0)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: divide by zero encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: invalid value encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:370: RuntimeWarning: invalid value encountered in divide
+  dx = np.where((plus_di + minus_di) > 0, 100 * np.abs(plus_di - minus_di) / (plus_di + minus_di), 0)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: invalid value encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:370: RuntimeWarning: invalid value encountered in divide
+  dx = np.where((plus_di + minus_di) > 0, 100 * np.abs(plus_di - minus_di) / (plus_di + minus_di), 0)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: divide by zero encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: invalid value encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:370: RuntimeWarning: invalid value encountered in divide
+  dx = np.where((plus_di + minus_di) > 0, 100 * np.abs(plus_di - minus_di) / (plus_di + minus_di), 0)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: invalid value encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:370: RuntimeWarning: invalid value encountered in divide
+  dx = np.where((plus_di + minus_di) > 0, 100 * np.abs(plus_di - minus_di) / (plus_di + minus_di), 0)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: invalid value encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:370: RuntimeWarning: invalid value encountered in divide
+  dx = np.where((plus_di + minus_di) > 0, 100 * np.abs(plus_di - minus_di) / (plus_di + minus_di), 0)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: divide by zero encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: invalid value encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:370: RuntimeWarning: invalid value encountered in divide
+  dx = np.where((plus_di + minus_di) > 0, 100 * np.abs(plus_di - minus_di) / (plus_di + minus_di), 0)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: divide by zero encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: invalid value encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:370: RuntimeWarning: invalid value encountered in divide
+  dx = np.where((plus_di + minus_di) > 0, 100 * np.abs(plus_di - minus_di) / (plus_di + minus_di), 0)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: divide by zero encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: invalid value encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:370: RuntimeWarning: invalid value encountered in divide
+  dx = np.where((plus_di + minus_di) > 0, 100 * np.abs(plus_di - minus_di) / (plus_di + minus_di), 0)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: divide by zero encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: invalid value encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:370: RuntimeWarning: invalid value encountered in divide
+  dx = np.where((plus_di + minus_di) > 0, 100 * np.abs(plus_di - minus_di) / (plus_di + minus_di), 0)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: divide by zero encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: invalid value encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:370: RuntimeWarning: invalid value encountered in divide
+  dx = np.where((plus_di + minus_di) > 0, 100 * np.abs(plus_di - minus_di) / (plus_di + minus_di), 0)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: invalid value encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:370: RuntimeWarning: invalid value encountered in divide
+  dx = np.where((plus_di + minus_di) > 0, 100 * np.abs(plus_di - minus_di) / (plus_di + minus_di), 0)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: divide by zero encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: invalid value encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:370: RuntimeWarning: invalid value encountered in divide
+  dx = np.where((plus_di + minus_di) > 0, 100 * np.abs(plus_di - minus_di) / (plus_di + minus_di), 0)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: invalid value encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:370: RuntimeWarning: invalid value encountered in divide
+  dx = np.where((plus_di + minus_di) > 0, 100 * np.abs(plus_di - minus_di) / (plus_di + minus_di), 0)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: divide by zero encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: invalid value encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:370: RuntimeWarning: invalid value encountered in divide
+  dx = np.where((plus_di + minus_di) > 0, 100 * np.abs(plus_di - minus_di) / (plus_di + minus_di), 0)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: divide by zero encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: invalid value encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:370: RuntimeWarning: invalid value encountered in divide
+  dx = np.where((plus_di + minus_di) > 0, 100 * np.abs(plus_di - minus_di) / (plus_di + minus_di), 0)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: invalid value encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:370: RuntimeWarning: invalid value encountered in divide
+  dx = np.where((plus_di + minus_di) > 0, 100 * np.abs(plus_di - minus_di) / (plus_di + minus_di), 0)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: divide by zero encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: invalid value encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:370: RuntimeWarning: invalid value encountered in divide
+  dx = np.where((plus_di + minus_di) > 0, 100 * np.abs(plus_di - minus_di) / (plus_di + minus_di), 0)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: divide by zero encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: invalid value encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:370: RuntimeWarning: invalid value encountered in divide
+  dx = np.where((plus_di + minus_di) > 0, 100 * np.abs(plus_di - minus_di) / (plus_di + minus_di), 0)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: invalid value encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:370: RuntimeWarning: invalid value encountered in divide
+  dx = np.where((plus_di + minus_di) > 0, 100 * np.abs(plus_di - minus_di) / (plus_di + minus_di), 0)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: divide by zero encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: invalid value encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:370: RuntimeWarning: invalid value encountered in divide
+  dx = np.where((plus_di + minus_di) > 0, 100 * np.abs(plus_di - minus_di) / (plus_di + minus_di), 0)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: invalid value encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:370: RuntimeWarning: invalid value encountered in divide
+  dx = np.where((plus_di + minus_di) > 0, 100 * np.abs(plus_di - minus_di) / (plus_di + minus_di), 0)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: divide by zero encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: invalid value encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:370: RuntimeWarning: invalid value encountered in divide
+  dx = np.where((plus_di + minus_di) > 0, 100 * np.abs(plus_di - minus_di) / (plus_di + minus_di), 0)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: invalid value encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:370: RuntimeWarning: invalid value encountered in divide
+  dx = np.where((plus_di + minus_di) > 0, 100 * np.abs(plus_di - minus_di) / (plus_di + minus_di), 0)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: invalid value encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:370: RuntimeWarning: invalid value encountered in divide
+  dx = np.where((plus_di + minus_di) > 0, 100 * np.abs(plus_di - minus_di) / (plus_di + minus_di), 0)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: divide by zero encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: invalid value encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:370: RuntimeWarning: invalid value encountered in divide
+  dx = np.where((plus_di + minus_di) > 0, 100 * np.abs(plus_di - minus_di) / (plus_di + minus_di), 0)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: divide by zero encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: invalid value encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:370: RuntimeWarning: invalid value encountered in divide
+  dx = np.where((plus_di + minus_di) > 0, 100 * np.abs(plus_di - minus_di) / (plus_di + minus_di), 0)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: invalid value encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:370: RuntimeWarning: invalid value encountered in divide
+  dx = np.where((plus_di + minus_di) > 0, 100 * np.abs(plus_di - minus_di) / (plus_di + minus_di), 0)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: divide by zero encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: invalid value encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:370: RuntimeWarning: invalid value encountered in divide
+  dx = np.where((plus_di + minus_di) > 0, 100 * np.abs(plus_di - minus_di) / (plus_di + minus_di), 0)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: invalid value encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:370: RuntimeWarning: invalid value encountered in divide
+  dx = np.where((plus_di + minus_di) > 0, 100 * np.abs(plus_di - minus_di) / (plus_di + minus_di), 0)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: invalid value encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:370: RuntimeWarning: invalid value encountered in divide
+  dx = np.where((plus_di + minus_di) > 0, 100 * np.abs(plus_di - minus_di) / (plus_di + minus_di), 0)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: divide by zero encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: invalid value encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:370: RuntimeWarning: invalid value encountered in divide
+  dx = np.where((plus_di + minus_di) > 0, 100 * np.abs(plus_di - minus_di) / (plus_di + minus_di), 0)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: divide by zero encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: invalid value encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:370: RuntimeWarning: invalid value encountered in divide
+  dx = np.where((plus_di + minus_di) > 0, 100 * np.abs(plus_di - minus_di) / (plus_di + minus_di), 0)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: invalid value encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:370: RuntimeWarning: invalid value encountered in divide
+  dx = np.where((plus_di + minus_di) > 0, 100 * np.abs(plus_di - minus_di) / (plus_di + minus_di), 0)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: invalid value encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:370: RuntimeWarning: invalid value encountered in divide
+  dx = np.where((plus_di + minus_di) > 0, 100 * np.abs(plus_di - minus_di) / (plus_di + minus_di), 0)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: divide by zero encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: invalid value encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:370: RuntimeWarning: invalid value encountered in divide
+  dx = np.where((plus_di + minus_di) > 0, 100 * np.abs(plus_di - minus_di) / (plus_di + minus_di), 0)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: divide by zero encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: invalid value encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:370: RuntimeWarning: invalid value encountered in divide
+  dx = np.where((plus_di + minus_di) > 0, 100 * np.abs(plus_di - minus_di) / (plus_di + minus_di), 0)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: divide by zero encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: invalid value encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:370: RuntimeWarning: invalid value encountered in divide
+  dx = np.where((plus_di + minus_di) > 0, 100 * np.abs(plus_di - minus_di) / (plus_di + minus_di), 0)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: invalid value encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:370: RuntimeWarning: invalid value encountered in divide
+  dx = np.where((plus_di + minus_di) > 0, 100 * np.abs(plus_di - minus_di) / (plus_di + minus_di), 0)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: invalid value encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:370: RuntimeWarning: invalid value encountered in divide
+  dx = np.where((plus_di + minus_di) > 0, 100 * np.abs(plus_di - minus_di) / (plus_di + minus_di), 0)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: invalid value encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:370: RuntimeWarning: invalid value encountered in divide
+  dx = np.where((plus_di + minus_di) > 0, 100 * np.abs(plus_di - minus_di) / (plus_di + minus_di), 0)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: divide by zero encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: invalid value encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:370: RuntimeWarning: invalid value encountered in divide
+  dx = np.where((plus_di + minus_di) > 0, 100 * np.abs(plus_di - minus_di) / (plus_di + minus_di), 0)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: divide by zero encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: invalid value encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:370: RuntimeWarning: invalid value encountered in divide
+  dx = np.where((plus_di + minus_di) > 0, 100 * np.abs(plus_di - minus_di) / (plus_di + minus_di), 0)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: divide by zero encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: invalid value encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:370: RuntimeWarning: invalid value encountered in divide
+  dx = np.where((plus_di + minus_di) > 0, 100 * np.abs(plus_di - minus_di) / (plus_di + minus_di), 0)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: divide by zero encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: invalid value encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:370: RuntimeWarning: invalid value encountered in divide
+  dx = np.where((plus_di + minus_di) > 0, 100 * np.abs(plus_di - minus_di) / (plus_di + minus_di), 0)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: divide by zero encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: invalid value encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:370: RuntimeWarning: invalid value encountered in divide
+  dx = np.where((plus_di + minus_di) > 0, 100 * np.abs(plus_di - minus_di) / (plus_di + minus_di), 0)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: divide by zero encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: invalid value encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:370: RuntimeWarning: invalid value encountered in divide
+  dx = np.where((plus_di + minus_di) > 0, 100 * np.abs(plus_di - minus_di) / (plus_di + minus_di), 0)
+    PARTIAL TP EURGBP: Closed 50% @ 0.85937 | P&L=$+0.00
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: divide by zero encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: invalid value encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:370: RuntimeWarning: invalid value encountered in divide
+  dx = np.where((plus_di + minus_di) > 0, 100 * np.abs(plus_di - minus_di) / (plus_di + minus_di), 0)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: invalid value encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:370: RuntimeWarning: invalid value encountered in divide
+  dx = np.where((plus_di + minus_di) > 0, 100 * np.abs(plus_di - minus_di) / (plus_di + minus_di), 0)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: divide by zero encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: invalid value encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:370: RuntimeWarning: invalid value encountered in divide
+  dx = np.where((plus_di + minus_di) > 0, 100 * np.abs(plus_di - minus_di) / (plus_di + minus_di), 0)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: divide by zero encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: invalid value encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:370: RuntimeWarning: invalid value encountered in divide
+  dx = np.where((plus_di + minus_di) > 0, 100 * np.abs(plus_di - minus_di) / (plus_di + minus_di), 0)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: invalid value encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:370: RuntimeWarning: invalid value encountered in divide
+  dx = np.where((plus_di + minus_di) > 0, 100 * np.abs(plus_di - minus_di) / (plus_di + minus_di), 0)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: invalid value encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:370: RuntimeWarning: invalid value encountered in divide
+  dx = np.where((plus_di + minus_di) > 0, 100 * np.abs(plus_di - minus_di) / (plus_di + minus_di), 0)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: divide by zero encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: invalid value encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:370: RuntimeWarning: invalid value encountered in divide
+  dx = np.where((plus_di + minus_di) > 0, 100 * np.abs(plus_di - minus_di) / (plus_di + minus_di), 0)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: divide by zero encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: invalid value encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:370: RuntimeWarning: invalid value encountered in divide
+  dx = np.where((plus_di + minus_di) > 0, 100 * np.abs(plus_di - minus_di) / (plus_di + minus_di), 0)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: divide by zero encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: invalid value encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:370: RuntimeWarning: invalid value encountered in divide
+  dx = np.where((plus_di + minus_di) > 0, 100 * np.abs(plus_di - minus_di) / (plus_di + minus_di), 0)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: invalid value encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:370: RuntimeWarning: invalid value encountered in divide
+  dx = np.where((plus_di + minus_di) > 0, 100 * np.abs(plus_di - minus_di) / (plus_di + minus_di), 0)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: invalid value encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:370: RuntimeWarning: invalid value encountered in divide
+  dx = np.where((plus_di + minus_di) > 0, 100 * np.abs(plus_di - minus_di) / (plus_di + minus_di), 0)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: invalid value encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:370: RuntimeWarning: invalid value encountered in divide
+  dx = np.where((plus_di + minus_di) > 0, 100 * np.abs(plus_di - minus_di) / (plus_di + minus_di), 0)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: divide by zero encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: invalid value encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:370: RuntimeWarning: invalid value encountered in divide
+  dx = np.where((plus_di + minus_di) > 0, 100 * np.abs(plus_di - minus_di) / (plus_di + minus_di), 0)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:336: RuntimeWarning: invalid value encountered in divide
+  rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
+C:\DUTCHKEM-TRADER-LEGENDARY-INTELLIGENCE-EDITION\backend\live_trading_complete.py:370: RuntimeWarning: invalid value encountered in divide
+  dx = np.where((plus_di + minus_di) > 0, 100 * np.abs(plus_di - minus_di) / (plus_di + minus_di), 0)
+
+  SIGNALS: 3
+    USDCAD     BUY    score=6.30 TFs=6/7
+    USDJPY     BUY    score=5.75 TFs=6/7
+    EURJPY     BUY    score=5.15 TFs=6/7
+  SKIP USDCAD: Max concurrent trades reached
+  SKIP USDJPY: Max concurrent trades reached
+  SKIP EURJPY: Max concurrent trades reached
+
+  SUMMARY: 3 open | 0 closed | WR=0.0% | P&L=$+0.00
+  Signals: 3 found | 0 executed
