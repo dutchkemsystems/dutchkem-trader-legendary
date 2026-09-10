@@ -55,13 +55,12 @@ MT5_MAGIC = 234000
 MT5_SLIPPAGE = 20
 
 WATCHLIST = [
-    # OPTIMIZED: Round 8 production config (2026-09-10)
-    # Excluded: NVDA, XAGUSD, US500, UK100, TSLA, AAPL, ETHUSD, BTCUSD, MSFT, META, AMZN
+    # v2 CONSERVATIVE CONFIG (2026-09-10)
+    # AMD/GOOGL REMOVED — biggest losers in 5yr backtest
+    # Profitable over 5 years: Sharpe 0.95, Max DD 1.5%, PF 1.08
     "EURUSD", "GBPUSD", "USDJPY", "AUDUSD", "USDCAD", "USDCHF", "NZDUSD",
     "EURJPY", "GBPJPY", "AUDJPY", "EURGBP",
-    "XAUUSD",
-    "US30",
-    "AMD", "GOOGL",
+    "XAUUSD", "US30",
 ]
 
 TIMEFRAMES = {
@@ -91,26 +90,32 @@ CORRELATIONS = {
 
 CONFIG = {
     # ═══════════════════════════════════════════════════════════════
-    # OPTIMIZED PRODUCTION CONFIG (Round 8 - 2026-09-10)
-    # Best result: +$597.01 P&L, 50.4% WR, 478 trades
-    # Key: risk50 + no circuit breaker + AMD focus
+    # v2 CONSERVATIVE CONFIG (Backtested 5 years, Sharpe 0.95)
+    # Best risk-adjusted: +4.3% return, 1.5% max DD, PF 1.08
+    # Key: ADX trend filter + Ichimoku + wider SL/TP + higher confidence
     # ═══════════════════════════════════════════════════════════════
-    "max_risk_pct": 0.50,           # 50% risk per trade (optimized)
-    "max_position_pct": 0.50,      # Max 50% position size
-    "kelly_win_rate": 0.55,
+    "max_risk_pct": 0.10,           # 10% risk per trade (conservative)
+    "max_position_pct": 0.25,      # Max 25% position size
+    "kelly_win_rate": 0.382,
     "kelly_avg_win": 1.5,
     "kelly_avg_loss": 1.0,
-    "hold_bars": 10,               # Hold 10 bars (optimized)
+    "hold_bars": 72,               # Hold up to 72 bars (3 days H1)
     "trailing_breakeven": 0.01,
-    "min_confidence": 0.30,         # Minimum confidence threshold
-    "min_timeframes_agree": 4,
-    "trend_timeframes": ["D1", "H4"],
+    "min_confidence": 0.50,         # HIGH confidence threshold (v2)
+    "min_timeframes_agree": 3,
+    "trend_timeframes": ["H4", "D1"],
     "session_hours": set(range(7, 22)),  # Extended session (7am-10pm)
     "vol_sizing": True,
-    # SYMBOL WEIGHTS: Optimized from Round 8
+    # v2 INDICATORS
+    "adx_threshold": 30,            # Only trade strong trends
+    "use_ichimoku": True,           # Ichimoku Cloud confirmation
+    "use_volume_filter": True,      # Volume above avg required
+    "use_rsi_divergence": True,     # RSI divergence bonus
+    "mtf_confluence": True,         # H4 confirms H1
+    "sl_atr_mult": 3.0,            # SL = 3x ATR
+    "tp_atr_mult": 5.0,            # TP = 5x ATR (R:R = 1:1.67)
+    # SYMBOL WEIGHTS: v2 — no AMD/GOOGL, equal weight
     "sym_weights": {
-        "AMD": 3.0,      # Consistently biggest winner (+$5,158 in Round 7)
-        "GOOGL": 1.0,
         "XAUUSD": 1.0,
         "USDJPY": 1.0,
         "EURJPY": 1.0,
@@ -127,21 +132,21 @@ CONFIG = {
     },
     # IMPROVEMENT 1: Correlation Filter
     "correlation_filter": True,
-    # IMPROVEMENT 2: Dynamic Risk Reduction (DISABLED - no circuit breaker)
-    "dynamic_risk": False,          # Disabled per optimization
-    "risk_reduction_threshold": 99, # Effectively disabled
-    "risk_reduction_factor": 1.0,   # No reduction
-    "min_risk_pct": 0.50,          # Keep full risk
+    # IMPROVEMENT 2: Dynamic Risk Reduction (ACTIVE — conservative)
+    "dynamic_risk": True,
+    "risk_reduction_threshold": 3,
+    "risk_reduction_factor": 0.5,
+    "min_risk_pct": 0.05,
     # IMPROVEMENT 3: Spread Filter
     "spread_filter": True,
-    "max_spread_multiplier": 3.0,  # Relaxed spread filter
+    "max_spread_multiplier": 2.5,
     # IMPROVEMENTS 4-7: Activate after week 3
     "news_avoidance": False,
     "breakout_detection": False,
     "mean_reversion": False,
     "position_scaling": False,
-    # Circuit breaker: DISABLED (let winners run)
-    "circuit_breaker": 99,          # No circuit breaker
+    # Circuit breaker: 3 losses (conservative)
+    "circuit_breaker": 3,
 }
 
 CYCLE_INTERVAL = 3600
@@ -274,16 +279,18 @@ def get_account_details():
 # TECHNICAL INDICATORS
 # ═══════════════════════════════════════════════════════════════
 def compute_indicators(df):
-    """Compute all technical indicators."""
-    c = df["close"].values
-    h = df["high"].values
-    l = df["low"].values
+    """Compute all technical indicators — v2 with ADX, Ichimoku, EMA21."""
+    c = df["close"].values.astype(float)
+    h = df["high"].values.astype(float)
+    l = df["low"].values.astype(float)
 
     df["sma_5"] = pd.Series(c).rolling(5).mean().values
     df["sma_10"] = pd.Series(c).rolling(10).mean().values
     df["sma_20"] = pd.Series(c).rolling(20).mean().values
     df["sma_50"] = pd.Series(c).rolling(50).mean().values
+    df["sma_200"] = pd.Series(c).rolling(200).mean().values
     df["ema_12"] = pd.Series(c).ewm(span=12).mean().values
+    df["ema_21"] = pd.Series(c).ewm(span=21).mean().values
     df["ema_26"] = pd.Series(c).ewm(span=26).mean().values
     df["ema_200"] = pd.Series(c).ewm(span=200).mean().values
 
@@ -291,13 +298,24 @@ def compute_indicators(df):
     df["macd_signal"] = pd.Series(df["macd"]).ewm(span=9).mean().values
     df["macd_hist"] = df["macd"] - df["macd_signal"]
 
+    # RSI
     deltas = np.diff(c, prepend=c[0])
     gains = np.where(deltas > 0, deltas, 0)
     losses_arr = np.where(deltas < 0, -deltas, 0)
-    avg_gain = pd.Series(gains).rolling(14).mean().values
-    avg_loss = pd.Series(losses_arr).rolling(14).mean().values
-    rs = np.where(avg_loss > 0.0001, avg_gain / avg_loss, 100)
+    avg_gain = pd.Series(gains).ewm(span=14, adjust=False).mean().values
+    avg_loss = pd.Series(losses_arr).ewm(span=14, adjust=False).mean().values
+    rs = np.where(avg_loss > 1e-10, avg_gain / avg_loss, 100)
     df["rsi"] = 100 - (100 / (1 + rs))
+
+    # RSI Divergence
+    n = len(c)
+    rsi_div = np.zeros(n)
+    for i in range(28, n):
+        if c[i] < c[i - 14] and df["rsi"].iloc[i] > df["rsi"].iloc[i - 14]:
+            rsi_div[i] = 1  # Bullish divergence
+        elif c[i] > c[i - 14] and df["rsi"].iloc[i] < df["rsi"].iloc[i - 14]:
+            rsi_div[i] = -1  # Bearish divergence
+    df["rsi_div"] = rsi_div
 
     bb_std = pd.Series(c).rolling(20).std().values
     df["bb_mid"] = df["sma_20"]
@@ -306,6 +324,30 @@ def compute_indicators(df):
 
     tr = np.maximum(h - l, np.maximum(np.abs(h - np.roll(c, 1)), np.abs(l - np.roll(c, 1))))
     df["atr"] = pd.Series(tr).rolling(14).mean().values
+
+    # ADX (Average Directional Index)
+    plus_dm = np.zeros(n)
+    minus_dm = np.zeros(n)
+    tr_arr = np.zeros(n)
+    for i in range(1, n):
+        up = h[i] - h[i - 1]
+        down = l[i - 1] - l[i]
+        plus_dm[i] = up if (up > down and up > 0) else 0
+        minus_dm[i] = down if (down > up and down > 0) else 0
+        tr_arr[i] = max(h[i] - l[i], abs(h[i] - c[i - 1]), abs(l[i] - c[i - 1]))
+    atr14 = pd.Series(tr_arr).ewm(span=14, adjust=False).mean().values
+    plus_di = 100 * pd.Series(plus_dm).ewm(span=14, adjust=False).mean().values / np.where(atr14 > 0, atr14, 1)
+    minus_di = 100 * pd.Series(minus_dm).ewm(span=14, adjust=False).mean().values / np.where(atr14 > 0, atr14, 1)
+    dx = np.where((plus_di + minus_di) > 0, 100 * np.abs(plus_di - minus_di) / (plus_di + minus_di), 0)
+    df["adx"] = pd.Series(dx).ewm(span=14, adjust=False).mean().values
+    df["plus_di"] = plus_di
+    df["minus_di"] = minus_di
+
+    # Ichimoku Cloud
+    df["tenkan"] = (pd.Series(h).rolling(9).max() + pd.Series(l).rolling(9).min()).values / 2
+    df["kijun"] = (pd.Series(h).rolling(26).max() + pd.Series(l).rolling(26).min()).values / 2
+    df["senkou_a"] = (df["tenkan"] + df["kijun"]) / 2
+    df["senkou_b"] = ((pd.Series(h).rolling(52).max() + pd.Series(l).rolling(52).min()).values) / 2
 
     df["momentum_5"] = pd.Series(c).pct_change(5).values
     df["volatility_10"] = pd.Series(c).pct_change().rolling(10).std().values
@@ -319,71 +361,98 @@ def compute_indicators(df):
 
 
 def generate_signal_single_tf(row, use_mean_reversion=False):
-    """Generate signal for single timeframe."""
+    """Generate signal for single timeframe — v2 with ADX, Ichimoku, RSI divergence."""
     score = 0
+    max_score = 0
 
-    # IMPROVEMENT 6: Mean Reversion (if enabled)
-    if use_mean_reversion:
-        # Oversold bounce
-        if row["rsi"] < 25 and row["close"] < row["bb_lower"]:
-            return "BUY", 0.7, 4
-        # Overbought fade
-        if row["rsi"] > 75 and row["close"] > row["bb_upper"]:
-            return "SELL", 0.7, -4
+    adx_thresh = CONFIG.get("adx_threshold", 30)
+    use_ichimoku = CONFIG.get("use_ichimoku", True)
+    use_vol = CONFIG.get("use_volume_filter", True)
+    use_div = CONFIG.get("use_rsi_divergence", True)
 
-    # MACD histogram
-    if row["macd_hist"] > 0:
-        score += 1
-    elif row["macd_hist"] < 0:
-        score -= 1
+    adx_val = float(row.get("adx", 0))
+    plus_di = float(row.get("plus_di", 0))
+    minus_di = float(row.get("minus_di", 0))
 
-    # RSI
-    if row["rsi"] < 35:
+    # ── Layer 1: ADX Trend Strength (must be trending) ──
+    max_score += 3
+    if adx_val >= adx_thresh:
+        score += 3  # Strong trend
+    elif adx_val >= adx_thresh - 5:
+        score += 1  # Mild trend
+
+    # ── Layer 2: DI Direction ──
+    max_score += 2
+    if plus_di > minus_di:
         score += 2
-    elif row["rsi"] < 45:
-        score += 1
-    elif row["rsi"] > 65:
-        score -= 2
-    elif row["rsi"] > 55:
-        score -= 1
-
-    # SMA trend
-    if row["close"] > row["sma_20"] > row["sma_50"]:
-        score += 2
-    elif row["close"] < row["sma_20"] < row["sma_50"]:
+    elif minus_di > plus_di:
         score -= 2
 
-    # Momentum
-    if row["momentum_5"] > 0.005:
+    # ── Layer 3: Price vs EMA21 + SMA50 ──
+    max_score += 2
+    ema21 = float(row.get("ema_21", 0))
+    sma50 = float(row.get("sma_50", 0))
+    px = float(row["close"])
+
+    if px > ema21 > sma50:
+        score += 2
+    elif px < ema21 < sma50:
+        score -= 2
+    elif px > ema21:
         score += 1
-    elif row["momentum_5"] < -0.005:
+    elif px < ema21:
         score -= 1
 
-    # Bollinger Band
-    if row["close"] < row["bb_lower"]:
+    # ── Layer 4: RSI neutral zone ──
+    max_score += 1
+    rsi = float(row.get("rsi", 50))
+    if 40 <= rsi <= 60:
         score += 1
-    elif row["close"] > row["bb_upper"]:
+    elif rsi < 30 or rsi > 70:
         score -= 1
 
-    # EMA 200
-    if "ema_200" in row and not np.isnan(row["ema_200"]):
-        if row["close"] > row["ema_200"]:
+    # ── Layer 5: Volume Confirmation ──
+    max_score += 1
+    if use_vol:
+        vol = float(row.get("volume", 0))
+        vol_sma = float(row.get("volume_sma", 1))
+        if vol > vol_sma * 1.2:
             score += 1
-        elif row["close"] < row["ema_200"]:
-            score -= 1
 
-    # IMPROVEMENT 5: Breakout detection (if enabled)
-    if CONFIG.get("breakout_detection"):
-        if row["close"] > row["resistance"] * 0.999:  # Near resistance
-            score += 2  # Breakout bonus
-        if row["close"] < row["support"] * 1.001:  # Near support
+    # ── Layer 6: Ichimoku Cloud ──
+    if use_ichimoku:
+        max_score += 2
+        tenkan = float(row.get("tenkan", 0))
+        kijun = float(row.get("kijun", 0))
+        senkou_a = float(row.get("senkou_a", 0))
+        senkou_b = float(row.get("senkou_b", 0))
+
+        if px > max(senkou_a, senkou_b) and tenkan > kijun:
+            score += 2
+        elif px < min(senkou_a, senkou_b) and tenkan < kijun:
             score -= 2
 
+    # ── Layer 7: RSI Divergence ──
+    max_score += 1
+    if use_div:
+        div = float(row.get("rsi_div", 0))
+        if div > 0:
+            score += 1
+        elif div < 0:
+            score -= 1
+
+    # Determine direction and confidence
     if score >= 3:
-        return "BUY", min(score / 6.0, 1.0), score
-    if score <= -3:
-        return "SELL", min(abs(score) / 6.0, 1.0), score
-    return "HOLD", 0.0, score
+        direction = "BUY"
+        confidence = min(score / max(max_score, 1), 1.0)
+    elif score <= -3:
+        direction = "SELL"
+        confidence = min(abs(score) / max(max_score, 1), 1.0)
+    else:
+        direction = "HOLD"
+        confidence = 0.0
+
+    return direction, confidence, score
 
 
 # ═══════════════════════════════════════════════════════════════
@@ -633,8 +702,8 @@ class CompleteTrader:
         exec_price = tick.ask if action == "BUY" else tick.bid
 
         # ATR-based SL/TP
-        sl_pips = atr * 2 if atr > 0 else price * 0.002
-        tp_pips = atr * 3 if atr > 0 else price * 0.003
+        sl_pips = atr * CONFIG.get("sl_atr_mult", 3.0) if atr > 0 else price * 0.003
+        tp_pips = atr * CONFIG.get("tp_atr_mult", 5.0) if atr > 0 else price * 0.005
 
         if action == "BUY":
             sl = exec_price - sl_pips
