@@ -43,7 +43,7 @@ django.setup()
 import MetaTrader5 as mt5
 import numpy as np
 import pandas as pd
-from fastapi import FastAPI, HTTPException, WebSocket, WebSocketDisconnect
+from fastapi import FastAPI, HTTPException, WebSocket, WebSocketDisconnect, Body
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 import uvicorn
@@ -1714,6 +1714,42 @@ def stop_engine():
 @app.get("/api/v1/config")
 def get_config():
     return CONFIG
+
+
+@app.post("/api/v1/config/toggle")
+def toggle_feature(body: dict = Body(...)):
+    """Toggle a feature on/off immediately."""
+    feature = body.get("feature", "")
+    enabled = body.get("enabled")
+
+    feature_map = {
+        "regime": "regime_enabled",
+        "calendar": "calendar_enabled",
+        "risk_parity": "risk_parity_enabled",
+        "multi_timeframe": "multi_timeframe_enabled",
+        "ai_analysis": "llm_enabled",
+        "ml_prediction": "ml_enabled",
+        "llm": "llm_enabled",
+        "ml": "ml_enabled",
+    }
+
+    config_key = feature_map.get(feature)
+    if not config_key:
+        return {"error": f"Unknown feature: {feature}", "valid": list(feature_map.keys())}
+
+    if enabled is None:
+        # Toggle current value
+        enabled = not CONFIG.get(config_key, False)
+
+    CONFIG[config_key] = bool(enabled)
+    log.info(f"Feature '{feature}' ({config_key}) set to {enabled}")
+
+    return {
+        "feature": feature,
+        "config_key": config_key,
+        "enabled": CONFIG[config_key],
+        "all_features": {k: CONFIG.get(k, False) for k in feature_map.values()}
+    }
 
 
 # ═══════════════════════════════════════════════════════════════
