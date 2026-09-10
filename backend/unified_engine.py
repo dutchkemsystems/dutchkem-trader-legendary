@@ -219,6 +219,7 @@ CONFIG = {
     "alternative_data_enabled": True,
 
     # ── MTF Analysis ──
+    "multi_timeframe_enabled": True,
     "mtf_timeframes": ["M15", "M30", "H1", "H4", "D1", "W1", "MN1"],
     "mtf_min_agree": 2,
     "mtf_weights": {
@@ -2074,6 +2075,10 @@ def engine_status():
             "cycle_interval": CONFIG.get("cycle_interval", 300),
             "llm_enabled": CONFIG.get("llm_enabled", False),
             "ml_enabled": CONFIG.get("ml_enabled", False),
+            "regime_enabled": CONFIG.get("regime_enabled", False),
+            "calendar_enabled": CONFIG.get("calendar_enabled", False),
+            "risk_parity_enabled": CONFIG.get("risk_parity_enabled", False),
+            "multi_timeframe_enabled": CONFIG.get("multi_timeframe_enabled", False),
         },
     }
 

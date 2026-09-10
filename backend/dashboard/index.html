@@ -568,14 +568,13 @@ function loadEngineStatus(){
     document.getElementById('ov-engine-tpatr').textContent=cfg.tp_atr!=null?cfg.tp_atr:(cfg.take_profit_atr!=null?cfg.take_profit_atr:'\u2014');
     var llmOn=cfg.llm_enabled||cfg.use_llm;document.getElementById('ov-engine-llm').textContent=llmOn!=null?(llmOn?'On':'Off'):'\u2014';document.getElementById('ov-engine-llm').className='value '+(llmOn?'green':'');
     var mlOn=cfg.ml_enabled||cfg.use_ml;document.getElementById('ov-engine-ml').textContent=mlOn!=null?(mlOn?'On':'Off'):'\u2014';document.getElementById('ov-engine-ml').className='value '+(mlOn?'green':'');
-    var features=d.features||{};
     var featureState={
-      regime:features.regime||features.regime_detection||cfg.regime_enabled||false,
-      calendar:features.calendar_events||features.calendar||cfg.calendar_enabled||false,
-      risk_parity:features.risk_parity||features.risk_parity_weights||cfg.risk_parity_enabled||false,
-      multi_timeframe:features.multi_timeframe||features.mtf||cfg.multi_timeframe_enabled||false,
-      ai_analysis:features.ai_analysis||features.llm||cfg.llm_enabled||false,
-      ml_prediction:features.ml_prediction||features.ml||cfg.ml_enabled||false
+      regime:cfg.regime_enabled||false,
+      calendar:cfg.calendar_enabled||false,
+      risk_parity:cfg.risk_parity_enabled||false,
+      multi_timeframe:cfg.multi_timeframe_enabled||false,
+      ai_analysis:cfg.llm_enabled||false,
+      ml_prediction:cfg.ml_enabled||false
     };
     renderFeatureCards(featureState);
   }).catch(function(){document.getElementById('engineStatusDot').className='dot red';document.getElementById('ov-engine-status').textContent='Error';});
