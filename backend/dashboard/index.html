@@ -118,16 +118,16 @@ tr:hover{background:rgba(0,102,255,0.02)}
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
 .pulse-dot{animation:pulse 1.5s ease-in-out infinite}
 .analyst-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
-.analyst-card{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:14px;transition:all .2s}
-.analyst-card:hover{box-shadow:var(--shadow-lg);transform:translateY(-1px)}
+.analyst-card{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:14px;transition:all .2s;cursor:pointer}
+.analyst-card:hover{box-shadow:var(--shadow-lg);transform:translateY(-2px);border-color:var(--blue)}
 .analyst-card .a-name{font-size:13px;font-weight:700;margin-bottom:6px;display:flex;align-items:center;gap:6px}
 .analyst-card .a-signal{font-size:18px;font-weight:800;margin-bottom:4px}
 .analyst-card .a-conf{font-size:11px;color:var(--ts);margin-bottom:6px}
 .analyst-card .a-reason{font-size:11px;color:var(--ts);line-height:1.4;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
 .legendary-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:12px}
-.legendary-card{background:var(--card);border:2px solid var(--gold);border-radius:12px;padding:16px;text-align:center;transition:all .2s;position:relative}
+.legendary-card{background:var(--card);border:2px solid var(--gold);border-radius:12px;padding:16px;text-align:center;transition:all .2s;position:relative;cursor:pointer}
 .legendary-card::before{content:'';position:absolute;top:-1px;left:20%;right:20%;height:3px;background:linear-gradient(90deg,transparent,var(--gold),transparent);border-radius:2px}
-.legendary-card:hover{box-shadow:0 8px 24px rgba(255,184,0,0.2);transform:translateY(-2px)}
+.legendary-card:hover{box-shadow:0 8px 24px rgba(255,184,0,0.2);transform:translateY(-3px)}
 .legendary-card .l-name{font-size:14px;font-weight:800;margin-bottom:4px}
 .legendary-card .l-signal{font-size:20px;font-weight:800;margin-bottom:4px}
 .legendary-card .l-conf{font-size:12px;color:var(--ts);margin-bottom:4px}
@@ -142,6 +142,24 @@ tr:hover{background:rgba(0,102,255,0.02)}
 .gate-icon.fail{background:rgba(255,107,107,0.12);color:var(--coral)}
 .gate-name{flex:1;font-size:13px;font-weight:600}
 .gate-detail{font-size:12px;color:var(--ts)}
+.agent-modal-overlay{display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.5);z-index:9999;align-items:center;justify-content:center;backdrop-filter:blur(4px)}
+.agent-modal-overlay.show{display:flex}
+.agent-modal{background:var(--card);border-radius:16px;max-width:520px;width:90%;max-height:85vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,0.3);position:relative}
+.agent-modal-header{padding:24px 24px 0;display:flex;align-items:center;justify-content:space-between}
+.agent-modal-header h2{font-size:20px;font-weight:800;margin:0;display:flex;align-items:center;gap:10px}
+.agent-modal-close{width:32px;height:32px;border-radius:50%;border:none;background:var(--bg);cursor:pointer;font-size:18px;display:flex;align-items:center;justify-content:center;transition:all .2s}
+.agent-modal-close:hover{background:var(--coral);color:#fff}
+.agent-modal-body{padding:20px 24px 24px}
+.agent-modal-purpose{background:var(--bg);border-radius:10px;padding:14px;margin-bottom:16px;border-left:4px solid var(--blue)}
+.agent-modal-purpose .label{font-size:11px;font-weight:700;color:var(--blue);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:4px}
+.agent-modal-purpose .text{font-size:13px;line-height:1.5;color:var(--text)}
+.agent-modal-stats{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px}
+.agent-modal-stat{background:var(--bg);border-radius:8px;padding:10px 12px;text-align:center}
+.agent-modal-stat .stat-val{font-size:20px;font-weight:800}
+.agent-modal-stat .stat-label{font-size:11px;color:var(--ts);margin-top:2px}
+.agent-modal-reasoning{background:var(--bg);border-radius:10px;padding:14px;border-left:4px solid var(--gold)}
+.agent-modal-reasoning .label{font-size:11px;font-weight:700;color:var(--gold);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:4px}
+.agent-modal-reasoning .text{font-size:13px;line-height:1.5;color:var(--text)}
 .memory-item{padding:12px;border:1px solid var(--border);border-radius:8px;margin-bottom:8px;background:#fff;border-left:4px solid var(--blue)}
 .memory-item .m-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:4px}
 .memory-item .m-symbol{font-weight:700;font-size:14px}
@@ -708,11 +726,13 @@ function loadAnalysts(symbol){
       '<div style="font-size:12px;color:var(--ts)">Buy:'+(v.buy||0)+' Sell:'+(v.sell||0)+' Hold:'+(v.hold||0)+' Avg Conf: '+fmt(avgConf*100,1)+'%</div></div>'+
       '<div class="analyst-grid">'+analysts.map(function(a){
         var s=(a.signal||'HOLD').toUpperCase();var sCol=signalColor(s);
-        return '<div class="analyst-card"><div class="a-name">'+a.name+' '+signalBadge(s)+'</div>'+
+        var safeData=JSON.stringify(a).replace(/'/g,"\\'").replace(/"/g,"&quot;");
+        return '<div class="analyst-card" onclick=\'showAgentModal('+safeData+',false)\'><div class="a-name">'+a.name+' '+signalBadge(s)+'</div>'+
         '<div class="a-signal" style="color:'+sCol+'">'+s+'</div>'+
         '<div class="a-conf">Confidence: '+fmt(a.confidence*100,1)+'%</div>'+
         '<div class="progress-bar"><div class="progress-fill" style="width:'+a.confidence*100+'%;background:'+sCol+'"></div></div>'+
-        '<div class="a-reason">'+a.reasoning+'</div></div>';
+        '<div class="a-reason">'+a.reasoning+'</div>'+
+        '<div style="text-align:center;margin-top:8px;font-size:10px;color:var(--blue);font-weight:600">CLICK FOR DETAILS</div></div>';
       }).join('')+'</div>';
   }).catch(function(){document.getElementById('analystsContent').innerHTML='<div class="empty-state">Failed to load analysts</div>';});
 }
@@ -725,11 +745,13 @@ function loadLegendary(symbol){
       '<div style="display:flex;align-items:center;gap:12px;margin-bottom:16px;flex-wrap:wrap"><div style="font-size:14px;font-weight:700">Consensus: '+signalBadge(c)+'</div><div style="font-size:12px;color:var(--ts)">Total: '+agents.length+' agents</div></div>'+
       '<div class="legendary-grid">'+agents.map(function(a){
         var s=(a.signal||'HOLD').toUpperCase();var sCol=signalColor(s);
-        return '<div class="legendary-card"><div class="l-name">'+a.name+'</div>'+
+        var safeData=JSON.stringify(a).replace(/'/g,"\\'").replace(/"/g,"&quot;");
+        return '<div class="legendary-card" onclick=\'showAgentModal('+safeData+',true)\'><div class="l-name">'+a.name+'</div>'+
         '<div class="l-signal" style="color:'+sCol+'">'+s+'</div>'+
         '<div class="l-conf">Confidence: '+fmt(a.confidence*100,1)+'%</div>'+
         '<div class="l-kelly">Kelly: '+fmt(a.kelly_fraction*100,1)+'%</div>'+
-        '<div class="l-reason">'+a.reasoning+'</div></div>';
+        '<div class="l-reason">'+a.reasoning+'</div>'+
+        '<div style="text-align:center;margin-top:8px;font-size:10px;color:var(--gold);font-weight:600">CLICK FOR DETAILS</div></div>';
       }).join('')+'</div>';
   }).catch(function(){document.getElementById('legendaryContent').innerHTML='<div class="empty-state">Failed to load legendary agents</div>';});
 }
@@ -826,6 +848,53 @@ function fmtTime(t){if(!t)return'\u2014';var d=new Date(t);return isNaN(d)?t:d.t
 /* ===== INIT ===== */
 function startAutoRefresh(){if(autoRefreshTimer)clearInterval(autoRefreshTimer);autoRefreshTimer=setInterval(function(){loadMT5Status();loadEngineStatus();loadOverviewAccount();loadOverviewSignals();fetchQuickPrices();},15000);}
 
+/* ===== AGENT DETAIL MODAL ===== */
+var AGENT_INFO={
+  market:{name:'Market Analyst',purpose:'Analyzes price action using RSI, MACD, and Bollinger Bands on real MT5 candle data. Identifies overbought/oversold conditions and momentum shifts to generate BUY/SELL signals.',strategy:'Combines 3 technical indicators (RSI, MACD, Bollinger Bands) with majority voting. Each indicator votes BUY/SELL/HOLD, then the majority wins.',dataSrc:'Real MT5 candle data (200 H1 candles)'},
+  technical:{name:'Technical Analyst',purpose:'Detects chart patterns, support/resistance levels, and trend direction from real MT5 price data. Identifies bullish/bearish crossovers, double tops/bottoms, and trend alignment.',strategy:'Fetches 100 MT5 candles, computes RSI, MACD, SMA20/SMA50, identifies patterns (bullish/bearish trend, crossovers, double tops/bottoms), and evaluates S/R levels.',dataSrc:'Real MT5 candle data (100 candles, multi-timeframe)'},
+  order_flow:{name:'Order Flow Analyst',purpose:'Analyzes bid/ask volume imbalance and cumulative volume delta (CVD) from real MT5 tick data. Detects buying/selling pressure and institutional flow.',strategy:'Reads real MT5 tick data, estimates bid/ask volume split from CVD, calculates microprice (volume-weighted price) and imbalance ratio to detect order flow bias.',dataSrc:'Real MT5 tick data (live bid/ask prices)'},
+  risk:{name:'Risk Analyst',purpose:'Calculates portfolio risk metrics including Value at Risk (VaR), Maximum Drawdown, Sharpe Ratio, and total exposure from real MT5 account and position data.',strategy:'Fetches real account info (balance, equity, margin) and position data from MT5. Computes returns from 100 H1 candles, calculates VaR at 95% confidence, Sharpe ratio, and max drawdown.',dataSrc:'Real MT5 account data + position data + candle returns'},
+  quant:{name:'Quant Analyst',purpose:'Applies quantitative finance techniques: z-score mean reversion, momentum analysis, Hurst exponent, and half-life of mean reversion on real MT5 price data.',strategy:'Computes z-score from 200 H1 candles, estimates mean reversion signal, calculates momentum from recent returns, and estimates Hurst exponent for trend/reversion classification.',dataSrc:'Real MT5 candle data (200 H1 candles)'},
+  compliance:{name:'Compliance Analyst',purpose:'Checks real MT5 positions against risk limits: per-symbol position size limits, total portfolio exposure limits, and regulatory compliance checks.',strategy:'Reads real MT5 positions and account info. Checks each position against max position size (10 lots), total exposure against 50% of equity, and flags any violations.',dataSrc:'Real MT5 positions + account limits'},
+  news:{name:'News Analyst',purpose:'Analyzes financial news sentiment for currency pairs. Requires external NewsAPI, GNews, or similar news data provider to function.',strategy:'Fetches recent news articles for the symbol, performs sentiment analysis, extracts keywords, and aggregates sentiment score into BUY/SELL/HOLD signal.',dataSrc:'Requires News API key (not configured)'},
+  sentiment:{name:'Sentiment Analyst',purpose:'Aggregates social media sentiment (Twitter, Reddit, Telegram), Fear & Greed index, and institutional positioning data to gauge market mood.',strategy:'Combines social sentiment scores, Fear/Greed index (0-100), and long/short positioning ratios into a composite sentiment score.',dataSrc:'Requires Twitter/Reddit/Alternative.me APIs (not configured)'},
+  fundamentals:{name:'Fundamentals Analyst',purpose:'Analyzes company/currency fundamentals: P/E ratio, P/B ratio, ROE, debt-to-equity, earnings growth, and valuation metrics.',strategy:'Fetches financial ratios from Yahoo Finance or Finnhub, compares against sector averages, and determines if the asset is undervalued or overvalued.',dataSrc:'Requires Yahoo Finance/Finnhub API (not configured)'},
+  macro:{name:'Macro Analyst',purpose:'Analyzes macroeconomic indicators: GDP growth, inflation rates, interest rates, employment data, PMI, and consumer confidence for currency pair countries.',strategy:'Fetches country-specific macro data from FRED or Trading Economics, compares economic strength between the two currencies in the pair.',dataSrc:'Requires FRED/Trading Economics API (not configured)'},
+  options:{name:'Options Analyst',purpose:'Analyzes options market data: implied volatility, put/call ratio, unusual options activity, and Greeks (delta, gamma, theta) for sentiment and volatility signals.',strategy:'Fetches options chain data, calculates IV rank/percentile, put/cull ratio, and detects unusual volume to gauge institutional sentiment.',dataSrc:'Requires CBOE/IBKR API (not configured)'},
+  on_chain:{name:'On-Chain Analyst',purpose:'Analyzes blockchain data for crypto assets: hash rate, wallet flows, exchange reserves, whale alerts, active addresses, and NVT ratio.',strategy:'Fetches on-chain metrics from Glassnode or CryptoQuant, analyzes exchange inflows/outflows, whale movements, and network health indicators.',dataSrc:'Requires Glassnode/CryptoQuant API (not configured). N/A for forex pairs.'}
+};
+var LEGENDARY_INFO={
+  soros:{name:'George Soros (Reflexivity)',purpose:'Applies Soros\'s Theory of Reflexivity — markets are not efficient, they are driven by feedback loops. Buys when price reflects reality poorly, sells when bubble forms.',strategy:'Analyzes trend strength and momentum using moving averages, detects reflexive feedback loops where price movement reinforces itself. Kelly criterion for position sizing.',philosophy:'Markets are always wrong. They create the reality they reflect. The key is to identify when the market is wrong and bet against it.',specialties:['Trend following','Reflexivity detection','Macro positioning'],riskTolerance:'High — concentrated bets when conviction is high'},
+  buffett:{name:'Warren Buffett (Value Investing)',purpose:'Applies Buffett\'s value investing philosophy — buy quality assets at a discount to intrinsic value. Focuses on long-term trends and mean reversion.',strategy:'Analyzes price relative to moving averages, identifies oversold conditions in strong trends, calculates margin of safety from mean reversion targets.',philosophy:'Price is what you pay, value is what you get. Be fearful when others are greedy, greedy when others are fearful.',specialties:['Value identification','Mean reversion','Long-term positioning'],riskTolerance:'Moderate — diversified, patient entries'},
+  druckenmiller:{name:'Stanley Druckenmiller (Concentration)',purpose:'Applies Druckenmiller\'s high-conviction concentration strategy — make big bets when the setup is right. Focus on risk/reward asymmetry.',strategy:'Analyzes trend strength, momentum, and volatility to identify asymmetric opportunities. Sizes positions aggressively when multiple indicators align.',philosophy:'The way to build superior long-term returns is to preserve capital and then deploy it when opportunities are great.',specialties:['Concentration','Risk/reward asymmetry','Momentum'],riskTolerance:'Very High — 25%+ on high conviction'},
+  tudor_jones:{name:'Paul Tudor Jones (MACD + Risk)',purpose:'Applies Tudor Jones\'s approach: combine MACD trend following with strict risk management. Never risk more than 1% on a trade.',strategy:'Uses MACD crossovers for entry signals, combines with trend analysis and volatility. Strict stop-losses and position sizing based on account risk.',philosophy:'Don\'t focus on making money; focus on protecting what you have. The most important rule of trading is to play great defense.',specialties:['MACD signals','Strict risk management','Defensive positioning'],riskTolerance:'Conservative — 1% risk per trade max'},
+  lynch:{name:'Peter Lynch (GARP)',purpose:' Applies Lynch\'s Growth at a Reasonable Price strategy — find assets with strong growth potential that are not yet overvalued.',strategy:'Analyzes momentum and trend strength, identifies assets in growth phases that haven\'t yet reached overbought territory. GARP scoring for entry timing.',philosophy:'Invest in what you know. The real key to making money in stocks is not to get scared out of them.',specialties:['Growth identification','GARP scoring','Trend analysis'],riskTolerance:'Moderate — diversified, growth-focused'}
+};
+
+function showAgentModal(data, isLegendary){
+  var name=data.name||'Unknown Agent';
+  var info=isLegendary?(LEGENDARY_INFO[name.toLowerCase().replace(/\s+/g,'_')]||{}):(AGENT_INFO[name.toLowerCase().replace(/\s+/g,'_')]||{});
+  document.getElementById('agentModalTitle').innerHTML=(isLegendary?'🏆 ':'📊 ')+name;
+  var purposeText=info.purpose||data.reasoning||'No description available.';
+  var strategyText=info.strategy||'';
+  var extraText='';
+  if(isLegendary&&info.philosophy)extraText='<br><br><strong>Philosophy:</strong> '+info.philosophy+'<br><strong>Specialties:</strong> '+(info.specialties||[]).join(', ')+'<br><strong>Risk Tolerance:</strong> '+(info.riskTolerance||'N/A');
+  if(!isLegendary&&info.dataSrc)extraText='<br><br><strong>Data Source:</strong> '+info.dataSrc;
+  document.getElementById('agentModalPurpose').innerHTML=purposeText+(strategyText?'<br><br><strong>Strategy:</strong> '+strategyText:'')+extraText;
+  var s=(data.signal||'HOLD').toUpperCase();var sCol=signalColor(s);
+  var confPct=fmt((data.confidence||0)*100,1);
+  var kelly=data.kelly_fraction?fmt(data.kelly_fraction*100,1)+'%':'N/A';
+  document.getElementById('agentModalStats').innerHTML=
+    '<div class="agent-modal-stat"><div class="stat-val" style="color:'+sCol+'">'+s+'</div><div class="stat-label">Signal</div></div>'+
+    '<div class="agent-modal-stat"><div class="stat-val">'+confPct+'%</div><div class="stat-label">Confidence</div></>'+
+    (isLegendary?'<div class="agent-modal-stat"><div class="stat-val" style="color:var(--gold)">'+kelly+'</div><div class="stat-label">Kelly Fraction</div></div>':'<div class="agent-modal-stat"><div class="stat-val">'+(data.timeframe||'H1')+'</div><div class="stat-label">Timeframe</div></div>');
+  document.getElementById('agentModalReasoning').textContent=data.reasoning||'No analysis available.';
+  document.getElementById('agentModal').classList.add('show');
+}
+
+function closeAgentModal(){document.getElementById('agentModal').classList.remove('show');}
+document.addEventListener('keydown',function(e){if(e.key==='Escape')closeAgentModal();});
+
 document.addEventListener('DOMContentLoaded',function(){
   checkAuth();loadOverview();initChart();initTickerStrip();loadPositions();loadSignals();
   startAutoRefresh();startAgentsAutoRefresh();
@@ -833,6 +902,28 @@ document.addEventListener('DOMContentLoaded',function(){
   gsap.fromTo('.tab-content.active .card',{y:20,opacity:0},{y:0,opacity:1,stagger:0.08,duration:0.5,ease:'power2.out',delay:0.2});
 });
 </script>
+
+<!-- Agent Detail Modal -->
+<div class="agent-modal-overlay" id="agentModal" onclick="if(event.target===this)closeAgentModal()">
+  <div class="agent-modal">
+    <div class="agent-modal-header">
+      <h2 id="agentModalTitle">Agent Name</h2>
+      <button class="agent-modal-close" onclick="closeAgentModal()">&times;</button>
+    </div>
+    <div class="agent-modal-body">
+      <div class="agent-modal-purpose">
+        <div class="label">Purpose & Strategy</div>
+        <div class="text" id="agentModalPurpose"></div>
+      </div>
+      <div class="agent-modal-stats" id="agentModalStats"></div>
+      <div class="agent-modal-reasoning">
+        <div class="label">Current Analysis</div>
+        <div class="text" id="agentModalReasoning"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
 <footer style="text-align:center;padding:20px;color:#888;font-size:12px;border-top:1px solid #e2e8f0;margin-top:20px;">
   Built by <strong style="background:linear-gradient(135deg,#0066FF,#00CC88);-webkit-background-clip:text;-webkit-text-fill-color:transparent;">Dutchkem Ventures</strong> &copy; 2026
 </footer>
