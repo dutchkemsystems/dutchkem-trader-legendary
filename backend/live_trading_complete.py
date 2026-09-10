@@ -44,6 +44,9 @@ import pandas as pd
 
 from execution.kelly_sizer import KellySizer
 
+# LLM integration for Ollama confirmation
+_llm_client = None
+
 # ═══════════════════════════════════════════════════════════════
 # CONFIGURATION
 # ═══════════════════════════════════════════════════════════════
@@ -176,6 +179,10 @@ CONFIG = {
     "mean_reversion": False,        # Activate week 3
     "position_scaling": False,      # Activate week 3
     "circuit_breaker": 3,           # Stop after 3 losses
+    
+    # NEW: LLM Confirmation via Ollama
+    "llm_confirmation_enabled": True,
+    "llm_min_confidence": 0.40,     # LLM must have >= 40% confidence to confirm
 }
 
 CYCLE_INTERVAL = 3600
@@ -1138,6 +1145,7 @@ class CompleteTrader:
                 "drawdown_throttle": CONFIG.get("drawdown_throttle_enabled", False),
                 "volatility_regime": CONFIG.get("volatility_regime_enabled", False),
                 "portfolio_heat": CONFIG.get("max_concurrent_trades", 3),
+                "llm_confirmation": CONFIG.get("llm_confirmation_enabled", False),
             },
             "positions": {s: {k: v for k, v in p.items() if k != "entry_time"} for s, p in self.positions.items()},
             "total_trades": len(self.trade_log),
@@ -1149,6 +1157,53 @@ class CompleteTrader:
     def load_state(self, state):
         self.balance = state.get("balance", 10000.0)
         self.consecutive_losses = state.get("consecutive_losses", 0)
+
+
+# ═══════════════════════════════════════════════════════════════
+# LLM CONFIRMATION (Ollama Integration)
+# ═══════════════════════════════════════════════════════════════
+def get_llm_client():
+    """Get or create the LLM client singleton."""
+    global _llm_client
+    if _llm_client is None:
+        try:
+            from apps.llm.client import LLMClient
+            _llm_client = LLMClient()
+        except Exception as e:
+            print(f"  LLM client init failed: {e}")
+            return None
+    return _llm_client
+
+
+def llm_confirm_signal(symbol, action, indicators):
+    """Ask Ollama LLM to confirm or reject a trading signal.
+    Returns (confirmed: bool, confidence: float, reasoning: str).
+    """
+    if not CONFIG.get("llm_confirmation_enabled", False):
+        return True, 0.0, "LLM confirmation disabled"
+
+    client = get_llm_client()
+    if client is None:
+        return True, 0.0, "LLM client not available"
+
+    try:
+        result = client.analyze_trading_signal(
+            symbol=symbol,
+            timeframe="H1",
+            indicators=indicators,
+        )
+
+        llm_signal = result.parsed.get("signal", "HOLD")
+        llm_confidence = result.parsed.get("confidence", 0)
+        reasoning = result.parsed.get("reasoning", result.text[:200])
+
+        min_conf = CONFIG.get("llm_min_confidence", 0.40)
+        confirmed = (llm_signal == action and llm_confidence >= min_conf)
+
+        return confirmed, llm_confidence, reasoning
+    except Exception as e:
+        print(f"  LLM confirmation error: {e}")
+        return True, 0.0, f"LLM error: {e}"
 
 
 # ═══════════════════════════════════════════════════════════════
@@ -1229,9 +1284,43 @@ def run_cycle(trader, cycle_num):
             tf_count = sum(1 for info in sig["details"].values() if info["action"] == sig["action"])
             print(f"    {sig['symbol']:<10} {sig['action']:<6} score={sig['weighted_score']:.2f} TFs={tf_count}/7")
 
-    # Execute top signals
+    # Execute top signals with LLM confirmation
     executed = 0
+    llm_rejected = 0
     for sig in signals[:5]:
+        # Build indicators dict for LLM
+        h1_info = sig["details"].get("H1", {})
+        indicators = {
+            "close": h1_info.get("price", 0),
+            "rsi": h1_info.get("rsi", 50),
+            "macd_hist": h1_info.get("macd_hist", 0),
+            "adx": h1_info.get("adx", 0),
+            "plus_di": 0,
+            "minus_di": 0,
+            "atr": sig["atr"],
+            "ema_21": 0,
+            "sma_50": 0,
+            "bb_width": 0,
+            "tenkan": 0,
+            "kijun": 0,
+            "senkou_a": 0,
+            "senkou_b": 0,
+            "vol_ratio": 1,
+        }
+
+        # LLM confirmation gate
+        confirmed, llm_conf, llm_reason = llm_confirm_signal(
+            sig["symbol"], sig["action"], indicators
+        )
+
+        if not confirmed:
+            print(f"    LLM REJECTED {sig['symbol']} {sig['action']}: conf={llm_conf:.2f} reason={llm_reason[:80]}")
+            llm_rejected += 1
+            continue
+
+        if llm_conf > 0:
+            print(f"    LLM CONFIRMED {sig['symbol']} {sig['action']}: conf={llm_conf:.2f}")
+
         result = trader.open_position(
             sig["symbol"], sig["action"], sig["price"],
             sig["atr"], sig["volatility"], sig["weighted_score"], sig["details"],
@@ -1247,7 +1336,7 @@ def run_cycle(trader, cycle_num):
     wr = wins / total_trades if total_trades > 0 else 0
 
     print(f"\n  SUMMARY: {active} open | {total_trades} closed | WR={wr:.1%} | P&L=${total_pnl:+.2f}")
-    print(f"  Signals: {len(signals)} found | {executed} executed")
+    print(f"  Signals: {len(signals)} found | {executed} executed | {llm_rejected} LLM rejected")
     return trader
 
 

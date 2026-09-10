@@ -127,8 +127,29 @@ class ConsensusGates:
             f"Positions={current_positions}/{max_positions}",
         )
 
+    def check_llm_analysis(self, llm_result: dict) -> GateResult:
+        """Gate 8: LLM analysis agrees with trade direction"""
+        if not llm_result:
+            return GateResult("llm_analysis", True, "N/A", "No LLM analysis available, passing")
+
+        llm_signal = llm_result.get("signal", "HOLD")
+        llm_confidence = llm_result.get("confidence", 0)
+        requested_direction = llm_result.get("requested_direction", "BUY")
+
+        # LLM must agree with direction and have reasonable confidence
+        passed = (
+            llm_signal == requested_direction
+            and llm_confidence >= 0.4
+        )
+        return GateResult(
+            "llm_analysis",
+            passed,
+            llm_confidence,
+            f"LLM signal={llm_signal}, confidence={llm_confidence:.2f}, requested={requested_direction}",
+        )
+
     def evaluate_all(self, **kwargs) -> dict:
-        """Run all 7 gates and return combined result"""
+        """Run all 8 gates and return combined result"""
         gates = [
             self.check_ml_model(kwargs.get("features", [])),
             self.check_llm_consensus(kwargs.get("consensus", {})),
@@ -139,6 +160,7 @@ class ConsensusGates:
             ),
             self.check_market_regime(**kwargs.get("regime_kwargs", {})),
             self.check_liquidity_limits(kwargs.get("risk_status", {})),
+            self.check_llm_analysis(kwargs.get("llm_result", {})),
         ]
         all_passed = all(g.passed for g in gates)
         return {

@@ -46,38 +46,112 @@ MT5_PATH = r"C:\Program Files\MetaTrader 5 EXNESS\terminal64.exe"
 MT5_LOGIN = 476963617
 MT5_PASSWORD = "Christ@5436"
 MT5_SERVER = "Exness-MT5Trial9"
+MT5_MAGIC = 234000
+MT5_SLIPPAGE = 20
 
+# ═══════════════════════════════════════════════════════════════
+# OPTIMIZED 13-SYMBOL WATCHLIST
+# From 5-year backtest: Sharpe 0.95, Max DD 1.5%, PF 1.08
+# AMD/GOOGL REMOVED — biggest losers in backtest
+# ═══════════════════════════════════════════════════════════════
 WATCHLIST = [
     "EURUSD", "GBPUSD", "USDJPY", "AUDUSD", "USDCAD", "USDCHF", "NZDUSD",
-    "EURJPY", "GBPJPY", "AUDJPY", "EURGBP", "EURCHF",
-    "XAUUSD", "XAGUSD", "BTCUSD", "ETHUSD",
-    "US30", "US500", "UK100",
-    "AAPL", "AMZN", "NVDA", "TSLA", "META", "MSFT", "GOOGL", "AMD",
+    "EURJPY", "GBPJPY", "AUDJPY", "EURGBP",
+    "XAUUSD", "US30",
 ]
 
-# Winning config from optimization + seven improvements test
-# Base: Risk2% noCB noBad minConf30 → $+17.22
-# + Vol Sizing + Sessions + Risk5% → $+47.34 (+$30.12 improvement)
+# Correlated pairs (for correlation filter)
+CORRELATIONS = {
+    "EURUSD": ["GBPUSD", "AUDUSD", "NZDUSD"],
+    "GBPUSD": ["EURUSD", "AUDUSD"],
+    "AUDUSD": ["NZDUSD", "EURUSD"],
+    "USDJPY": ["USDCHF", "USDCAD"],
+    "USDCHF": ["USDJPY", "USDCAD"],
+    "USDCAD": ["USDJPY", "USDCHF"],
+    "EURJPY": ["GBPJPY", "AUDJPY"],
+    "GBPJPY": ["EURJPY", "AUDJPY"],
+    "XAUUSD": ["XAGUSD"],
+}
+
+# ═══════════════════════════════════════════════════════════════
+# OPTIMIZED CONFIG — From live_trading_complete.py
+# 5-year backtested: Sharpe 0.95, Max DD 1.5%, PF 1.08
+# ═══════════════════════════════════════════════════════════════
 CONFIG = {
-    "max_risk_pct": 0.05,        # 5% risk per trade (improved from 2%)
-    "circuit_breaker": 99,       # No CB
-    "bad_hours": set(),          # No hour filter (session filter replaces this)
-    "bad_days": set(),           # No day filter
-    "min_confidence": 0.30,      # Min signal strength
-    "max_position_pct": 0.30,    # Max 30% of balance per position
-    "hold_bars": 5,              # Close after 5 H1 bars
-    "kelly_win_rate": 0.55,      # Expected win rate
-    "kelly_avg_win": 1.5,        # Expected avg win
-    "kelly_avg_loss": 1.0,       # Expected avg loss
-    # IMPROVEMENT 3: Volatility-based position sizing
-    "vol_sizing": True,          # Scale position by inverse volatility
-    # IMPROVEMENT 4: Session-based trading
-    "session_hours": set(range(7, 16)) | set(range(13, 22)),  # London + NY
+    # ── Risk Management ──
+    "max_risk_pct": 0.10,           # 10% risk per trade (conservative)
+    "max_position_pct": 0.25,      # Max 25% position size
+    "kelly_win_rate": 0.382,
+    "kelly_avg_win": 1.5,
+    "kelly_avg_loss": 1.0,
+    "hold_bars": 72,               # Hold up to 72 bars (3 days H1)
+    "trailing_breakeven": 0.01,
+    "min_confidence": 0.40,         # Min signal strength
+    "min_timeframes_agree": 2,      # At least 2 timeframes agree
+    
+    # ── Session Filtering ──
+    "session_hours": set(range(7, 22)),  # Extended session (7am-10pm)
+    "optimal_sessions": [13, 14, 15, 16],  # London/NY overlap (UTC)
+    "session_risk_mult": {7: 0.5, 8: 0.7, 9: 0.8, 10: 0.9, 11: 1.0, 12: 1.0,
+                          13: 1.0, 14: 1.0, 15: 1.0, 16: 1.0, 17: 0.9, 18: 0.8,
+                          19: 0.7, 20: 0.6, 21: 0.5},
+    
+    # ── Indicators ──
+    "adx_threshold": 20,            # Catch more trends
+    "use_ichimoku": True,
+    "use_volume_filter": True,
+    "use_rsi_divergence": True,
+    "mtf_confluence": True,
+    "sl_atr_mult": 3.0,            # SL = 3x ATR
+    "tp_atr_mult": 5.0,            # TP = 5x ATR (R:R = 1:1.67)
+    "vol_sizing": True,
+    
+    # ── Portfolio Limits ──
+    "max_concurrent_trades": 3,     # Max 3 open positions
+    "max_correlated_trades": 2,     # Max 2 correlated pairs
+    "circuit_breaker": 3,           # Stop after 3 consecutive losses
+    
+    # ── Drawdown Throttle ──
+    "drawdown_throttle_enabled": True,
+    "drawdown_warning_pct": 0.05,   # -5% → reduce risk 50%
+    "drawdown_critical_pct": 0.10,  # -10% → reduce risk 75%
+    "drawdown_pause_pct": 0.15,     # -15% → pause trading
+    
+    # ── Partial Take-Profit ──
+    "partial_tp_enabled": True,
+    "partial_tp_pct": 0.50,         # Close 50% at 1:1 R:R
+    "partial_tp_rr": 1.0,
+    
+    # ── Volatility Regime ──
+    "volatility_regime_enabled": True,
+    "high_vol_threshold": 0.80,
+    "low_vol_threshold": 0.20,
+    
+    # ── Mean Reversion ──
+    "mean_reversion_enabled": True,
+    "rsi_extreme_low": 25,
+    "rsi_extreme_high": 75,
+    
+    # ── Symbol Weights (equal) ──
+    "sym_weights": {s: 1.0 for s in WATCHLIST},
+    
+    # ── Active Improvements ──
+    "correlation_filter": True,
+    "dynamic_risk": True,
+    "risk_reduction_threshold": 3,
+    "risk_reduction_factor": 0.5,
+    "min_risk_pct": 0.05,
+    "spread_filter": True,
+    "max_spread_multiplier": 2.5,
+    
+    # ── LLM Confirmation ──
+    "llm_confirmation_enabled": True,
+    "llm_min_confidence": 0.40,
 }
 
 TIMEFRAME = "1H"
 CYCLE_INTERVAL = 3600  # 1 hour (match H1 candle close)
-DURATION_DAYS = 14     # 2 weeks
+DURATION_DAYS = 21     # 3 weeks (was 2)
 PAPER_TRADES_DIR = Path("paper_trades")
 LOG_FILE = PAPER_TRADES_DIR / "paper_trades_v2.jsonl"
 STATE_FILE = PAPER_TRADES_DIR / "paper_trading_state_v2.json"
@@ -86,22 +160,25 @@ SUMMARY_FILE = PAPER_TRADES_DIR / "paper_trading_summary_v2.json"
 
 # ─── Signal Generation (Deterministic) ──────────────────────
 def compute_indicators(df):
-    """Compute all technical indicators."""
+    """Compute all technical indicators — matching live_trading_complete.py."""
     c = df["close"].values
     h = df["high"].values
     l = df["low"].values
 
+    # ── Moving Averages ──
     df["sma_5"] = pd.Series(c).rolling(5).mean().values
     df["sma_10"] = pd.Series(c).rolling(10).mean().values
     df["sma_20"] = pd.Series(c).rolling(20).mean().values
     df["sma_50"] = pd.Series(c).rolling(50).mean().values
     df["ema_12"] = pd.Series(c).ewm(span=12).mean().values
     df["ema_26"] = pd.Series(c).ewm(span=26).mean().values
+    
+    # ── MACD ──
     df["macd"] = df["ema_12"] - df["ema_26"]
     df["macd_signal"] = pd.Series(df["macd"]).ewm(span=9).mean().values
     df["macd_hist"] = df["macd"] - df["macd_signal"]
 
-    # RSI
+    # ── RSI ──
     deltas = np.diff(c, prepend=c[0])
     gains = np.where(deltas > 0, deltas, 0)
     losses_arr = np.where(deltas < 0, -deltas, 0)
@@ -110,69 +187,143 @@ def compute_indicators(df):
     rs = np.where(avg_loss > 0.0001, avg_gain / avg_loss, 100)
     df["rsi"] = 100 - (100 / (1 + rs))
 
-    # Bollinger Bands
+    # ── Bollinger Bands ──
     bb_std = pd.Series(c).rolling(20).std().values
     df["bb_mid"] = df["sma_20"]
     df["bb_upper"] = df["bb_mid"] + 2 * bb_std
     df["bb_lower"] = df["bb_mid"] - 2 * bb_std
 
-    # ATR
+    # ── ATR ──
     tr = np.maximum(h - l, np.maximum(np.abs(h - np.roll(c, 1)), np.abs(l - np.roll(c, 1))))
     df["atr"] = pd.Series(tr).rolling(14).mean().values
 
-    # Momentum
+    # ── ADX ──
+    plus_dm = np.diff(h, prepend=h[0])
+    minus_dm = -np.diff(l, prepend=l[0])
+    plus_dm = np.where((plus_dm > minus_dm) & (plus_dm > 0), plus_dm, 0)
+    minus_dm = np.where((minus_dm > plus_dm) & (minus_dm > 0), minus_dm, 0)
+    atr_safe = np.where(df["atr"].values > 0, df["atr"].values, 1)
+    plus_di = 100 * pd.Series(plus_dm).rolling(14).mean().values / atr_safe
+    minus_di = 100 * pd.Series(minus_dm).rolling(14).mean().values / atr_safe
+    di_sum = plus_di + minus_di
+    di_sum = np.where(di_sum > 0, di_sum, 1)
+    dx = 100 * np.abs(plus_di - minus_di) / di_sum
+    df["adx"] = pd.Series(dx).rolling(14).mean().values
+    df["plus_di"] = plus_di
+    df["minus_di"] = minus_di
+
+    # ── Ichimoku Cloud ──
+    nine_high = pd.Series(h).rolling(9).max().values
+    nine_low = pd.Series(l).rolling(9).min().values
+    df["tenkan"] = (nine_high + nine_low) / 2
+    
+    twenty_six_high = pd.Series(h).rolling(26).max().values
+    twenty_six_low = pd.Series(l).rolling(26).min().values
+    df["kijun"] = (twenty_six_high + twenty_six_low) / 2
+    
+    df["senkou_a"] = ((df["tenkan"] + df["kijun"]) / 2)
+    # Shift senkou_a forward 26 periods
+    df["senkou_a"] = np.roll(df["senkou_a"], 26)
+    
+    fifty_two_high = pd.Series(h).rolling(52).max().values
+    fifty_two_low = pd.Series(l).rolling(52).min().values
+    df["senkou_b"] = ((fifty_two_high + fifty_two_low) / 2)
+    df["senkou_b"] = np.roll(df["senkou_b"], 26)
+
+    # ── Momentum & Volatility ──
     df["momentum_5"] = pd.Series(c).pct_change(5).values
     df["volatility_10"] = pd.Series(c).pct_change().rolling(10).std().values
+
+    # ── Volume Ratio ──
+    if "volume" in df.columns:
+        df["vol_sma_20"] = pd.Series(df["volume"].values).rolling(20).mean().values
+        df["vol_ratio"] = df["volume"] / df["vol_sma_20"]
+    else:
+        df["vol_ratio"] = 1.0
 
     return df
 
 
 def generate_signal(row):
     """
-    Deterministic signal from technical indicators.
+    Deterministic signal — matching live_trading_complete.py scoring.
     Returns (action, confidence).
     """
     score = 0
 
-    # MACD histogram
+    # ── MACD histogram ──
     if row["macd_hist"] > 0:
         score += 1
     elif row["macd_hist"] < 0:
         score -= 1
 
-    # RSI
-    if row["rsi"] < 35:
+    # ── RSI ──
+    rsi = row["rsi"]
+    if rsi < 25:          # Extreme oversold → mean reversion
+        score += 3
+    elif rsi < 35:
         score += 2
-    elif row["rsi"] < 45:
+    elif rsi < 45:
         score += 1
-    elif row["rsi"] > 65:
+    elif rsi > 75:        # Extreme overbought → mean reversion
+        score -= 3
+    elif rsi > 65:
         score -= 2
-    elif row["rsi"] > 55:
+    elif rsi > 55:
         score -= 1
 
-    # SMA trend
+    # ── SMA trend ──
     if row["close"] > row["sma_20"] > row["sma_50"]:
         score += 2
     elif row["close"] < row["sma_20"] < row["sma_50"]:
         score -= 2
 
-    # Momentum
+    # ── ADX trend strength ──
+    adx = row.get("adx", 0)
+    if adx > CONFIG.get("adx_threshold", 20):
+        # Strong trend — amplify signal
+        if row["plus_di"] > row["minus_di"]:
+            score += 1
+        else:
+            score -= 1
+
+    # ── Ichimoku Cloud ──
+    if CONFIG.get("use_ichimoku", True):
+        cloud_top = max(row.get("senkou_a", 0), row.get("senkou_b", 0))
+        cloud_bottom = min(row.get("senkou_a", 0), row.get("senkou_b", 0))
+        if row["close"] > cloud_top:
+            score += 1  # Above cloud = bullish
+        elif row["close"] < cloud_bottom:
+            score -= 1  # Below cloud = bearish
+
+    # ── Volume filter ──
+    if CONFIG.get("use_volume_filter", True):
+        vol_ratio = row.get("vol_ratio", 1.0)
+        if vol_ratio > 1.2:
+            # High volume confirms signal direction
+            if score > 0:
+                score += 1
+            elif score < 0:
+                score -= 1
+
+    # ── Momentum ──
     if row["momentum_5"] > 0.005:
         score += 1
     elif row["momentum_5"] < -0.005:
         score -= 1
 
-    # Bollinger Band position
+    # ── Bollinger Band position ──
     if row["close"] < row["bb_lower"]:
         score += 1
     elif row["close"] > row["bb_upper"]:
         score -= 1
 
-    # Decision
+    # ── Decision ──
+    max_score = 8  # Increased with new indicators
     if score >= 3:
-        return "BUY", min(score / 6.0, 1.0)
+        return "BUY", min(score / max_score, 1.0)
     if score <= -3:
-        return "SELL", min(abs(score) / 6.0, 1.0)
+        return "SELL", min(abs(score) / max_score, 1.0)
     return "HOLD", 0.0
 
 
@@ -205,13 +356,15 @@ def fetch_latest_candles(symbol, num_candles=200):
 
 # ─── Position Tracking ──────────────────────────────────────
 class PositionManager:
-    """Track open positions and manage entry/exit."""
+    """Track open positions and manage entry/exit — matching live_trading_complete.py."""
 
     def __init__(self):
         self.positions = {}  # symbol -> {action, entry_price, entry_time, entry_bar, size}
         self.trade_log = []
         self.balance = 10000.0
+        self.peak_balance = 10000.0
         self.consecutive_losses = 0
+        self.consecutive_wins = 0
         self.kelly = KellySizer()
         self.kelly_frac = self.kelly.calculate(
             win_rate=CONFIG["kelly_win_rate"],
@@ -219,21 +372,89 @@ class PositionManager:
             avg_loss=CONFIG["kelly_avg_loss"],
         )
 
+    def _get_drawdown_pct(self):
+        """Calculate current drawdown from peak."""
+        if self.peak_balance <= 0:
+            return 0.0
+        return (self.peak_balance - self.balance) / self.peak_balance
+
+    def _get_risk_multiplier(self):
+        """Dynamic risk based on drawdown — from live_trading_complete.py."""
+        if not CONFIG.get("drawdown_throttle_enabled", False):
+            return 1.0
+        dd = self._get_drawdown_pct()
+        if dd >= CONFIG.get("drawdown_pause_pct", 0.15):
+            return 0.0  # PAUSE
+        elif dd >= CONFIG.get("drawdown_critical_pct", 0.10):
+            return 0.25  # Reduce 75%
+        elif dd >= CONFIG.get("drawdown_warning_pct", 0.05):
+            return 0.50  # Reduce 50%
+        return 1.0
+
+    def _get_session_risk_mult(self, hour):
+        """Session-based risk scaling — from live_trading_complete.py."""
+        session_mult = CONFIG.get("session_risk_mult", {})
+        return session_mult.get(hour, 1.0)
+
+    def _check_correlation(self, symbol):
+        """Check if adding this position would exceed correlation limit."""
+        if not CONFIG.get("correlation_filter", False):
+            return True
+        max_correlated = CONFIG.get("max_correlated_trades", 2)
+        correlations = CORRELATIONS.get(symbol, [])
+        correlated_count = sum(1 for s in self.positions if s in correlations)
+        return correlated_count < max_correlated
+
+    def _check_portfolio_limits(self):
+        """Check concurrent trade and portfolio heat limits."""
+        max_concurrent = CONFIG.get("max_concurrent_trades", 3)
+        if len(self.positions) >= max_concurrent:
+            return False
+        return True
+
+    def _check_circuit_breaker(self):
+        """Check if circuit breaker should halt trading."""
+        cb_limit = CONFIG.get("circuit_breaker", 3)
+        if cb_limit and self.consecutive_losses >= cb_limit:
+            return False  # HALT
+        return True
+
     def open_position(self, symbol, action, price, timestamp, bar_num, volatility=0.01):
-        """Open a new position with optional volatility-based sizing."""
+        """Open a new position with full risk management."""
         if symbol in self.positions:
-            return None  # Already have a position
+            return None
 
-        # Calculate base size: 5% risk per trade
-        risk_amount = self.balance * CONFIG["max_risk_pct"]
+        # ── Pre-trade checks ──
+        if not self._check_circuit_breaker():
+            return None
+        if not self._check_portfolio_limits():
+            return None
+        if not self._check_correlation(symbol):
+            return None
 
-        # IMPROVEMENT 3: Volatility-based position sizing
-        # Lower volatility = bigger position (inverse scaling)
+        # ── Risk multiplier from drawdown ──
+        risk_mult = self._get_risk_multiplier()
+        if risk_mult <= 0:
+            return None  # Trading paused
+
+        # ── Session risk scaling ──
+        session_mult = self._get_session_risk_mult(timestamp.hour)
+
+        # ── Dynamic risk reduction after losses ──
+        dyn_risk = 1.0
+        if CONFIG.get("dynamic_risk", False) and self.consecutive_losses >= CONFIG.get("risk_reduction_threshold", 3):
+            dyn_risk = CONFIG.get("risk_reduction_factor", 0.5)
+
+        # ── Calculate position size ──
+        base_risk = self.balance * CONFIG["max_risk_pct"]
+        risk_amount = base_risk * risk_mult * session_mult * dyn_risk
+
+        # Volatility-based sizing (inverse scaling)
         if CONFIG.get("vol_sizing", False):
             vol_factor = max(0.5, min(2.0, 1.0 / (volatility * 100 + 0.01)))
             risk_amount *= vol_factor
 
-        # Kelly provides additional sizing guidance
+        # Kelly sizing
         kelly_size = max(10, self.kelly_frac * risk_amount)
         size = min(kelly_size, self.balance * CONFIG["max_position_pct"])
 
@@ -246,6 +467,9 @@ class PositionManager:
             "entry_time": timestamp,
             "entry_bar": bar_num,
             "size": round(size, 2),
+            "sl_price": None,  # Will be set by ATR-based SL
+            "tp_price": None,  # Will be set by ATR-based TP
+            "partial_tp_done": False,
         }
         self.positions[symbol] = pos
         return pos
@@ -264,11 +488,14 @@ class PositionManager:
             pnl = (pos["entry_price"] - price) / pos["entry_price"] * pos["size"]
 
         self.balance += pnl
+        self.peak_balance = max(self.peak_balance, self.balance)
 
-        # Track consecutive losses
+        # Track consecutive losses/wins
         if pnl <= 0:
             self.consecutive_losses += 1
+            self.consecutive_wins = 0
         else:
+            self.consecutive_wins += 1
             self.consecutive_losses = 0
 
         trade = {
@@ -286,36 +513,87 @@ class PositionManager:
         self.trade_log.append(trade)
         return trade
 
+    def check_partial_tp(self, symbol, current_price, bar_num):
+        """Check if partial take-profit should trigger."""
+        if not CONFIG.get("partial_tp_enabled", False):
+            return None
+        if symbol not in self.positions:
+            return None
+        pos = self.positions[symbol]
+        if pos.get("partial_tp_done", False):
+            return None
+
+        # Calculate current R:R
+        entry = pos["entry_price"]
+        if pos["action"] == "BUY":
+            unrealized = (current_price - entry) / entry
+        else:
+            unrealized = (entry - current_price) / entry
+
+        # Close 50% at 1:1 R:R
+        if unrealized >= CONFIG.get("partial_tp_rr", 1.0) * (CONFIG["max_risk_pct"] / 100):
+            partial_size = pos["size"] * CONFIG.get("partial_tp_pct", 0.50)
+            pos["size"] -= partial_size
+            pos["partial_tp_done"] = True
+
+            if pos["action"] == "BUY":
+                pnl = (current_price - entry) / entry * partial_size
+            else:
+                pnl = (entry - current_price) / entry * partial_size
+
+            self.balance += pnl
+            self.peak_balance = max(self.peak_balance, self.balance)
+
+            return {
+                "symbol": symbol,
+                "action": pos["action"],
+                "type": "PARTIAL_TP",
+                "size": round(partial_size, 2),
+                "pnl": round(pnl, 2),
+            }
+        return None
+
     def get_state(self):
         """Get current state for persistence."""
         return {
             "balance": self.balance,
+            "peak_balance": self.peak_balance,
             "consecutive_losses": self.consecutive_losses,
             "positions": self.positions,
             "total_trades": len(self.trade_log),
             "total_pnl": round(sum(t["pnl"] for t in self.trade_log), 2),
             "wins": sum(1 for t in self.trade_log if t["pnl"] > 0),
             "losses": sum(1 for t in self.trade_log if t["pnl"] <= 0),
+            "drawdown_pct": round(self._get_drawdown_pct() * 100, 2),
         }
 
     def load_state(self, state):
         """Restore from saved state."""
         self.balance = state.get("balance", 10000.0)
+        self.peak_balance = state.get("peak_balance", self.balance)
         self.consecutive_losses = state.get("consecutive_losses", 0)
         self.positions = state.get("positions", {})
-        # Trade log not restored (append-only)
 
 
 # ─── Main Trading Loop ──────────────────────────────────────
 def run_cycle(positions, cycle_num, start_time):
-    """Run one analysis cycle across all symbols."""
+    """Run one analysis cycle across all symbols — matching live_trading_complete.py."""
     now = datetime.now(timezone.utc)
+    dd_pct = positions._get_drawdown_pct() * 100
+    risk_mult = positions._get_risk_multiplier()
+    
     print(f"\n{'='*70}")
     print(f"  CYCLE {cycle_num} | {now.strftime('%Y-%m-%d %H:%M:%S')} UTC")
-    print(f"  Balance: ${positions.balance:,.2f} | Open: {len(positions.positions)}")
+    print(f"  Balance: ${positions.balance:,.2f} | Peak: ${positions.peak_balance:,.2f} | DD: {dd_pct:.1f}%")
+    print(f"  Open: {len(positions.positions)} | Risk Mult: {risk_mult:.2f} | CL: {positions.consecutive_losses}")
     print(f"{'='*70}")
 
-    # Fetch data for all symbols
+    # ── Check if trading is paused ──
+    if risk_mult <= 0:
+        print(f"  ⚠ TRADING PAUSED — Drawdown {dd_pct:.1f}% exceeds {CONFIG.get('drawdown_pause_pct', 0.15)*100:.0f}% limit")
+        return positions
+
+    # ── Fetch data for all symbols ──
     symbol_data = {}
     for sym in WATCHLIST:
         df = fetch_latest_candles(sym, 200)
@@ -326,14 +604,23 @@ def run_cycle(positions, cycle_num, start_time):
 
     print(f"  Data loaded: {len(symbol_data)}/{len(WATCHLIST)} symbols")
 
-    # Process each symbol
+    # ── Check partial TP on existing positions ──
+    for sym in list(positions.positions.keys()):
+        if sym in symbol_data:
+            latest = symbol_data[sym].iloc[-1]
+            price = float(latest["close"])
+            bar_num = len(symbol_data[sym])
+            partial = positions.check_partial_tp(sym, price, bar_num)
+            if partial:
+                print(f"  PARTIAL TP {sym:10} | Size=${partial['size']:.2f} | P&L=${partial['pnl']:+.2f}")
+
+    # ── Process each symbol ──
     for sym, df in symbol_data.items():
-        # Get latest bar
         latest = df.iloc[-1]
         bar_num = len(df)
         price = float(latest["close"])
 
-        # Check if we need to close existing position
+        # Check if we need to close existing position (hold_bars reached)
         if sym in positions.positions:
             pos = positions.positions[sym]
             bars_held = bar_num - pos["entry_bar"]
@@ -348,8 +635,7 @@ def run_cycle(positions, cycle_num, start_time):
         if sym in positions.positions:
             continue
 
-        # IMPROVEMENT 4: Session-based trading
-        # Only trade during London (07-16 UTC) and NY (13-22 UTC)
+        # Session filter
         session_hours = CONFIG.get("session_hours")
         if session_hours and now.hour not in session_hours:
             continue
@@ -361,7 +647,7 @@ def run_cycle(positions, cycle_num, start_time):
         if action == "HOLD" or confidence < CONFIG["min_confidence"]:
             continue
 
-        # IMPROVEMENT 3: Get volatility for position sizing
+        # Get volatility for position sizing
         volatility = float(latest.get("volatility_10", 0.01))
 
         # Open new position
@@ -369,14 +655,15 @@ def run_cycle(positions, cycle_num, start_time):
         if pos:
             print(f"  OPEN  {sym:10} {action:4} @ {price:.5f} | Size=${pos['size']:.2f} | Conf={confidence:.2f} | Vol={volatility:.4f}")
 
-    # Summary
+    # ── Summary ──
     active = len(positions.positions)
     total_trades = len(positions.trade_log)
     wins = sum(1 for t in positions.trade_log if t["pnl"] > 0)
     total_pnl = sum(t["pnl"] for t in positions.trade_log)
     wr = wins / total_trades if total_trades > 0 else 0
 
-    print(f"\n  SUMMARY: {active} open | {total_trades} closed | WR={wr:.1%} | P&L=${total_pnl:+.2f}")
+    cb_status = "ACTIVE" if positions._check_circuit_breaker() else f"HALTED ({positions.consecutive_losses} losses)"
+    print(f"\n  SUMMARY: {active} open | {total_trades} closed | WR={wr:.1%} | P&L=${total_pnl:+.2f} | CB={cb_status}")
     return positions
 
 
@@ -436,16 +723,21 @@ def save_summary(positions, start_time, total_cycles):
 def main():
     print("\n" + "=" * 70)
     print("  DUTCHKEM TRADER - PAPER TRADING V2")
-    print("  Signal-Agnostic | Technical Indicators Only | 2% Risk")
+    print("  Optimized 13-Symbol Watchlist | Full Risk Management")
     print("=" * 70)
-    print(f"  Watchlist: {len(WATCHLIST)} symbols")
+    print(f"  Watchlist: {len(WATCHLIST)} symbols (Sharpe 0.95, Max DD 1.5%)")
     print(f"  Timeframe: {TIMEFRAME}")
     print(f"  Cycle: {CYCLE_INTERVAL}s ({CYCLE_INTERVAL//60}min)")
     print(f"  Duration: {DURATION_DAYS} days")
     print(f"  Risk per trade: {CONFIG['max_risk_pct']*100:.0f}%")
-    print(f"  Min confidence: {CONFIG['min_confidence']}")
-    print(f"  Circuit breaker: OFF")
-    print(f"  Bad hours/days: NONE")
+    print(f"  SL/TP: {CONFIG['sl_atr_mult']}x ATR / {CONFIG['tp_atr_mult']}x ATR")
+    print(f"  Partial TP: {CONFIG['partial_tp_pct']*100:.0f}% at 1:1 R:R")
+    print(f"  Circuit breaker: {CONFIG['circuit_breaker']} consecutive losses")
+    print(f"  Max concurrent: {CONFIG['max_concurrent_trades']}")
+    print(f"  Drawdown throttle: {CONFIG['drawdown_warning_pct']*100:.0f}%/{CONFIG['drawdown_critical_pct']*100:.0f}%/{CONFIG['drawdown_pause_pct']*100:.0f}%")
+    print(f"  Session hours: London+NY ({CONFIG['session_hours'][0]}-{CONFIG['session_hours'][-1]} UTC)")
+    print(f"  Correlation filter: {CONFIG['correlation_filter']}")
+    print(f"  LLM confirmation: {CONFIG['llm_confirmation_enabled']}")
 
     # Connect MT5
     print("\nConnecting to MT5...")

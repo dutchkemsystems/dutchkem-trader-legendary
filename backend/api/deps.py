@@ -26,12 +26,14 @@ from config.broker_config import BrokerConfig
 from data.manager import MarketDataManager
 from execution.broker_factory import create_broker
 from execution.engine import OrderExecutionEngine
+from apps.llm.client import LLMClient
 from cache.redis import RedisCache
 
 
 _chart_analyzer = None
 _ml_predictor = None
 _market_data_manager = None
+_llm_client = None
 
 
 def get_market_data_manager():
@@ -67,25 +69,6 @@ def get_market_analyst():
 
 
 @lru_cache
-def get_consensus_engine():
-    chart_analyzer = get_chart_analyzer()
-    ml_predictor = get_ml_predictor()
-    analysts = [
-        MarketAnalyst(), NewsAnalyst(), FundamentalsAnalyst(), SentimentAnalyst(),
-        TechnicalAnalyst(chart_analyzer=chart_analyzer), OptionsAnalyst(), OrderFlowAnalyst(),
-        RiskAnalyst(), MacroAnalyst(), OnChainAnalyst(), QuantAnalyst(), ComplianceAnalyst()
-    ]
-    debate_engine = DebateEngine(max_rounds=1)
-    memory = FinancialSituationMemory()
-    return ConsensusEngine(
-        analysts=analysts,
-        ml_predictor=ml_predictor,
-        debate_engine=debate_engine,
-        memory=memory,
-    )
-
-
-@lru_cache
 def get_consensus_gates():
     ml_predictor = get_ml_predictor()
     return ConsensusGates(ml_predictor=ml_predictor)
@@ -111,6 +94,33 @@ def get_broker():
 def get_execution_engine():
     broker = get_broker()
     return OrderExecutionEngine(broker)
+
+
+def get_llm_client():
+    global _llm_client
+    if _llm_client is None:
+        _llm_client = LLMClient()
+    return _llm_client
+
+
+@lru_cache
+def get_consensus_engine():
+    chart_analyzer = get_chart_analyzer()
+    ml_predictor = get_ml_predictor()
+    llm_client = get_llm_client()
+    analysts = [
+        MarketAnalyst(), NewsAnalyst(), FundamentalsAnalyst(), SentimentAnalyst(),
+        TechnicalAnalyst(chart_analyzer=chart_analyzer), OptionsAnalyst(), OrderFlowAnalyst(),
+        RiskAnalyst(), MacroAnalyst(), OnChainAnalyst(), QuantAnalyst(), ComplianceAnalyst()
+    ]
+    debate_engine = DebateEngine(llm_client=llm_client, max_rounds=1)
+    memory = FinancialSituationMemory()
+    return ConsensusEngine(
+        analysts=analysts,
+        ml_predictor=ml_predictor,
+        debate_engine=debate_engine,
+        memory=memory,
+    )
 
 
 def get_current_user():

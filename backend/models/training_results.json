@@ -1,0 +1,15 @@
+{
+  "symbols": [
+    "EURUSD",
+    "GBPUSD",
+    "USDJPY",
+    "AUDUSD",
+    "USDCAD"
+  ],
+  "timeframe": "1H",
+  "model_type": "lightgbm",
+  "total_samples": 2370,
+  "test_accuracy": 0.5759493670886076,
+  "cv_mean": 0.5594936708860759,
+  "cv_std": 0.05775198445897575
+}
