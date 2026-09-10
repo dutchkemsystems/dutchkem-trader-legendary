@@ -1,5 +1,7 @@
 {
-  "balance": 9999.94,
+  "balance": 8870.12,
+  "peak_equity": 10000.0,
+  "drawdown_pct": 11.3,
   "consecutive_losses": 0,
   "week_number": 1,
   "active_improvements": {
@@ -9,9 +11,50 @@
     "news_avoidance": false,
     "breakout_detection": false,
     "mean_reversion": false,
-    "position_scaling": false
+    "position_scaling": false,
+    "partial_tp": true,
+    "drawdown_throttle": true,
+    "volatility_regime": true,
+    "portfolio_heat": 3
   },
-  "positions": {},
+  "positions": {
+    "EURGBP": {
+      "ticket": 3208415619,
+      "action": "BUY",
+      "entry_price": 0.85872,
+      "size": 1.65,
+      "sl": 0.8580964285714285,
+      "tp": 0.8597592857142857,
+      "initial_sl": 0.8580964285714285,
+      "tf_score": 8.350000000000001,
+      "tf_agreement": 5,
+      "scaled": false
+    },
+    "EURUSD": {
+      "ticket": 3208415624,
+      "action": "BUY",
+      "entry_price": 1.16373,
+      "size": 1.02,
+      "sl": 1.1621657142857142,
+      "tp": 1.1663371428571427,
+      "initial_sl": 1.1621657142857142,
+      "tf_score": 7.3,
+      "tf_agreement": 4,
+      "scaled": false
+    },
+    "USDCHF": {
+      "ticket": 3208415628,
+      "action": "BUY",
+      "entry_price": 0.81046,
+      "size": 1.46,
+      "sl": 0.8083878571428572,
+      "tp": 0.8139135714285712,
+      "initial_sl": 0.8083878571428572,
+      "tf_score": 6.4,
+      "tf_agreement": 5,
+      "scaled": false
+    }
+  },
   "total_trades": 0,
   "total_pnl": 0,
   "wins": 0,

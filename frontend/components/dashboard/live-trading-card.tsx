@@ -21,7 +21,9 @@ import {
   AlertTriangle,
 } from "lucide-react";
 
-const API = "http://localhost:8001/api/v1/live";
+import { API_BASE_URL } from "@/lib/constants";
+
+const API = `${API_BASE_URL}/live`;
 
 interface MT5Setup {
   installed: boolean;

@@ -28,5 +28,9 @@ class MLPredictor:
             features_used=features.shape[1],
         )
 
+    @property
+    def is_trained(self) -> bool:
+        return self.model.trained
+
     def train(self, X: np.ndarray, y: np.ndarray):
         self.model.train(X, y)

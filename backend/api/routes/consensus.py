@@ -3,6 +3,12 @@ from api.deps import get_consensus_engine, get_consensus_gates, get_ml_predictor
 from apps.vision import ChartAnalyzer
 from apps.consensus.black_scholes import BlackScholesEngine
 from apps.consensus.regime import MarketRegimeDetector
+from apps.ml.features import FeatureExtractor
+from data.mt5_fetcher import async_fetch_mt5_candles, async_fetch_mt5_price
+import numpy as np
+import logging
+
+logger = logging.getLogger(__name__)
 
 router = APIRouter()
 
@@ -45,7 +51,46 @@ async def get_full_consensus(
             vote_counts[signal] += 1
     result["votes"] = vote_counts
 
-    # Run 7 gates
+    # --- Fetch real data for ML + gates ---
+    p_up = 0.5
+    market_price = 0.5
+    ml_status = "not_available"
+    features_used = 0
+    real_features = []
+
+    df = await async_fetch_mt5_candles(symbol, timeframe, 200)
+    if df is not None and len(df) >= FeatureExtractor.MIN_ROWS:
+        extractor = FeatureExtractor()
+        try:
+            features_df = extractor.extract(df)
+            if len(features_df) > 0:
+                last_row = features_df.iloc[[-1]].values
+                real_features = last_row.tolist()
+                ml_predictor = get_ml_predictor()
+                ml_pred = ml_predictor.predict_from_features(last_row)
+                p_up = ml_pred.p_up
+                features_used = ml_pred.features_used
+                ml_status = f"{ml_pred.model_name}_trained={ml_predictor.is_trained}"
+                logger.info("ML P(UP) for %s: %.4f (%s)", symbol, p_up, ml_status)
+        except Exception as e:
+            logger.warning("ML prediction failed for %s: %s", symbol, e)
+            ml_status = f"error: {e}"
+
+    price_data = await async_fetch_mt5_price(symbol)
+    if price_data:
+        market_price = price_data["bid"]
+    else:
+        market_price = df["close"].iloc[-1] if df is not None and len(df) > 0 else 0.5
+
+    result["ml"] = {
+        "p_up": round(p_up, 4),
+        "market_price": market_price,
+        "status": ml_status,
+        "features_used": features_used,
+        "model_trained": get_ml_predictor().is_trained,
+    }
+
+    # Run 7 gates with real P(UP) and market price
     gates = get_consensus_gates()
     regime_detector = MarketRegimeDetector()
     black_scholes = BlackScholesEngine()
@@ -55,7 +100,8 @@ async def get_full_consensus(
     gate_result = gates.evaluate_all(
         consensus={"agreement_pct": result.get("agreement_pct", 0)},
         analyst_results=[],
-        p_up=0.5,
+        features=real_features,
+        p_up=p_up,
         market_price=0.5,
         risk_status={"max_positions": 10, "current_positions": 0},
     )

@@ -1,6 +1,7 @@
 from fastapi import APIRouter
 import pandas as pd
 import numpy as np
+import logging
 from apps.legendary.seykota import SeykotaTrendModule
 from apps.legendary.pyramiding import PyramidingLogic
 from apps.legendary.turtle_soup import TurtleSoupModule
@@ -9,6 +10,9 @@ from apps.legendary.buffett import BuffettAgent
 from apps.legendary.druckenmiller import DruckenmillerAgent
 from apps.legendary.tudor_jones import TudorJonesAgent
 from apps.legendary.lynch import LynchAgent
+from data.mt5_fetcher import async_fetch_mt5_candles
+
+logger = logging.getLogger(__name__)
 
 router = APIRouter()
 
@@ -21,9 +25,14 @@ AGENTS = {
     "lynch": LynchAgent(),
 }
 
-def _generate_market_data(n=200, base=100):
-    """Generate simulated market data for analysis"""
-    close = np.random.randn(n).cumsum() + base
+
+async def _fetch_market_data(symbol: str, n=200, timeframe="H1"):
+    """Fetch real market data from MT5. Falls back to random walk if MT5 unavailable."""
+    df = await async_fetch_mt5_candles(symbol, timeframe, n)
+    if df is not None and len(df) >= 30:
+        return df
+    logger.warning("MT5 unavailable for %s — using simulated data", symbol)
+    close = np.random.randn(n).cumsum() + 2350
     high = close + np.abs(np.random.randn(n)) * 0.5
     low = close - np.abs(np.random.randn(n)) * 0.5
     volume = np.random.randint(100000, 1000000, n).astype(float)
@@ -35,17 +44,17 @@ def _generate_market_data(n=200, base=100):
 @router.get("/seykota/{symbol}")
 async def get_seykota(symbol: str):
     module = SeykotaTrendModule()
-    data = _generate_market_data(200)
+    data = await _fetch_market_data(symbol, 200)
     result = module.analyze_trend(data)
-    return {"symbol": symbol, **result}
+    return {"symbol": symbol, "data_source": "mt5", **result}
 
 
 @router.get("/turtle-soup/{symbol}")
 async def get_turtle_soup(symbol: str):
     module = TurtleSoupModule()
-    data = _generate_market_data(50)
+    data = await _fetch_market_data(symbol, 50)
     result = module.detect_false_breakout(data)
-    return {"symbol": symbol, "result": result}
+    return {"symbol": symbol, "data_source": "mt5", "result": result}
 
 
 @router.get("/pyramiding/{symbol}")
@@ -59,40 +68,45 @@ async def get_pyramiding(symbol: str):
 @router.get("/soros/{symbol}")
 async def get_soros(symbol: str):
     agent = AGENTS["soros"]
-    data = _generate_market_data(200)
+    data = await _fetch_market_data(symbol, 200)
     result = agent.analyze(data, symbol)
+    result["data_source"] = "mt5"
     return result
 
 
 @router.get("/buffett/{symbol}")
 async def get_buffett(symbol: str):
     agent = AGENTS["buffett"]
-    data = _generate_market_data(200)
+    data = await _fetch_market_data(symbol, 200)
     result = agent.analyze(data, symbol)
+    result["data_source"] = "mt5"
     return result
 
 
 @router.get("/druckenmiller/{symbol}")
 async def get_druckenmiller(symbol: str):
     agent = AGENTS["druckenmiller"]
-    data = _generate_market_data(200)
+    data = await _fetch_market_data(symbol, 200)
     result = agent.analyze(data, symbol)
+    result["data_source"] = "mt5"
     return result
 
 
 @router.get("/tudor-jones/{symbol}")
 async def get_tudor_jones(symbol: str):
     agent = AGENTS["tudor_jones"]
-    data = _generate_market_data(200)
+    data = await _fetch_market_data(symbol, 200)
     result = agent.analyze(data, symbol)
+    result["data_source"] = "mt5"
     return result
 
 
 @router.get("/lynch/{symbol}")
 async def get_lynch(symbol: str):
     agent = AGENTS["lynch"]
-    data = _generate_market_data(200)
+    data = await _fetch_market_data(symbol, 200)
     result = agent.analyze(data, symbol)
+    result["data_source"] = "mt5"
     return result
 
 
@@ -101,7 +115,7 @@ async def get_lynch(symbol: str):
 @router.get("/analyze/{symbol}")
 async def analyze_all_agents(symbol: str):
     """Run all 5 persona agents on a symbol and return combined results"""
-    data = _generate_market_data(200)
+    data = await _fetch_market_data(symbol, 200)
     results = {}
     for name, agent in AGENTS.items():
         results[name] = agent.analyze(data, symbol)
@@ -124,6 +138,7 @@ async def analyze_all_agents(symbol: str):
     
     return {
         "symbol": symbol,
+        "data_source": "mt5",
         "consensus": consensus,
         "buy_votes": buy_count,
         "sell_votes": sell_count,

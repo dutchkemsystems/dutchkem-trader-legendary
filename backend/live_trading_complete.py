@@ -803,18 +803,27 @@ class CompleteTrader:
         # Calculate SL distance in price terms (ATR-based)
         sl_distance = atr * CONFIG.get("sl_atr_mult", 3.0) if atr > 0 else price * 0.003
         
-        # Lot size = Risk Amount / (SL Distance * Contract Size)
+        # Minimum SL distance: 0.3% of price (prevent tiny SL = huge lots)
+        min_sl = price * 0.003
+        sl_distance = max(sl_distance, min_sl)
+
+        # Calculate lot size
         symbol_info = mt5.symbol_info(symbol)
         if symbol_info is None:
             return 0.0
 
         contract_size = getattr(symbol_info, 'trade_contract_size', 100000)
         
-        if sl_distance > 0 and contract_size > 0:
-            lots = risk_amount / (sl_distance * contract_size)
-        else:
-            # Fallback: simple percentage of equity
-            lots = risk_amount / (price * contract_size)
+        lots = risk_amount / (sl_distance * contract_size)
+
+        # HARD CAP: Max 5% margin per trade
+        acct_info = mt5.account_info()
+        leverage = acct_info.leverage if acct_info else 100
+        max_margin = self.balance * 0.05
+        margin_per_lot = price * contract_size / leverage if leverage > 0 else price * contract_size
+        if margin_per_lot > 0:
+            max_lots_by_margin = max_margin / margin_per_lot
+            lots = min(lots, max_lots_by_margin)
 
         # Enforce min/max limits
         lot_size = symbol_info.volume_min

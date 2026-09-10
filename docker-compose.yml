@@ -65,8 +65,8 @@ services:
     container_name: dutchkem-fastapi
     env_file: .env
     ports:
-      - "8001:8001"
-    command: uvicorn api.main:app --host 0.0.0.0 --port 8001
+      - "8000:8000"
+    command: uvicorn api.main:app --host 0.0.0.0 --port 8000
     depends_on:
       db:
         condition: service_healthy
@@ -74,7 +74,7 @@ services:
         condition: service_healthy
     restart: unless-stopped
     healthcheck:
-      test: ["CMD-SHELL", "curl -fsS http://localhost:8001/api/v1/health || exit 1"]
+      test: ["CMD-SHELL", "curl -fsS http://localhost:8000/api/v1/health || exit 1"]
       interval: 30s
       timeout: 10s
       start_period: 30s
@@ -127,7 +127,7 @@ services:
       - "3000:3000"
     environment:
       - NEXT_PUBLIC_API_URL=http://localhost:8000
-      - NEXT_PUBLIC_WS_URL=ws://localhost:8001
+      - NEXT_PUBLIC_WS_URL=ws://localhost:8000/ws
     depends_on:
       backend:
         condition: service_healthy
