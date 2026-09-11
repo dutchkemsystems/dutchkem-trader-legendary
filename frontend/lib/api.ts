@@ -1,4 +1,4 @@
-import axios from "axios";
+﻿import axios from "axios";
 import type {
   LoginRequest,
   LoginResponse,
@@ -19,6 +19,7 @@ import type {
   DebateResult,
   MemorySituation,
   GateStatus,
+  ScalperStatus,
 } from "./types-v5";
 import { API_BASE_URL } from "./constants";
 
@@ -207,6 +208,15 @@ export async function getPaperTradesStats(): Promise<{
   last_trade: Record<string, unknown> | null;
 }> {
   const res = await api.get("/paper-trades/stats");
+  return res.data;
+}
+
+// ---------------------------------------------------------------------------
+// MTF Cascading Scalper
+// ---------------------------------------------------------------------------
+
+export async function getScalperStatus(): Promise<ScalperStatus> {
+  const res = await api.get<ScalperStatus>("/scalper/status");
   return res.data;
 }
 

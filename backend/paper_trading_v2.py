@@ -1,3 +1,4 @@
+import os
 """
 Paper Trading Engine V2 — Signal-Agnostic + Improvements
 =========================================================
@@ -43,9 +44,9 @@ from execution.kelly_sizer import KellySizer
 
 # ─── Config ──────────────────────────────────────────────────
 MT5_PATH = r"C:\Program Files\MetaTrader 5 EXNESS\terminal64.exe"
-MT5_LOGIN = 476963617
-MT5_PASSWORD = "Christ@5436"
-MT5_SERVER = "Exness-MT5Trial9"
+MT5_LOGIN = int(os.environ.get("MT5_LOGIN", "0"))
+MT5_PASSWORD = os.environ.get("MT5_PASSWORD", "")
+MT5_SERVER = os.environ.get("MT5_SERVER", "")
 MT5_MAGIC = 234000
 MT5_SLIPPAGE = 20
 

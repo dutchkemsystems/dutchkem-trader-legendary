@@ -45,7 +45,7 @@ def _load_credentials() -> dict:
                 return json.load(f)
         except Exception:
             pass
-    return {"login": 476963617, "password": "Christ@5436", "server": "Exness-MT5Trial9", "mt5_path": DEFAULT_MT5_PATH}
+    return {"login": int(os.environ.get("MT5_LOGIN", "0")), "password": os.environ.get("MT5_PASSWORD", ""), "server": os.environ.get("MT5_SERVER", ""), "mt5_path": DEFAULT_MT5_PATH}
 
 
 def _get_mt5_data(symbol: str, timeframe, count: int = 200):

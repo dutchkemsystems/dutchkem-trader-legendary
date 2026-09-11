@@ -1,3 +1,4 @@
+import os
 """Quick verify: deterministic best configs."""
 import os, sys, json, time
 if sys.platform == "win32":
@@ -15,7 +16,7 @@ SYMBOLS = ["EURUSD","GBPUSD","USDJPY","AUDUSD","USDCAD","USDCHF","NZDUSD","EURJP
 
 
 def load_data():
-    mt5.initialize(path=MT5_PATH, login=476963617, password="Christ@5436", server="Exness-MT5Trial9")
+    mt5.initialize(path=MT5_PATH, login=int(os.environ.get("MT5_LOGIN", "0")), password=os.environ.get("MT5_PASSWORD", ""), server=os.environ.get("MT5_SERVER", ""))
     all_data = {}
     for sym in SYMBOLS:
         info = mt5.symbol_info(sym)

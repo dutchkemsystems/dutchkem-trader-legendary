@@ -1,11 +1,12 @@
+import os
 """Close all open MT5 positions — cleanup script."""
 import MetaTrader5 as mt5
 
 mt5.initialize(
     path=r"C:\Program Files\MetaTrader 5 EXNESS\terminal64.exe",
-    login=476963617,
-    password="Christ@5436",
-    server="Exness-MT5Trial9",
+    login=int(os.environ.get("MT5_LOGIN", "0")),
+    password=os.environ.get("MT5_PASSWORD", ""),
+    server=os.environ.get("MT5_SERVER", ""),
 )
 
 positions = mt5.positions_get()

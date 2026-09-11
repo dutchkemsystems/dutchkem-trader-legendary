@@ -1,3 +1,4 @@
+import os
 """Get all available symbols from MT5."""
 import os, sys
 if sys.platform == "win32":
@@ -7,7 +8,7 @@ import MetaTrader5 as mt5
 
 MT5_PATH = r"C:\Program Files\MetaTrader 5 EXNESS\terminal64.exe"
 
-if not mt5.initialize(path=MT5_PATH, login=476963617, password="Christ@5436", server="Exness-MT5Trial9"):
+if not mt5.initialize(path=MT5_PATH, login=int(os.environ.get("MT5_LOGIN", "0")), password=os.environ.get("MT5_PASSWORD", ""), server=os.environ.get("MT5_SERVER", "")):
     print(f"FAILED: {mt5.last_error()}")
     sys.exit(1)
 

@@ -1,3 +1,4 @@
+import os
 """
 Round 6: Symbol-Weighted Portfolio Optimization
 Key insight from Round 3-5: Some symbols are consistently profitable (AMD +$86, ETH +$52, TSLA +$40),
@@ -34,7 +35,7 @@ ALL_SYMBOLS = [
 
 
 def load_data():
-    mt5.initialize(path=MT5_PATH, login=476963617, password="Christ@5436", server="Exness-MT5Trial9")
+    mt5.initialize(path=MT5_PATH, login=int(os.environ.get("MT5_LOGIN", "0")), password=os.environ.get("MT5_PASSWORD", ""), server=os.environ.get("MT5_SERVER", ""))
     all_data = {}
     for sym in ALL_SYMBOLS:
         info = mt5.symbol_info(sym)

@@ -1,3 +1,43 @@
+# Environment variables (contains secrets)
+.env
+.env.*
+!.env.example
 
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.egg-info/
+dist/
+build/
+*.egg
+
+# Temporary/utility scripts (not part of the app)
+test_cols.py
+test_score.py
+test_signals.py
+clean_credentials.py
+scrub.py
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Hive
 .hive/
 .hive2/
+
+# Logs
+*.log
+
+# Data files
+*.csv
+*.sqlite
+*.db

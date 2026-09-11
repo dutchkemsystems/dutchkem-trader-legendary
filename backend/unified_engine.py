@@ -23,6 +23,8 @@ API: http://localhost:8000
 import asyncio
 import json
 import os
+from dotenv import load_dotenv
+load_dotenv()
 import sys
 import time
 import logging
@@ -84,11 +86,11 @@ except ImportError as e:
 # ═══════════════════════════════════════════════════════════════
 # MT5 CONFIGURATION
 # ═══════════════════════════════════════════════════════════════
-MT5_PATH = r"C:\Program Files\MetaTrader 5 EXNESS\terminal64.exe"
-MT5_LOGIN = 476963617
-MT5_PASSWORD = "Christ@5436"
-MT5_SERVER = "Exness-MT5Trial9"
-MT5_MAGIC = 234000
+MT5_PATH = os.environ.get("MT5_PATH", r"C:\Program Files\MetaTrader 5 EXNESS\terminal64.exe")
+MT5_LOGIN = int(os.environ.get("MT5_LOGIN", "0"))
+MT5_PASSWORD = os.environ.get("MT5_PASSWORD", "")
+MT5_SERVER = os.environ.get("MT5_SERVER", "")
+MT5_MAGIC = int(os.environ.get("MT5_MAGIC", "234000"))
 MT5_SLIPPAGE = 20
 
 # ═══════════════════════════════════════════════════════════════
@@ -149,8 +151,8 @@ CONFIG = {
     "kelly_avg_win": 1.5,
     "kelly_avg_loss": 1.0,
     "hold_bars": 72,
-    "min_confidence": 0.35,
-    "min_score": 3,
+    "min_confidence": 0.25,
+    "min_score": 2,
 
     # ── Safety Limits ──
     "max_correlated_trades": 2,      # Max 2 correlated pairs open
@@ -226,6 +228,26 @@ CONFIG = {
         "M15": 0.05, "M30": 0.08, "H1": 0.12,
         "H4": 0.25, "D1": 0.30, "W1": 0.15, "MN1": 0.05,
     },
+
+    # ── MTF Cascading Scalper ──
+    "mtf_cascading_scalper_enabled": False,
+    "scalper_timeframes": ["M1", "M5", "M15", "M30", "H1", "H4", "D1", "W1", "MN1"],
+    "scalper_groups": [
+        {"name": "G1", "timeframes": ["M1", "M5", "M15"]},
+        {"name": "G2", "timeframes": ["M5", "M15", "M30"]},
+        {"name": "G3", "timeframes": ["M15", "M30", "H1"]},
+        {"name": "G4", "timeframes": ["M30", "H1", "H4"]},
+        {"name": "G5", "timeframes": ["H1", "H4", "D1"]},
+        {"name": "G6", "timeframes": ["H4", "D1", "W1"]},
+        {"name": "G7", "timeframes": ["D1", "W1", "MN1"]},
+    ],
+    "scalper_tp_pips": 10,
+    "scalper_sl_pips": 5,
+    "scalper_lot_size": 0.01,
+    "scalper_max_concurrent": 3,
+    "scalper_scan_interval": 60,
+    "scalper_restart_from_group1": True,
+    "scalper_symbol": "EURUSD",
 }
 
 TIMEFRAME = "H1"
@@ -370,10 +392,11 @@ def compute_indicators(df: pd.DataFrame) -> pd.DataFrame:
     df["momentum_5"] = pd.Series(c).pct_change(5).values
     df["volatility_10"] = pd.Series(c).pct_change().rolling(10).std().values
 
-    # Volume Ratio
-    if "volume" in df.columns and df["volume"].sum() > 0:
-        df["vol_sma_20"] = pd.Series(df["volume"].values).rolling(20).mean().values
-        df["vol_ratio"] = df["volume"] / df["vol_sma_20"].replace(0, 1)
+    # Volume Ratio (MT5 uses 'tick_volume', not 'volume')
+    vol_col = "tick_volume" if "tick_volume" in df.columns else "volume" if "volume" in df.columns else None
+    if vol_col and df[vol_col].sum() > 0:
+        df["vol_sma_20"] = pd.Series(df[vol_col].values).rolling(20).mean().values
+        df["vol_ratio"] = df[vol_col] / df["vol_sma_20"].replace(0, 1)
     else:
         df["vol_ratio"] = 1.0
 
@@ -681,6 +704,11 @@ class RiskManager:
         self.balance = new_balance
         self.peak_balance = max(self.peak_balance, new_balance)
 
+    def update_equity(self, equity: float):
+        """Track equity for position sizing."""
+        self.equity = equity
+        self.peak_balance = max(self.peak_balance, equity)
+
     def get_drawdown_pct(self) -> float:
         if self.peak_balance <= 0:
             return 0.0
@@ -756,8 +784,9 @@ class RiskManager:
         # Tier-based risk multiplier
         tier_mult = TIER_RISK_MULT.get(symbol, 0.5) if symbol else 1.0
 
-        # Base risk = equity × risk percentage
-        base_risk = self.balance * CONFIG["max_risk_pct"]
+        # Base risk = EQUITY × risk percentage (always use equity, not balance)
+        equity = getattr(self, 'equity', self.balance)
+        base_risk = equity * CONFIG["max_risk_pct"]
 
         # Apply safety multipliers (these only REDUCE size)
         risk_amount = base_risk * risk_mult * session_mult * dyn_risk * tier_mult
@@ -775,8 +804,8 @@ class RiskManager:
         sym_max = MAX_LOTS_PER_SYMBOL.get(symbol, 0.50) if symbol else 0.50
         lots = min(lots, sym_max)
 
-        # Cap at max position (25% of equity)
-        max_lots = (self.balance * CONFIG["max_position_pct"]) / (price * contract_size)
+        # Cap at max position (5% of equity)
+        max_lots = (equity * CONFIG["max_position_pct"]) / (price * contract_size)
         lots = min(lots, max_lots)
 
         # Enforce minimum lot size (MT5 requires at least 0.01)
@@ -1031,6 +1060,13 @@ class UnifiedEngine:
             self.execution_optimizer = None
             self.alternative_data = None
 
+        # Initialize MTF Cascading Scalper
+        if CONFIG.get("mtf_cascading_scalper_enabled"):
+            from apps.legendary.mtf_cascading_scalper import MTFCascadingScalper
+            self.scalper = MTFCascadingScalper(self.mt5, self.risk, CONFIG)
+        else:
+            self.scalper = None
+
     def start(self):
         """Initialize and start the engine."""
         log.info("=" * 70)
@@ -1080,6 +1116,7 @@ class UnifiedEngine:
         acct = self.mt5.get_account_info()
         if acct:
             self.risk.update_balance(acct["balance"])
+            self.risk.update_equity(acct["equity"])
             log.info(f"  Balance: ${acct['balance']:.2f} | Equity: ${acct['equity']:.2f} | DD: {self.risk.get_drawdown_pct()*100:.1f}%")
 
         # Check drawdown pause
@@ -1095,6 +1132,27 @@ class UnifiedEngine:
 
         # Manage existing positions (trailing stops, partial TP)
         self._manage_existing_positions()
+
+        # ═══ COMPUTE RISK PARITY ONCE PER CYCLE (not per-symbol) ═══
+        if NEW_FEATURES_AVAILABLE and self.risk_parity and CONFIG.get("risk_parity_enabled"):
+            try:
+                if self.risk_parity.should_rebalance(interval_hours=4):
+                    price_data = {}
+                    for sym in WATCHLIST:
+                        sym_df = self.mt5.fetch_candles(sym, TIMEFRAME, 100)
+                        if sym_df is not None and len(sym_df) > 20:
+                            price_data[sym] = sym_df["close"]
+                    if len(price_data) >= 2:
+                        self.risk_parity.calculate_weights(price_data)
+                        log.info(f"  RISK PARITY: weights computed for {len(price_data)} symbols: "
+                                 + ", ".join(f"{s}={w:.2f}" for s, w in list(self.risk_parity.weights.items())[:5]))
+            except Exception as e:
+                log.debug(f"  Risk parity rebalance skipped: {e}")
+
+        # MTF Cascading Scalper
+        if self.scalper:
+            self.scalper.scan_and_execute()
+            self.scalper.refresh_trade_statuses()
 
         # Scan all symbols
         signals = []
@@ -1178,6 +1236,10 @@ class UnifiedEngine:
         # Layer 5: ML ranking
         ml_p_up = ml_rank(indicator_dict)
 
+        # Calculate SL/TP
+        atr = float(row.get("atr", 0))
+        price = float(row["close"])
+
         # NEW FEATURES: Additional filters and analysis
         feature_data = {}
         if NEW_FEATURES_AVAILABLE:
@@ -1208,10 +1270,6 @@ class UnifiedEngine:
             if CONFIG.get("alternative_data_enabled") and self.alternative_data:
                 alt_signal = self.alternative_data.get_signal(symbol)
                 feature_data["alternative"] = alt_signal
-
-        # Calculate SL/TP
-        atr = float(row.get("atr", 0))
-        price = float(row["close"])
         sl, tp = self.risk.calculate_sl_tp(price, atr, action)
 
         # Create signal
@@ -1534,7 +1592,9 @@ async def startup():
                 except KeyboardInterrupt:
                     engine.running = False
                 except Exception as e:
+                    import traceback
                     log.error(f"Engine error: {e}")
+                    log.error(traceback.format_exc())
                     time.sleep(60)
 
     thread = threading.Thread(target=run_engine, daemon=True)
@@ -2079,8 +2139,20 @@ def engine_status():
             "calendar_enabled": CONFIG.get("calendar_enabled", False),
             "risk_parity_enabled": CONFIG.get("risk_parity_enabled", False),
             "multi_timeframe_enabled": CONFIG.get("multi_timeframe_enabled", False),
+            "mtf_cascading_scalper_enabled": CONFIG.get("mtf_cascading_scalper_enabled", False),
         },
+        "scalper": engine.scalper.get_status() if getattr(engine, 'scalper', None) else None,
     }
+
+
+@app.get("/api/v1/scalper/status")
+def scalper_status():
+    """MTF Cascading Scalper status endpoint."""
+    if not getattr(engine, 'scalper', None):
+        return {"enabled": False, "open_scalps": 0, "total_trades": 0,
+                "last_scan": None, "last_error": None, "symbol": None,
+                "tp_pips": 0, "sl_pips": 0, "max_concurrent": 0, "groups": []}
+    return engine.scalper.get_status()
 
 
 @app.get("/api/v1/live/tick/{symbol}")

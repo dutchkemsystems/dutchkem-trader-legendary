@@ -1,3 +1,4 @@
+import os
 """
 Seven Improvements Framework
 ============================
@@ -35,7 +36,7 @@ SYMBOLS = [
 
 # ─── Data Loading ────────────────────────────────────────────
 def load_all_data():
-    mt5.initialize(path=MT5_PATH, login=476963617, password="Christ@5436", server="Exness-MT5Trial9")
+    mt5.initialize(path=MT5_PATH, login=int(os.environ.get("MT5_LOGIN", "0")), password=os.environ.get("MT5_PASSWORD", ""), server=os.environ.get("MT5_SERVER", ""))
     all_data = {}
     for sym in SYMBOLS:
         info = mt5.symbol_info(sym)

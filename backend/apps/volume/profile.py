@@ -27,6 +27,10 @@ class VolumeProfile:
         if len(prices) < 10:
             return []
 
+        # Align indices to prevent boolean index mismatch
+        prices = prices.reset_index(drop=True)
+        volumes = volumes.reset_index(drop=True)
+
         # Create price bins
         price_min = prices.min()
         price_max = prices.max()

@@ -1,3 +1,4 @@
+import os
 import asyncio
 from typing import Dict, Any, List, Tuple
 from dataclasses import dataclass
@@ -17,9 +18,9 @@ MT5_TIMEFRAMES = {
 
 MT5_CONFIG = {
     "path": r"C:\Program Files\MetaTrader 5 EXNESS\terminal64.exe",
-    "login": 476963617,
-    "password": "Christ@5436",
-    "server": "Exness-MT5Trial9",
+    "login": int(os.environ.get("MT5_LOGIN", "0")),
+    "password": os.environ.get("MT5_PASSWORD", ""),
+    "server": os.environ.get("MT5_SERVER", ""),
 }
 
 

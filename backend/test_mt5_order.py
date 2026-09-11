@@ -1,3 +1,4 @@
+import os
 """
 Manual MT5 Order Test
 =====================
@@ -24,7 +25,7 @@ def main():
 
     # 1. Initialize MT5 directly
     print("\n[1] Connecting to MT5...")
-    if not mt5.initialize(path=MT5_PATH, login=476963617, password="Christ@5436", server="Exness-MT5Trial9"):
+    if not mt5.initialize(path=MT5_PATH, login=int(os.environ.get("MT5_LOGIN", "0")), password=os.environ.get("MT5_PASSWORD", ""), server=os.environ.get("MT5_SERVER", "")):
         print(f"  FAILED: {mt5.last_error()}")
         return
 

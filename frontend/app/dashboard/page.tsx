@@ -12,6 +12,7 @@ import { GateStatusCard } from "@/components/dashboard/gate-status-card";
 import { DebateResultCard } from "@/components/dashboard/debate-result-card";
 import { MemoryContextCard } from "@/components/dashboard/memory-context-card";
 import { PaperTradingCard } from "@/components/dashboard/paper-trading-card";
+import { ScalperDashboardPanel } from "@/components/dashboard/scalper-dashboard-panel";
 import { LiveTradingCard } from "@/components/dashboard/live-trading-card";
 import { PriceChart } from "@/components/charts/price-chart";
 import { Indicators } from "@/components/charts/indicators";
@@ -19,6 +20,7 @@ import { ErrorBoundary } from "@/components/error-boundary";
 import { useTrades } from "@/hooks/use-trades";
 import { usePositions } from "@/hooks/use-positions";
 import { useFullConsensus } from "@/hooks/use-full-consensus";
+import { useScalper } from "@/hooks/use-scalper";
 import { useSymbolStore } from "@/stores/symbol-store";
 
 function StatsLoadingSkeleton() {
@@ -42,6 +44,7 @@ export default function DashboardPage() {
   const { count: tradeCount, loading: tradesLoading } = useTrades();
   const { positions, loading: positionsLoading } = usePositions();
   const { data: fullConsensus, loading: consensusLoading } = useFullConsensus();
+  const { status: scalperStatus, loading: scalperLoading } = useScalper();
 
   if (tradesLoading && positionsLoading) {
     return (
@@ -161,6 +164,11 @@ export default function DashboardPage() {
               <PaperTradingCard />
             </ErrorBoundary>
           </div>
+
+          {/* MTF Cascading Scalper */}
+          <ErrorBoundary>
+            <ScalperDashboardPanel status={scalperStatus} loading={scalperLoading} />
+          </ErrorBoundary>
         </div>
 
         {/* Right column — quick trade + chart */}
