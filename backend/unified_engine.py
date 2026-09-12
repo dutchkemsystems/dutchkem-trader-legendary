@@ -2312,7 +2312,7 @@ class UnifiedEngine:
 
     def _run_analyst_consensus(self, symbol: str, timeframe: str = "H1", df=None):
         """
-        Run the 6 working analysts on a symbol and return consensus.
+        Run all 12 analysts on a symbol and return consensus.
         Returns: (consensus_action, confidence_modifier, analyst_details)
         """
         if not CONFIG.get("analyst_consensus_enabled"):
@@ -2326,6 +2326,11 @@ class UnifiedEngine:
             ("Technical", "apps.analysts.technical", "TechnicalAnalyst"),
             ("Compliance", "apps.analysts.compliance", "ComplianceAnalyst"),
             ("OrderFlow", "apps.analysts.order_flow", "OrderFlowAnalyst"),
+            ("News", "apps.analysts.news", "NewsAnalyst"),
+            ("Sentiment", "apps.analysts.sentiment", "SentimentAnalyst"),
+            ("Macro", "apps.analysts.macro", "MacroAnalyst"),
+            ("Options", "apps.analysts.options", "OptionsAnalyst"),
+            ("OnChain", "apps.analysts.on_chain", "OnChainAnalyst"),
         ]
 
         votes = {"BUY": 0, "SELL": 0, "HOLD": 0}
