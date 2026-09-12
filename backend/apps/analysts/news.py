@@ -31,7 +31,8 @@ class NewsAnalyst(BaseAnalyst):
                 signal='HOLD',
                 confidence=0.0,
                 reasoning='No news API configured — cannot analyze news sentiment',
-                data={'error': 'no_news_api', 'data_source': 'none'}
+                data={'error': 'no_news_api', 'data_source': 'none'},
+                data_source='none'
             )
         sentiment_score = self._analyze_sentiment(news_data)
         keywords = self._extract_keywords(news_data)

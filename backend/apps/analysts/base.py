@@ -13,6 +13,7 @@ class AnalystResult:
     confidence: float
     reasoning: str
     data: Dict[str, Any] = field(default_factory=dict)
+    data_source: str = "unknown"  # "mt5", "yfinance", "llm", "none"
     timestamp: datetime = None
 
     def __post_init__(self):

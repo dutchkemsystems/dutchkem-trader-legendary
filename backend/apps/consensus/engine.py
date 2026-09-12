@@ -38,8 +38,16 @@ class ConsensusEngine:
             if isinstance(result, Exception):
                 logger.warning(f'Analyst {self.analysts[i].__class__.__name__} failed: {result}')
 
-        # Filter out exceptions
-        valid_results = [r for r in results if isinstance(r, AnalystResult)]
+        # Filter out exceptions AND stub results (data_source == "none")
+        valid_results = [
+            r for r in results
+            if isinstance(r, AnalystResult) and r.data_source != "none"
+        ]
+
+        # Log filtered stubs
+        stub_count = sum(1 for r in results if isinstance(r, AnalystResult) and r.data_source == "none")
+        if stub_count > 0:
+            logger.info(f'Filtered {stub_count} stub analysts from consensus')
 
         # 2. Count votes
         votes = self.vote_counter.count_votes(valid_results)

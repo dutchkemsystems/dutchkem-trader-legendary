@@ -45,35 +45,91 @@ class OrderFlowAnalyst(BaseAnalyst):
             signal=signal,
             confidence=confidence,
             reasoning=f'Microprice: {microprice:.5f}, Imbalance: {imbalance:.2f}',
-            data=flow_data
+            data=flow_data,
+            data_source='mt5'
         )
 
     async def _fetch_order_flow(self, symbol: str) -> dict:
+        """Fetch real tick volume data from MT5 and analyze order flow.
+        
+        Uses actual tick data to classify buyer vs seller initiated transactions.
+        A tick is buyer-initiated if the price moved up (ask was hit).
+        A tick is seller-initiated if the price moved down (bid was hit).
+        """
         try:
             import MetaTrader5 as mt5
+            import numpy as np
+            
             tick = mt5.symbol_info_tick(symbol)
-            if tick:
-                info = mt5.symbol_info(symbol)
-                spread = info.spread if info else 10
-                bid_vol = max(1000, 15000 + int((tick.bid - 1.1) * 100000))
-                ask_vol = max(1000, 12000 + int((1.1 - tick.ask) * 100000))
-                cvd = bid_vol - ask_vol
+            if not tick:
+                return None
+            
+            info = mt5.symbol_info(symbol)
+            if not info:
+                return None
+            
+            # Get real tick data (last 1000 ticks)
+            ticks = mt5.copy_ticks_from_pos(symbol, 0, 1000, mt5.COPY_TICKS_ALL)
+            
+            if ticks is None or len(ticks) < 10:
+                # Fallback: use M1 bar volumes as approximation
                 rates = mt5.copy_rates_from_pos(symbol, mt5.TIMEFRAME_M1, 0, 20)
                 if rates is not None and len(rates) > 0:
                     tick_volumes = [r['tick_volume'] for r in rates]
-                    avg_vol = sum(tick_volumes) / len(tick_volumes) if tick_volumes else 1000
-                    bid_vol = int(avg_vol * (1 + (cvd / (avg_vol * 2 + 1))))
-                    ask_vol = int(avg_vol * (1 - (cvd / (avg_vol * 2 + 1))))
-                return {
-                    'bid_volume': max(100, bid_vol),
-                    'ask_volume': max(100, ask_vol),
-                    'bid_price': tick.bid,
-                    'ask_price': tick.ask,
-                    'cvd': cvd,
-                }
-        except Exception:
-            pass
-        return None  # No MT5 data available
+                    avg_vol = sum(tick_volumes) / len(tick_volumes)
+                    # Use price direction in recent bars to estimate buyer/seller split
+                    recent_closes = [r['close'] for r in rates[-5:]]
+                    recent_opens = [r['open'] for r in rates[-5:]]
+                    up_bars = sum(1 for c, o in zip(recent_closes, recent_opens) if c > o)
+                    down_bars = len(recent_closes) - up_bars
+                    total = up_bars + down_bars
+                    bid_vol = int(avg_vol * (up_bars / total)) if total > 0 else int(avg_vol / 2)
+                    ask_vol = int(avg_vol * (down_bars / total)) if total > 0 else int(avg_vol / 2)
+                else:
+                    return None
+            else:
+                # Classify ticks by price movement direction
+                df_ticks = np.array(ticks)
+                prices = df_ticks['last']
+                
+                # Determine direction: if price went up from previous tick → buyer
+                # If price went down → seller
+                directions = np.diff(prices)
+                
+                # Use tick volume as weight
+                volumes = df_ticks[1:]['volume'].clip(min=1)
+                
+                # Buyer volume: sum of volume where price went up
+                # Seller volume: sum of volume where price went down
+                buyer_mask = directions > 0
+                seller_mask = directions < 0
+                
+                bid_vol = int(np.sum(volumes[buyer_mask]))
+                ask_vol = int(np.sum(volumes[seller_mask]))
+                
+                # If no clear direction, use 50/50 split
+                if bid_vol == 0 and ask_vol == 0:
+                    total_vol = int(np.sum(volumes))
+                    bid_vol = total_vol // 2
+                    ask_vol = total_vol // 2
+            
+            total = bid_vol + ask_vol
+            cvd = bid_vol - ask_vol
+            imbalance = cvd / total if total > 0 else 0.0
+            
+            return {
+                'bid_volume': max(100, bid_vol),
+                'ask_volume': max(100, ask_vol),
+                'bid_price': tick.bid,
+                'ask_price': tick.ask,
+                'cvd': cvd,
+                'imbalance': imbalance,
+                'data_source': 'mt5',
+            }
+        except Exception as e:
+            import logging
+            logging.getLogger(__name__).warning(f"Order flow fetch failed for {symbol}: {e}")
+            return None
 
     def _calculate_microprice(self, data: dict) -> float:
         bid_vol = data.get('bid_volume', 1)

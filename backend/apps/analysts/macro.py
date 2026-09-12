@@ -30,7 +30,8 @@ class MacroAnalyst(BaseAnalyst):
             signal='HOLD',
             confidence=0.0,
             reasoning='No macro API configured — requires FRED/Trading Economics API',
-            data={'error': 'no_macro_api', 'data_source': 'none'}
+            data={'error': 'no_macro_api', 'data_source': 'none'},
+            data_source='none'
         )
 
     def get_capabilities(self) -> list[str]:

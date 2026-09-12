@@ -34,9 +34,9 @@ class MLDataLoader:
 
     def __init__(self, data_manager: Optional[MarketDataManager] = None):
         if data_manager is None:
-            registry = ProviderRegistry()
-            registry.register(StubProvider())
-            data_manager = MarketDataManager(registry=registry)
+            # Use default registry which chains: AKShare (free) -> StubProvider (fallback)
+            # This ensures real market data is used when available
+            data_manager = MarketDataManager()
         self.data_manager = data_manager
         self.extractor = FeatureExtractor()
 

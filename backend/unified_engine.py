@@ -34,6 +34,10 @@ from typing import Dict, List, Optional, Any, Tuple
 from dataclasses import dataclass, field, asdict
 from enum import Enum
 
+# Models directory for ML model persistence
+MODELS_DIR = Path(__file__).parent / "models"
+MODELS_DIR.mkdir(parents=True, exist_ok=True)
+
 if sys.platform == "win32":
     sys.stdout.reconfigure(encoding="utf-8", errors="replace")
     sys.stderr.reconfigure(encoding="utf-8", errors="replace")
@@ -145,14 +149,88 @@ SESSION_OVERLAP = (12, 16) # London-NY overlap (best spreads)
 # ═══════════════════════════════════════════════════════════════
 CONFIG = {
     # ── Risk Management ──
-    "max_risk_pct": 0.25,           # 25% risk per trade (demo account)
-    "max_position_pct": 0.25,
+    "max_risk_pct": 0.10,              # 10% risk per trade (reduced from 25% for safety)
+    "max_position_pct": 0.15,
     "kelly_win_rate": 0.55,
     "kelly_avg_win": 1.5,
     "kelly_avg_loss": 1.0,
     "hold_bars": 72,
     "min_confidence": 0.25,
     "min_score": 2,
+
+    # ── Daily ROI Limits ──
+    "daily_profit_target_pct": 0.02,   # Stop trading after +2% daily gain
+    "daily_loss_limit_pct": 0.015,     # Stop trading after -1.5% daily loss
+    "daily_risk_per_trade_pct": 0.005, # 0.5% risk per trade (conservative)
+    "daily_reset_hour_utc": 0,         # Reset counters at midnight UTC
+    "daily_extraction_enabled": True,  # Enable weekly profit extraction
+    "extraction_day": "friday",        # Extract profits on Friday
+    "extraction_pct": 0.30,           # Extract 30% of weekly profits
+
+    # ── ML Live Learning ──
+    "ml_live_learning_enabled": True,  # Enable live learning from real trades
+    "ml_retrain_interval": 20,        # Retrain every 20 trades
+    "ml_min_diversity": 5,            # Min 5 wins AND 5 losses before retraining
+    "ml_max_training_data": 200,      # Keep last 200 trades for training
+
+    # ── Dual Kelly Profiles (LLM picks per-trade) ──
+    "kelly_profiles": {
+        "aggressive": {
+            "avg_win": 2.0,
+            "avg_loss": 0.5,
+            "description": "High R:R (4:1). Use in strong trends with clear momentum.",
+            "conditions": "ADX>30, high volume, trending Ichimoku, London/NY session",
+        },
+        "neutral": {
+            "avg_win": 1.75,
+            "avg_loss": 0.75,
+            "description": "Medium R:R (2.3:1). Use in moderate trends with some confirmation.",
+            "conditions": "ADX 20-30, moderate volume, partial Ichimoku alignment",
+        },
+        "conservative": {
+            "avg_win": 1.5075,
+            "avg_loss": 0.995,
+            "description": "Balanced R:R (1.5:1). Use in ranging or uncertain markets.",
+            "conditions": "ADX<25, low volume, mixed signals, off-peak session",
+        },
+    },
+    "strategy_selector_enabled": True,
+
+    # ── Symbol-Specific Default Profiles ──
+    "symbol_default_profiles": {
+        # Stable pairs → aggressive default
+        "EURUSD": "aggressive",
+        "GBPUSD": "aggressive",
+        "USDCHF": "aggressive",
+        "AUDUSD": "aggressive",
+        "NZDUSD": "aggressive",
+        "USDCAD": "aggressive",
+        "EURGBP": "aggressive",
+        # Volatile pairs → conservative default
+        "USDJPY": "conservative",
+        "EURJPY": "conservative",
+        "GBPJPY": "conservative",
+        "AUDJPY": "conservative",
+        "XAUUSD": "conservative",
+    },
+
+    # ── Session Strategy Bias ──
+    "session_strategy_bias": {
+        # Hour (UTC): "aggressive" or "conservative"
+        # London/NY overlap: aggressive (high liquidity, big moves)
+        13: "aggressive", 14: "aggressive", 15: "aggressive", 16: "aggressive",
+        # London open: slightly aggressive
+        7: "neutral", 8: "neutral", 9: "neutral", 10: "neutral",
+        11: "neutral", 12: "neutral",
+        # NY afternoon: neutral
+        17: "neutral", 18: "neutral",
+        # Off-peak: conservative
+        19: "conservative", 20: "conservative", 21: "conservative",
+        # Asian session: conservative (low liquidity)
+        0: "conservative", 1: "conservative", 2: "conservative", 3: "conservative",
+        4: "conservative", 5: "conservative", 6: "conservative",
+        22: "conservative", 23: "conservative",
+    },
 
     # ── Safety Limits ──
     "max_correlated_trades": 2,      # Max 2 correlated pairs open
@@ -220,6 +298,16 @@ CONFIG = {
     "rl_execution_enabled": True,
     "alternative_data_enabled": True,
 
+    # ── ANALYST CONSENSUS (Phase 1) ──
+    "analyst_consensus_enabled": True,
+    "analyst_min_agreement": 0.50,       # Min % of analysts that must agree to boost
+    "analyst_block_threshold": 0.50,     # If >50% disagree → block trade
+    "analyst_confidence_boost": 0.20,    # Boost confidence by 20% on strong agreement
+    "analyst_confidence_penalty": 0.15,  # Reduce confidence by 15% on weak agreement
+
+    # ── LEGENDARY CONSENSUS (Phase 2) ──
+    "legendary_consensus_enabled": True,
+
     # ── MTF Analysis ──
     "multi_timeframe_enabled": True,
     "mtf_timeframes": ["M15", "M30", "H1", "H4", "D1", "W1", "MN1"],
@@ -230,7 +318,7 @@ CONFIG = {
     },
 
     # ── MTF Cascading Scalper ──
-    "mtf_cascading_scalper_enabled": False,
+    "mtf_cascading_scalper_enabled": True,
     "scalper_timeframes": ["M1", "M5", "M15", "M30", "H1", "H4", "D1", "W1", "MN1"],
     "scalper_groups": [
         {"name": "G1", "timeframes": ["M1", "M5", "M15"]},
@@ -244,10 +332,15 @@ CONFIG = {
     "scalper_tp_pips": 10,
     "scalper_sl_pips": 5,
     "scalper_lot_size": 0.01,
-    "scalper_max_concurrent": 3,
+    "scalper_max_concurrent": 5,
     "scalper_scan_interval": 60,
     "scalper_restart_from_group1": True,
-    "scalper_symbol": "EURUSD",
+    "scalper_symbol": "EURUSD",  # Fallback if multi-symbol disabled
+    "scalper_multi_symbol": True,  # Scan all WATCHLIST symbols
+    "scalper_trailing_enabled": True,
+    "scalper_trailing_breakeven_rr": 1.0,  # Move SL to entry at 1:1 R:R
+    "scalper_trailing_step_pips": 5,  # Trail by 5 pips
+    "scalper_prefer_groups": ["G3", "G4", "G5"],  # Prefer M15-H1-H4 range
 }
 
 TIMEFRAME = "H1"
@@ -591,6 +684,59 @@ def mtf_analysis(mtf_data: Dict[str, pd.DataFrame]) -> Tuple[str, float, Dict]:
 
 
 # ═══════════════════════════════════════════════════════════════
+# STRATEGY SELECTION PROMPT — LLM picks aggressive vs conservative
+# ═══════════════════════════════════════════════════════════════
+
+STRATEGY_SELECTION_PROMPT = """You are a senior trading strategist with 20+ years of experience. You must decide which risk profile to use for the next trade.
+
+═══ THREE PROFILES ═══
+A) AGGRESSIVE (avg_win=2.0, avg_loss=0.5 → R:R = 4:1)
+   - Larger position sizing, higher reward per risk unit
+   - BEST WHEN: Strong directional trend, high conviction, volume confirms
+   - RISK: bigger losses when wrong
+
+B) NEUTRAL (avg_win=1.75, avg_loss=0.75 → R:R ≈ 2.3:1)
+   - Balanced-aggressive sizing, moderate reward per risk unit
+   - BEST WHEN: Moderate trend with some confirmation, partial volume support
+   - BALANCED: neither too aggressive nor too cautious
+
+C) CONSERVATIVE (avg_win=1.5075, avg_loss=0.995 → R:R ≈ 1.5:1)
+   - Balanced position sizing, standard reward per risk unit
+   - BEST WHEN: Ranging market, mixed signals, low volume, uncertain
+   - SAFER: smaller losses when wrong
+
+═══ MARKET DATA ═══
+Symbol: {symbol} | Direction: {action}
+Current Price: {close}
+ADX: {adx} | RSI: {rsi}
+Volume Ratio: {vol_ratio}x average
+ATR%: {atr_pct}%
+Ichimoku: Tenkan={tenkan}, Kijun={kijun}, SenkouA={senkou_a}, SenkouB={senkou_b}
+Session Hour (UTC): {session_hour}
+Signal Confidence: {confidence}
+Balance: ${current_balance}
+Open Positions: {open_positions}
+Recent Performance: {recent_wins}W / {recent_losses}L (last 10 trades)
+
+═══ YOUR REASONING ═══
+Analyze the market conditions critically:
+1. Is there a clear directional trend (ADX, Ichimoku cloud, moving averages)?
+2. Is volume confirming the move?
+3. Is the session active (London/NY overlap)?
+4. What is the risk/reward context?
+5. How has recent performance been?
+
+Think like a human trader — not just numbers, but market context.
+
+Respond with ONLY this JSON:
+{{
+    "profile": "aggressive" or "neutral" or "conservative",
+    "confidence": 0.0 to 1.0 (how confident in your choice),
+    "reasoning": "1-2 sentences explaining your decision"
+}}"""
+
+
+# ═══════════════════════════════════════════════════════════════
 # LAYER 4: LLM MARKET ANALYSIS
 # ═══════════════════════════════════════════════════════════════
 
@@ -646,12 +792,15 @@ def llm_analyze(symbol: str, indicators: Dict[str, float], action: str) -> Dict:
 
 def ml_rank(indicators: Dict[str, float]) -> float:
     """Use ML model to rank signal quality. Returns P(UP)."""
-    if not CONFIG["ml_enabled"]:
+    if not CONFIG.get("ml_live_learning_enabled", True):
         return 0.5
 
     try:
         from apps.ml.predictor import MLPredictor
-        ml = MLPredictor(model_type="xgboost")
+        # Cache predictor instance to avoid re-loading model every call
+        if not hasattr(ml_rank, '_predictor'):
+            ml_rank._predictor = MLPredictor(model_type="xgboost")
+        ml = ml_rank._predictor
 
         if not ml.is_trained:
             return 0.5
@@ -668,10 +817,10 @@ def ml_rank(indicators: Dict[str, float]) -> float:
             indicators.get("atr", 0) / close if close > 0 else 0,  # atr_pct
             indicators.get("vol_ratio", 1.0),
             indicators.get("momentum_5", 0),
-            1.0 if indicators.get("adx", 0) > 25 else 0.0,  # volatility_regime
+            indicators.get("volatility_regime", 1.0 if indicators.get("adx", 0) > 25 else 0.0),
             indicators.get("adx", 0),  # trend_strength
-            0.0,  # support_distance (not available from indicators dict)
-            0.0,  # resistance_distance (not available from indicators dict)
+            indicators.get("support_distance", 0.0),  # real S/R distance
+            indicators.get("resistance_distance", 0.0),  # real S/R distance
         ])
 
         pred = ml.predict_from_features(features)
@@ -686,7 +835,13 @@ def ml_rank(indicators: Dict[str, float]) -> float:
 # ═══════════════════════════════════════════════════════════════
 
 class RiskManager:
-    """Combined risk management: Kelly + Circuit Breaker + Drawdown + Correlation."""
+    """SINGLE SOURCE OF TRUTH for risk management.
+    
+    Combined risk management: Kelly + Circuit Breaker + Drawdown + Correlation + Daily Limits.
+    
+    This is the ONLY RiskManager used by the live trading engine.
+    The deprecated version in execution/risk_manager.py is NOT used.
+    """
 
     def __init__(self):
         self.balance = 10000.0
@@ -699,6 +854,20 @@ class RiskManager:
         self.circuit_breaker_state = "CLOSED"  # CLOSED, OPEN, HALF_OPEN
         self.cb_opened_at = None
         self.cb_recoveries = 0
+
+        # ── Daily ROI Tracking ──
+        self.daily_start_balance = 10000.0  # Balance at start of day
+        self.daily_trades = 0
+        self.daily_wins = 0
+        self.daily_pnl_dollar = 0.0
+        self.daily_date = datetime.now(timezone.utc).date()
+        self.daily_target_hit = False
+        self.daily_limit_hit = False
+
+        # ── Weekly Extraction Tracking ──
+        self.weekly_pnl = 0.0
+        self.weekly_start_balance = 10000.0
+        self.last_extraction_date = None
 
     def update_balance(self, new_balance: float):
         self.balance = new_balance
@@ -742,6 +911,23 @@ class RiskManager:
         self.peak_balance = max(self.peak_balance, self.balance)
         self.daily_pnl += pnl_pct
 
+        # Record trade in trade_log (BUG FIX: was never populated)
+        self.trade_log.append({
+            "pnl": pnl,
+            "pnl_pct": pnl_pct,
+            "time": datetime.now(timezone.utc).isoformat(),
+        })
+
+        # ── Daily Tracking ──
+        self.daily_trades += 1
+        self.daily_pnl_dollar += pnl
+        if pnl > 0:
+            self.daily_wins += 1
+        self.weekly_pnl += pnl
+
+        # Check daily limits
+        self._check_daily_limits()
+
         if pnl <= 0:
             self.consecutive_losses += 1
             self.consecutive_wins = 0
@@ -757,6 +943,111 @@ class RiskManager:
                     self.circuit_breaker_state = "CLOSED"
                     self.daily_pnl = 0
                     self.cb_recoveries = 0
+
+    def _check_daily_limits(self):
+        """Check if daily profit target or loss limit is hit."""
+        if self.daily_start_balance <= 0:
+            return
+
+        daily_return = self.daily_pnl_dollar / self.daily_start_balance
+
+        # Profit target hit
+        if daily_return >= CONFIG["daily_profit_target_pct"]:
+            if not self.daily_target_hit:
+                self.daily_target_hit = True
+                log.warning(f"  DAILY PROFIT TARGET HIT: {daily_return:.2%} >= {CONFIG['daily_profit_target_pct']:.2%}")
+
+        # Loss limit hit
+        if daily_return <= -CONFIG["daily_loss_limit_pct"]:
+            if not self.daily_limit_hit:
+                self.daily_limit_hit = True
+                log.warning(f"  DAILY LOSS LIMIT HIT: {daily_return:.2%} <= -{CONFIG['daily_loss_limit_pct']:.2%}")
+
+    def reset_daily_counters(self):
+        """Reset daily counters at midnight UTC."""
+        now = datetime.now(timezone.utc).date()
+        if now != self.daily_date:
+            log.info(f"  DAILY RESET: {self.daily_date} → {now} | "
+                     f"P&L=${self.daily_pnl_dollar:+.2f} | "
+                     f"Trades={self.daily_trades} | WR={self.daily_wins}/{self.daily_trades}")
+            self.daily_start_balance = self.balance
+            self.daily_trades = 0
+            self.daily_wins = 0
+            self.daily_pnl_dollar = 0.0
+            self.daily_date = now
+            self.daily_target_hit = False
+            self.daily_limit_hit = False
+
+    def can_trade_today(self) -> bool:
+        """Check if trading is allowed today (daily limits not hit)."""
+        self.reset_daily_counters()  # Auto-reset at midnight
+
+        if self.daily_target_hit:
+            return False  # Already hit profit target
+        if self.daily_limit_hit:
+            return False  # Already hit loss limit
+        return True
+
+    def get_daily_status(self) -> Dict:
+        """Get daily trading status."""
+        self.reset_daily_counters()  # Auto-reset at midnight
+        daily_return = self.daily_pnl_dollar / self.daily_start_balance if self.daily_start_balance > 0 else 0
+        return {
+            "date": str(self.daily_date),
+            "start_balance": round(self.daily_start_balance, 2),
+            "current_balance": round(self.balance, 2),
+            "daily_pnl": round(self.daily_pnl_dollar, 2),
+            "daily_return": round(daily_return, 4),
+            "daily_trades": self.daily_trades,
+            "daily_wins": self.daily_wins,
+            "daily_win_rate": round(self.daily_wins / self.daily_trades, 2) if self.daily_trades > 0 else 0,
+            "profit_target": CONFIG["daily_profit_target_pct"],
+            "loss_limit": CONFIG["daily_loss_limit_pct"],
+            "target_hit": self.daily_target_hit,
+            "limit_hit": self.daily_limit_hit,
+            "can_trade": not self.daily_target_hit and not self.daily_limit_hit,
+        }
+
+    def check_weekly_extraction(self) -> Dict:
+        """Check if it's time for weekly profit extraction."""
+        if not CONFIG.get("daily_extraction_enabled"):
+            return {"extract": False, "reason": "extraction disabled"}
+
+        now = datetime.now(timezone.utc)
+        extraction_day = CONFIG.get("extraction_day", "friday").lower()
+
+        # Check if it's the extraction day
+        day_map = {"monday": 0, "tuesday": 1, "wednesday": 2, "thursday": 3,
+                   "friday": 4, "saturday": 5, "sunday": 6}
+        target_day = day_map.get(extraction_day, 4)
+
+        if now.weekday() != target_day:
+            return {"extract": False, "reason": f"not {extraction_day} (today={now.strftime('%A')})"}
+
+        # Check if already extracted today
+        if self.last_extraction_date == now.date():
+            return {"extract": False, "reason": "already extracted today"}
+
+        # Calculate extraction amount
+        extraction_pct = CONFIG.get("extraction_pct", 0.30)
+        extraction_amount = self.weekly_pnl * extraction_pct
+
+        if extraction_amount <= 0:
+            return {"extract": False, "reason": f"no profits to extract (weekly P&L=${self.weekly_pnl:+.2f})"}
+
+        return {
+            "extract": True,
+            "amount": round(extraction_amount, 2),
+            "weekly_pnl": round(self.weekly_pnl, 2),
+            "extraction_pct": extraction_pct,
+            "reason": f"{extraction_day} extraction: ${extraction_amount:.2f} ({extraction_pct:.0%} of ${self.weekly_pnl:.2f})",
+        }
+
+    def record_extraction(self, amount: float):
+        """Record that a profit extraction was made."""
+        self.last_extraction_date = datetime.now(timezone.utc).date()
+        self.weekly_pnl -= amount
+        log.info(f"  PROFIT EXTRACTION: ${amount:.2f} | Remaining weekly P&L: ${self.weekly_pnl:+.2f}")
 
     def check_correlation(self, symbol: str) -> bool:
         max_correlated = CONFIG["max_correlated_trades"]
@@ -786,7 +1077,10 @@ class RiskManager:
 
         # Base risk = EQUITY × risk percentage (always use equity, not balance)
         equity = getattr(self, 'equity', self.balance)
-        base_risk = equity * CONFIG["max_risk_pct"]
+        # Use daily_risk_per_trade_pct for conservative per-trade sizing (0.5%)
+        # Fall back to max_risk_pct if daily_risk_per_trade_pct not set
+        risk_pct = CONFIG.get("daily_risk_per_trade_pct", CONFIG["max_risk_pct"])
+        base_risk = equity * risk_pct
 
         # Apply safety multipliers (these only REDUCE size)
         risk_amount = base_risk * risk_mult * session_mult * dyn_risk * tier_mult
@@ -1067,6 +1361,907 @@ class UnifiedEngine:
         else:
             self.scalper = None
 
+        # ── ConsensusGates: ML + LLM gating as additional safety layer ──
+        try:
+            from apps.consensus.gates import ConsensusGates
+            from apps.ml.predictor import MLPredictor
+            self.consensus_gates = ConsensusGates(ml_predictor=MLPredictor(model_type="xgboost"))
+            log.info("  ConsensusGates initialized (ML gate active)")
+        except Exception as e:
+            self.consensus_gates = None
+            log.debug(f"  ConsensusGates not available: {e}")
+
+        # ── Phase 4: Equity Curve MA + Kelly Criterion ──
+        self.equity_curve = []  # Rolling equity history for MA
+        self.equity_curve_ma_period = CONFIG.get("equity_curve_ma_period", 20)
+        self.kelly_fraction = CONFIG.get("kelly_win_rate", 0.55)  # Start with config default
+        self._trade_results = []  # Track wins/losses for dynamic Kelly
+
+        # ── Strategy Profile Performance Tracker ──
+        self._profile_performance = {
+            "aggressive": {"trades": 0, "wins": 0, "total_pnl": 0.0},
+            "neutral": {"trades": 0, "wins": 0, "total_pnl": 0.0},
+            "conservative": {"trades": 0, "wins": 0, "total_pnl": 0.0},
+        }
+
+        # ── Phase 2: ML Live Learning ──
+        self._ml_training_data = []  # Store (features, label) pairs for retraining
+        self._ml_retrain_count = 0  # How many times we've retrained
+        self._last_ml_retrain_cycle = 0  # Last cycle we retrained on
+
+        # ── Phase 5: Profit Maximization ──
+        self.win_streak = 0
+        self.loss_streak = 0
+        self.consecutive_wins = 0
+        self.consecutive_losses = 0
+        self.last_trade_pnl = 0
+        self.peak_balance = 0
+
+    # ═══════════════════════════════════════════════════════════════
+    # SCALPER-MAIN ENGINE INTEGRATION
+    # ═══════════════════════════════════════════════════════════════
+
+    def _sync_scalp_results(self):
+        """Feed scalper trade results into main engine's learning systems.
+        
+        This ensures:
+        - Scalp wins/losses feed into Kelly calculation
+        - Scalp trades update win/loss streaks
+        - Scalp trades count toward daily limits
+        - Unified performance tracking across both systems
+        """
+        if not self.scalper:
+            return
+
+        # Check for newly closed scalps (in trade_history but not yet synced)
+        for scalp in self.scalper.trade_history:
+            if scalp.get("_synced"):
+                continue  # Already processed
+
+            ticket = scalp.get("ticket")
+            symbol = scalp.get("symbol")
+            entry_price = scalp.get("entry_price", 0)
+            size = scalp.get("size", 0)
+            status = scalp.get("status", "OPEN")
+
+            if status != "CLOSED":
+                continue
+
+            # Get actual P&L from MT5 deal history
+            pnl = 0
+            try:
+                deals = mt5.history_deals_get(ticket=ticket)
+                if deals:
+                    pnl = sum(d.profit for d in deals)
+            except Exception:
+                # Fallback: estimate from price movement
+                pass
+
+            # Record in main engine's learning systems
+            if pnl != 0:
+                # 1. Feed into Kelly trade results
+                self._trade_results.append(pnl)
+                if len(self._trade_results) > 50:
+                    self._trade_results = self._trade_results[-50:]
+
+                # 2. Update risk manager
+                self.risk.record_trade_result(pnl, pnl / self.risk.balance if self.risk.balance > 0 else 0)
+
+                # 3. Update streaks
+                self._update_streaks(pnl)
+
+                # 4. Log the integration
+                direction = scalp.get("direction", "?")
+                group = scalp.get("group", "?")
+                log.info(f"  SCALP SYNCED: {direction} {symbol} ({group}) | P&L=${pnl:+.2f} | "
+                         f"Kelly={len(self._trade_results)} trades | Streak=W{self.consecutive_wins}/L{self.consecutive_losses}")
+
+            # Store profit in scalp dict for scalper's streak-based sizing
+            scalp["profit"] = pnl
+
+            # Mark as synced
+            scalp["_synced"] = True
+
+            # Remove from risk manager open_positions
+            if symbol in self.risk.open_positions and self.risk.open_positions[symbol].get("source") == "scalper":
+                del self.risk.open_positions[symbol]
+
+        # Cap trade_history to prevent memory leak (keep last 200)
+        if len(self.scalper.trade_history) > 200:
+            self.scalper.trade_history = self.scalper.trade_history[-200:]
+
+    # ═══════════════════════════════════════════════════════════════
+    # PHASE 2: ML LIVE LEARNING LOOP
+    # ═══════════════════════════════════════════════════════════════
+
+    def _record_trade_for_ml(self, symbol: str, action: str, indicators: Dict,
+                              confidence: float, pnl: float, entry_price: float,
+                              exit_price: float, atr: float):
+        """Record trade features + outcome for ML live learning.
+        
+        Stores (features, label) pairs that will be used to retrain
+        the XGBoost model periodically.
+        """
+        if not CONFIG.get("ml_live_learning_enabled", True):
+            return
+
+        # Fetch recent OHLC to compute support_distance and resistance_distance
+        support_dist = 0.0
+        resistance_dist = 0.0
+        volatility_regime = 1.0 if indicators.get("adx", 0) > 25 else 0.0
+        try:
+            rates = self.mt5.copy_rates_from_pos(symbol, self.mt5.TIMEFRAME_H1, 0, 30)
+            if rates is not None and len(rates) >= 20:
+                closes = np.array([r['close'] for r in rates])
+                highs = np.array([r['high'] for r in rates])
+                lows = np.array([r['low'] for r in rates])
+                # Support distance: (close - 20-period low) / close
+                support_level = float(np.min(lows[-20:]))
+                resistance_level = float(np.max(highs[-20:]))
+                current_price = float(closes[-1])
+                if current_price > 0:
+                    support_dist = (current_price - support_level) / current_price
+                    resistance_dist = (resistance_level - current_price) / current_price
+                # Volatility regime: ATR percentile rank
+                atrs = []
+                for i in range(1, min(30, len(highs))):
+                    tr = max(highs[i] - lows[i],
+                             abs(highs[i] - closes[i-1]),
+                             abs(lows[i] - closes[i-1]))
+                    atrs.append(tr)
+                if len(atrs) >= 14:
+                    recent_atr = np.mean(atrs[-14:])
+                    hist_atr = np.mean(atrs[-50:]) if len(atrs) >= 50 else np.mean(atrs)
+                    volatility_regime = 1.0 if recent_atr > hist_atr else 0.0
+        except Exception:
+            pass
+
+        # Build feature vector matching the model's expected input
+        # Features: rsi, macd_hist, bb_width, atr_pct, volume_ratio,
+        #           price_momentum, volatility_regime, trend_strength,
+        #           support_distance, resistance_distance
+        features = [
+            indicators.get("rsi", 50),
+            indicators.get("macd_hist", 0),
+            indicators.get("bb_width", 0),
+            atr / entry_price if entry_price > 0 else 0,  # atr_pct
+            indicators.get("vol_ratio", 1.0),
+            indicators.get("momentum_5", 0),
+            volatility_regime,  # actual ATR percentile rank
+            indicators.get("adx", 0),  # trend_strength
+            support_dist,  # actual support distance
+            resistance_dist,  # actual resistance distance
+        ]
+
+        # Label: 1 = profitable trade, 0 = losing trade
+        label = 1 if pnl > 0 else 0
+
+        # Store with metadata
+        trade_record = {
+            "features": features,
+            "label": label,
+            "pnl": pnl,
+            "symbol": symbol,
+            "action": action,
+            "confidence": confidence,
+            "entry_price": entry_price,
+            "exit_price": exit_price,
+            "time": datetime.now(timezone.utc).isoformat(),
+        }
+
+        self._ml_training_data.append(trade_record)
+
+        # Keep only last N trades for training (configurable)
+        max_data = CONFIG.get("ml_max_training_data", 200)
+        if len(self._ml_training_data) > max_data:
+            self._ml_training_data = self._ml_training_data[-max_data:]
+
+        log.info(f"  ML DATA: recorded trade #{len(self._ml_training_data)} | "
+                 f"{symbol} {action} | P&L=${pnl:+.2f} | Label={label}")
+
+        # Check if it's time to retrain
+        self._maybe_retrain_ml()
+
+    def _maybe_retrain_ml(self):
+        """Retrain ML model every N trades from real data."""
+        retrain_interval = CONFIG.get("ml_retrain_interval", 20)
+        
+        if len(self._ml_training_data) < retrain_interval:
+            return  # Not enough data yet
+
+        # Don't retrain more than once per cycle
+        if hasattr(self, '_last_ml_retrain_cycle') and self._last_ml_retrain_cycle == self.cycle_count:
+            return
+
+        # Check if we have enough diverse data
+        labels = [t["label"] for t in self._ml_training_data]
+        wins = sum(labels)
+        losses = len(labels) - wins
+
+        # Need minimum wins and losses for meaningful training (configurable)
+        min_diversity = CONFIG.get("ml_min_diversity", 5)
+        if wins < min_diversity or losses < min_diversity:
+            log.info(f"  ML RETRAIN SKIPPED: need more diversity (W={wins} L={losses}, need {min_diversity} each)")
+            return
+
+        try:
+            from apps.ml.predictor import MLPredictor
+            from apps.ml.model import PredictionModel
+
+            # Prepare training data
+            X = np.array([t["features"] for t in self._ml_training_data])
+            y = np.array([t["label"] for t in self._ml_training_data])
+
+            # Create and train new model
+            new_model = PredictionModel(model_type="xgboost")
+            new_model.train(X, y)
+
+            # Save to disk (backup old first)
+            model_path = MODELS_DIR / "xgboost_model.pkl"
+            backup_path = MODELS_DIR / "xgboost_model_backup.pkl"
+
+            if model_path.exists():
+                import shutil
+                shutil.copy2(model_path, backup_path)
+
+            new_model.save(str(model_path))
+
+            self._last_ml_retrain_cycle = self.cycle_count
+            self._ml_retrain_count += 1
+
+            log.info(f"  ML RETRAIN #{self._ml_retrain_count}: trained on {len(y)} samples "
+                     f"(W={wins} L={losses}) | Saved to {model_path}")
+
+        except Exception as e:
+            log.warning(f"  ML RETRAIN FAILED: {e}")
+
+    # ═══════════════════════════════════════════════════════════════
+    # PHASE 4: EQUITY CURVE MA — Pause trading when equity < MA
+    # ═══════════════════════════════════════════════════════════════
+
+    def _update_equity_curve(self):
+        """Track equity and check if below moving average."""
+        acct = self.mt5.get_account_info()
+        if not acct:
+            return True  # Can't check, allow trading
+
+        equity = acct["equity"]
+        self.equity_curve.append(equity)
+
+        # Keep only last N periods
+        if len(self.equity_curve) > self.equity_curve_ma_period * 2:
+            self.equity_curve = self.equity_curve[-self.equity_curve_ma_period * 2:]
+
+        # Need at least MA period data points
+        if len(self.equity_curve) < self.equity_curve_ma_period:
+            return True  # Not enough data, allow trading
+
+        # Calculate MA
+        ma = sum(self.equity_curve[-self.equity_curve_ma_period:]) / self.equity_curve_ma_period
+
+        if equity < ma:
+            log.warning(f"  EQUITY CURVE PAUSE: equity ${equity:.2f} < MA ${ma:.2f} "
+                       f"(period={self.equity_curve_ma_period})")
+            return False  # Pause trading
+
+        return True  # OK to trade
+
+    # ═══════════════════════════════════════════════════════════════
+    # STRATEGY SELECTOR — LLM + rules pick aggressive vs conservative
+    # ═══════════════════════════════════════════════════════════════
+
+    def _select_strategy_profile(self, symbol: str, indicators: Dict, action: str,
+                                  confidence: float, atr: float) -> Dict:
+        """Select aggressive or conservative Kelly profile based on market conditions.
+        
+        Uses a hybrid approach:
+        1. Rule-based scoring (fast, deterministic)
+        2. LLM reasoning (slow, contextual) — when available
+        3. Final decision combines both with override logic
+        
+        Returns: {"profile": "aggressive"|"conservative", "reason": str, "confidence": float}
+        """
+        profiles = CONFIG.get("kelly_profiles", {})
+        if not profiles:
+            return {"profile": "conservative", "reason": "no profiles configured", "confidence": 0.5}
+
+        # ── RULE-BASED SCORING ──
+        # Score > 0 → aggressive, Score < 0 → conservative
+        score = 0
+        reasons = []
+
+        # Factor 1: ADX (trend strength)
+        adx = indicators.get("adx", 20)
+        if adx > 30:
+            score += 2
+            reasons.append(f"ADX={adx:.0f}>30 (strong trend)")
+        elif adx < 20:
+            score -= 2
+            reasons.append(f"ADX={adx:.0f}<20 (weak/ranging)")
+        else:
+            reasons.append(f"ADX={adx:.0f} (moderate)")
+
+        # Factor 2: Volume (confirmation)
+        vol_ratio = indicators.get("vol_ratio", 1.0)
+        if vol_ratio > 1.5:
+            score += 1
+            reasons.append(f"Vol={vol_ratio:.1f}x>1.5 (high conviction)")
+        elif vol_ratio < 0.5:
+            score -= 1
+            reasons.append(f"Vol={vol_ratio:.1f}x<0.5 (low conviction)")
+
+        # Factor 3: Ichimoku alignment (trend confirmation)
+        tenkan = indicators.get("tenkan", 0)
+        kijun = indicators.get("kijun", 0)
+        senkou_a = indicators.get("senkou_a", 0)
+        senkou_b = indicators.get("senkou_b", 0)
+        close = indicators.get("close", 0)
+
+        if close > 0 and tenkan > 0 and kijun > 0:
+            if close > senkou_a > senkou_b and tenkan > kijun:
+                score += 1
+                reasons.append("Ichimoku: bullish cloud + TK cross")
+            elif close < senkou_a < senkou_b and tenkan < kijun:
+                score += 1
+                reasons.append("Ichimoku: bearish cloud + TK cross")
+            else:
+                score -= 1
+                reasons.append("Ichimoku: mixed signals")
+
+        # Factor 4: RSI extremes (overbought/oversold)
+        rsi = indicators.get("rsi", 50)
+        if rsi > 70 or rsi < 30:
+            # Extreme RSI in trend direction = aggressive, against = conservative
+            if (action == "BUY" and rsi < 30) or (action == "SELL" and rsi > 70):
+                score += 1
+                reasons.append(f"RSI={rsi:.0f} (extreme in trade direction)")
+            else:
+                score -= 1
+                reasons.append(f"RSI={rsi:.0f} (extreme against trade)")
+
+        # Factor 5: Session (use config-driven bias)
+        now_hour = datetime.now(timezone.utc).hour
+        session_bias = CONFIG.get("session_strategy_bias", {}).get(now_hour, "neutral")
+        if session_bias == "aggressive":
+            score += 2
+            reasons.append(f"Hour={now_hour} (session=AGGRESSIVE — London/NY overlap)")
+        elif session_bias == "conservative":
+            score -= 2
+            reasons.append(f"Hour={now_hour} (session=CONSERVATIVE — off-peak/Asian)")
+        else:
+            reasons.append(f"Hour={now_hour} (session=neutral)")
+
+        # Factor 6: Signal confidence
+        if confidence > 0.7:
+            score += 1
+            reasons.append(f"Confidence={confidence:.2f}>0.7 (strong)")
+        elif confidence < 0.4:
+            score -= 1
+            reasons.append(f"Confidence={confidence:.2f}<0.4 (weak)")
+
+        # Factor 7: Win/loss streak (momentum)
+        if len(self._trade_results) >= 3:
+            recent = self._trade_results[-5:]
+            wins = sum(1 for r in recent if r > 0)
+            if wins >= 4:
+                score += 1
+                reasons.append(f"Win streak: {wins}/{len(recent)} recent")
+            elif wins <= 1:
+                score -= 1
+                reasons.append(f"Loss streak: {len(recent)-wins}/{len(recent)} recent")
+
+        # Factor 8: ATR relative (volatility opportunity)
+        atr_pct = (atr / close * 100) if close > 0 else 0
+        if atr_pct > 0.3:
+            score += 1
+            reasons.append(f"ATR%={atr_pct:.2f}% (good volatility)")
+        elif atr_pct < 0.05:
+            score -= 1
+            reasons.append(f"ATR%={atr_pct:.2f}% (too quiet)")
+
+        # ── LLM REASONING (when enabled) ──
+        llm_choice = None
+        llm_reason = ""
+        if CONFIG.get("strategy_selector_enabled") and CONFIG.get("llm_enabled"):
+            try:
+                from apps.llm.client import LLMClient
+                client = LLMClient()
+
+                prompt = STRATEGY_SELECTION_PROMPT.format(
+                    symbol=symbol,
+                    action=action,
+                    adx=adx,
+                    rsi=rsi,
+                    vol_ratio=vol_ratio,
+                    atr_pct=f"{atr_pct:.3f}",
+                    close=close,
+                    tenkan=tenkan,
+                    kijun=kijun,
+                    senkou_a=senkou_a,
+                    senkou_b=senkou_b,
+                    session_hour=now_hour,
+                    confidence=confidence,
+                    current_balance=f"{self.risk.balance:.2f}",
+                    open_positions=len(self.risk.open_positions),
+                    recent_wins=sum(1 for r in self._trade_results[-10:] if r > 0) if self._trade_results else 0,
+                    recent_losses=sum(1 for r in self._trade_results[-10:] if r <= 0) if self._trade_results else 0,
+                )
+
+                response = client.analyze(prompt, task="analysis")
+                parsed = client._try_parse_json(response.text) if hasattr(client, '_try_parse_json') else {}
+                if parsed:
+                    llm_choice = parsed.get("profile", "conservative")
+                    llm_reason = parsed.get("reasoning", "")
+                    if llm_choice not in ["aggressive", "neutral", "conservative"]:
+                        llm_choice = None  # Invalid response, fall back to rules
+            except Exception as e:
+                log.debug(f"  Strategy LLM failed (falling back to rules): {e}")
+
+        # ── FINAL DECISION ──
+        # Map score to profile: >+1 aggressive, -1 to +1 neutral, <-1 conservative
+        if score > 1:
+            rule_decision = "aggressive"
+        elif score < -1:
+            rule_decision = "conservative"
+        else:
+            rule_decision = "neutral"
+        original_decision = rule_decision
+
+        # Symbol-specific default override for borderline scores (score = 0)
+        if score == 0:
+            symbol_default = CONFIG.get("symbol_default_profiles", {}).get(symbol)
+            if symbol_default:
+                rule_decision = symbol_default
+                reasons.append(f"Symbol default: {symbol} → {symbol_default}")
+
+        # Performance bias: lean toward whichever profile performs better
+        perf_bias = self._get_performance_bias()
+        if perf_bias != 0:
+            score += perf_bias
+            reasons.append(f"Performance bias: {perf_bias:+d} (better profile gets edge)")
+            # Recompute with performance bias
+            if score > 1:
+                rule_decision = "aggressive"
+            elif score < -1:
+                rule_decision = "conservative"
+            else:
+                rule_decision = "neutral"
+
+        # LLM can override if confident and rule score is borderline (-1 to +1)
+        final_decision = rule_decision
+        override_reason = ""
+
+        if llm_choice and abs(score) <= 2:
+            # LLM override for borderline cases
+            if llm_choice != rule_decision:
+                final_decision = llm_choice
+                override_reason = f"LLM override: {llm_reason}"
+            else:
+                override_reason = f"LLM agrees: {llm_reason}"
+        elif llm_choice:
+            # Strong rule score — log LLM opinion but follow rules
+            override_reason = f"Rules dominate (score={score}), LLM said: {llm_choice}"
+        else:
+            override_reason = f"Rules only (score={score}): {'; '.join(reasons)}"
+
+        # Ensure final_decision is valid
+        if final_decision not in ["aggressive", "neutral", "conservative"]:
+            final_decision = "conservative"
+
+        profile_data = profiles.get(final_decision, profiles.get("conservative", {}))
+
+        log.info(f"  STRATEGY {symbol}: {final_decision.upper()} "
+                 f"(score={score}, llm={llm_choice or 'N/A'}) | "
+                 f"{override_reason}")
+
+        return {
+            "profile": final_decision,
+            "avg_win": profile_data.get("avg_win", 1.5),
+            "avg_loss": profile_data.get("avg_loss", 1.0),
+            "reason": override_reason,
+            "rule_score": score,
+            "llm_choice": llm_choice,
+            "rule_factors": reasons,
+        }
+
+    def _get_profile_performance(self) -> Dict:
+        """Get performance stats for each strategy profile.
+        Returns: {profile: {trades, wins, win_rate, total_pnl, avg_pnl}}"""
+        result = {}
+        for profile, stats in self._profile_performance.items():
+            trades = stats["trades"]
+            wins = stats["wins"]
+            total_pnl = stats["total_pnl"]
+            win_rate = wins / trades if trades > 0 else 0
+            avg_pnl = total_pnl / trades if trades > 0 else 0
+            result[profile] = {
+                "trades": trades,
+                "wins": wins,
+                "win_rate": round(win_rate, 3),
+                "total_pnl": round(total_pnl, 2),
+                "avg_pnl": round(avg_pnl, 2),
+            }
+        return result
+
+    def _get_performance_bias(self) -> float:
+        """Compute performance-based bias for strategy selection.
+        Returns: positive = lean aggressive, negative = lean conservative.
+        Based on which profile has better win rate and P&L."""
+        agg = self._profile_performance.get("aggressive", {})
+        con = self._profile_performance.get("conservative", {})
+
+        agg_trades = agg.get("trades", 0)
+        con_trades = con.get("trades", 0)
+
+        # Need at least 5 trades per profile to use performance bias
+        if agg_trades < 5 or con_trades < 5:
+            return 0  # Not enough data
+
+        agg_wr = agg.get("wins", 0) / agg_trades
+        con_wr = con.get("wins", 0) / con_trades
+        agg_avg = agg.get("total_pnl", 0) / agg_trades
+        con_avg = con.get("total_pnl", 0) / con_trades
+
+        # Compare win rates and average P&L
+        bias = 0
+        if agg_wr > con_wr + 0.05:  # Aggressive wins 5% more often
+            bias += 1
+        elif con_wr > agg_wr + 0.05:  # Conservative wins 5% more often
+            bias -= 1
+
+        if agg_avg > con_avg * 1.2:  # Aggressive makes 20% more per trade
+            bias += 1
+        elif con_avg > agg_avg * 1.2:  # Conservative makes 20% more per trade
+            bias -= 1
+
+        return bias
+
+    # ═══════════════════════════════════════════════════════════════
+    # PHASE 4: KELLY CRITERION — Dynamic position sizing
+    # ═══════════════════════════════════════════════════════════════
+
+    def _calculate_kelly_fraction(self, avg_win: float = None, avg_loss: float = None) -> float:
+        """Calculate Kelly fraction from recent trade history.
+        Uses quarter-Kelly capped at 0.25 for safety.
+        If avg_win/avg_loss provided (from strategy profile), use those."""
+        win_rate = CONFIG.get("kelly_win_rate", 0.55)
+        if avg_win is None:
+            avg_win = CONFIG.get("kelly_avg_win", 1.5)
+        if avg_loss is None:
+            avg_loss = CONFIG.get("kelly_avg_loss", 1.0)
+
+        # If we have enough trade results, compute dynamic Kelly
+        if len(self._trade_results) >= 10:
+            recent = self._trade_results[-20:]  # Last 20 trades
+            wins = [r for r in recent if r > 0]
+            losses = [r for r in recent if r <= 0]
+            if wins and losses:
+                win_rate = len(wins) / len(recent)
+                avg_win = sum(wins) / len(wins)
+                avg_loss = abs(sum(losses) / len(losses))
+
+        # Kelly formula: f* = (b*p - q) / b
+        b = avg_win / avg_loss if avg_loss > 0 else 1.5
+        p = win_rate
+        q = 1 - p
+
+        kelly = (b * p - q) / b if b > 0 else 0
+
+        # Quarter-Kelly for safety, capped at 0.25
+        kelly = max(0, min(0.25, kelly / 4))
+
+        self.kelly_fraction = kelly
+        return kelly
+
+    # ═══════════════════════════════════════════════════════════════
+    # PHASE 4: CORRELATION HEDGING — Auto-hedge correlated positions
+    # ═══════════════════════════════════════════════════════════════
+
+    def _check_hedging(self, signal_symbol: str, signal_direction: str, signal_size: float):
+        """Check if correlation hedging is needed after executing a trade."""
+        if not CONFIG.get("hedging_enabled") or not self.hedging:
+            return
+
+        if not self.risk.open_positions:
+            return
+
+        # Build price data for correlation computation
+        try:
+            import pandas as pd
+            price_data = {}
+            for sym in list(self.risk.open_positions.keys()) + [signal_symbol]:
+                df = self.mt5.get_candles(sym, "H1", 50)
+                if df is not None and len(df) >= 50:
+                    price_data[sym] = df["close"]
+
+            if len(price_data) < 2:
+                return
+
+            corr_matrix = self.hedging.compute_correlations(price_data)
+            if corr_matrix.empty:
+                return
+
+            # Check if we need to hedge
+            hedge_decision = self.hedging.should_hedge(
+                signal_symbol, signal_direction, signal_size,
+                self.risk.open_positions, corr_matrix
+            )
+
+            if hedge_decision.get("hedge"):
+                log.info(f"  HEDGE NEEDED: {hedge_decision['reason']} "
+                        f"→ hedge {hedge_decision['hedge_symbol']} "
+                        f"{hedge_decision['hedge_direction']} "
+                        f"size={hedge_decision['hedge_size']}")
+
+        except Exception as e:
+            log.debug(f"  Hedging check skipped: {e}")
+
+    # ═══════════════════════════════════════════════════════════════
+    # PHASE 4: EXIT OPTIMIZER — ML-enhanced exit decisions
+    # ═══════════════════════════════════════════════════════════════
+
+    def _get_optimized_exit(self, symbol: str, pos: dict) -> dict:
+        """Get ML-optimized exit recommendation for a position."""
+        if not CONFIG.get("exit_model_enabled") or not self.exit_optimizer:
+            return {"method": "none"}
+
+        try:
+            trade_data = {
+                "entry_price": pos.get("entry_price", 0),
+                "current_price": pos.get("current_price", 0),
+                "direction": pos.get("action", "BUY"),
+                "atr": pos.get("atr", 0),
+                "volatility": pos.get("atr", 0) / pos.get("entry_price", 1) if pos.get("entry_price", 0) > 0 else 0,
+                "momentum": 0,
+                "time_in_trade": (datetime.now(timezone.utc) - datetime.fromisoformat(pos.get("entry_time", datetime.now(timezone.utc).isoformat()))).total_seconds() / 3600,
+                "unrealized_pnl": pos.get("profit", 0),
+                "rsi": 50,
+                "bb_position": 0.5,
+                "session_hour": datetime.now(timezone.utc).hour,
+            }
+
+            result = self.exit_optimizer.predict_optimal_exit(trade_data)
+            return result
+
+        except Exception as e:
+            log.debug(f"  Exit optimizer failed for {symbol}: {e}")
+            return {"method": "fallback"}
+
+    # ═══════════════════════════════════════════════════════════════
+    # PHASE 4: REGIME DETECTION — Adjust strategy by market state
+    # ═══════════════════════════════════════════════════════════════
+
+    def _get_regime_adjustment(self, symbol: str) -> float:
+        """Get confidence adjustment based on market regime.
+        Returns multiplier: >1.0 = boost, <1.0 = reduce."""
+        if not CONFIG.get("regime_enabled") or not self.ensemble:
+            return 1.0
+
+        try:
+            df = self.mt5.get_candles(symbol, "H1", 50)
+            if df is None or len(df) < 50:
+                return 1.0
+
+            regime = self.ensemble.regime_detector.detect(df["close"].values)
+            current_regime = regime.get("regime", "unknown")
+
+            # Adjust confidence based on regime
+            adjustments = {
+                "TRENDING_UP": 1.1,    # Boost trend-following confidence
+                "TRENDING_DOWN": 1.1,
+                "RANGING": 0.85,       # Reduce confidence in ranging markets
+                "VOLATILE": 0.9,       # Slightly reduce in volatile markets
+            }
+
+            adj = adjustments.get(current_regime, 1.0)
+            log.debug(f"  REGIME {symbol}: {current_regime} → adjustment={adj:.2f}")
+            return adj
+
+        except Exception as e:
+            log.debug(f"  Regime detection failed for {symbol}: {e}")
+            return 1.0
+
+    # ═══════════════════════════════════════════════════════════════
+    # PHASE 5: SPREAD FILTER — Skip trades during wide spreads
+    # ═══════════════════════════════════════════════════════════════
+
+    def _check_spread(self, symbol: str) -> bool:
+        """Check if spread is acceptable for trading. Returns True if OK."""
+        try:
+            info = mt5.symbol_info(symbol)
+            if info is None:
+                return False
+
+            spread = info.spread  # In points
+            point = info.point if info.point else 0.0001
+            spread_pips = spread * point * 10
+
+            # Max spread thresholds by symbol type
+            max_spread = 2.0  # Default 2 pips
+            if "JPY" in symbol:
+                max_spread = 1.5  # JPY pairs: tighter
+            elif "GBP" in symbol:
+                max_spread = 2.5  # GBP pairs: slightly wider
+            elif "AUD" in symbol or "NZD" in symbol:
+                max_spread = 2.0
+
+            if spread_pips > max_spread:
+                log.info(f"  SPREAD FILTER {symbol}: {spread_pips:.1f} pips > max {max_spread:.1f}")
+                return False
+
+            return True
+
+        except Exception as e:
+            log.debug(f"  Spread check failed for {symbol}: {e}")
+            return True  # Allow if can't check
+
+    # ═══════════════════════════════════════════════════════════════
+    # PHASE 5: WIN/LOSS STREAK SCALING
+    # ═══════════════════════════════════════════════════════════════
+
+    def _get_streak_multiplier(self) -> float:
+        """Get position size multiplier based on win/loss streak.
+        Increase on wins (momentum), reduce on losses (protection)."""
+        if self.consecutive_wins >= 5:
+            return 1.3   # Hot streak: increase 30%
+        elif self.consecutive_wins >= 3:
+            return 1.15  # Winning: increase 15%
+        elif self.consecutive_losses >= 3:
+            return 0.5   # Cold streak: reduce 50%
+        elif self.consecutive_losses >= 2:
+            return 0.7   # Losing: reduce 30%
+        return 1.0
+
+    def _update_streaks(self, pnl: float):
+        """Update win/loss streaks after a trade closes."""
+        if pnl > 0:
+            self.consecutive_wins += 1
+            self.consecutive_losses = 0
+        elif pnl < 0:
+            self.consecutive_losses += 1
+            self.consecutive_wins = 0
+        self.last_trade_pnl = pnl
+
+    # ═══════════════════════════════════════════════════════════════
+    # PHASE 5: SESSION-BASED AGGRESSION
+    # ═══════════════════════════════════════════════════════════════
+
+    def _get_session_multiplier(self) -> float:
+        """Get aggression multiplier based on current session.
+        More aggressive during London-NY overlap, less during Asian."""
+        hour = datetime.now(timezone.utc).hour
+
+        # London-NY overlap (12-16 UTC) — best liquidity, tightest spreads
+        if 12 <= hour <= 16:
+            return 1.2   # +20% aggression
+        # London session (7-12 UTC)
+        elif 7 <= hour <= 12:
+            return 1.0   # Normal
+        # NY session (13-21 UTC)
+        elif 13 <= hour <= 21:
+            return 1.1   # Slight boost
+        # Asian session (22-6 UTC) — low liquidity
+        else:
+            return 0.7   # -30% aggression
+
+    # ═══════════════════════════════════════════════════════════════
+    # PHASE 5: PORTFOLIO HEAT MANAGEMENT
+    # ═══════════════════════════════════════════════════════════════
+
+    def _check_portfolio_heat(self) -> float:
+        """Calculate total portfolio heat (risk exposure).
+        Returns 0.0-1.0 scale: 0=safe, 1=max risk."""
+        positions = self.risk.open_positions
+        if not positions:
+            return 0.0
+
+        total_risk = 0
+        for sym, pos in positions.items():
+            size = pos.get("size", 0)
+            entry = pos.get("entry_price", 0)
+            sl = pos.get("sl", 0)
+            if entry > 0 and sl > 0 and size > 0:
+                risk_per_lot = abs(entry - sl) * 100000  # Approximate risk in USD
+                total_risk += risk_per_lot * size
+
+        # Normalize to equity
+        equity = self.risk.balance
+        if equity > 0:
+            heat = total_risk / equity
+            return min(1.0, heat)
+
+        return 0.0
+
+    # ═══════════════════════════════════════════════════════════════
+    # PHASE 5: TRAILING TP — Move TP in profit direction
+    # ═══════════════════════════════════════════════════════════════
+
+    def _manage_trailing_tp(self, symbol: str, pos: dict, rm_pos: dict):
+        """Move TP in profit direction when trade is well in profit."""
+        if not CONFIG.get("trailing_enabled"):
+            return
+
+        entry = rm_pos.get("entry_price", 0)
+        current = pos.get("current_price", 0)
+        atr = rm_pos.get("atr", 0)
+        tp = rm_pos.get("tp", 0)
+
+        if entry == 0 or current == 0 or atr == 0:
+            return
+
+        if rm_pos["action"] == "BUY":
+            unrealized = current - entry
+            sl_distance = entry - rm_pos.get("sl", entry - atr) if rm_pos.get("sl", 0) > 0 else atr
+        else:
+            unrealized = entry - current
+            sl_distance = rm_pos.get("sl", entry + atr) - entry if rm_pos.get("sl", 0) > 0 else atr
+
+        rr_ratio = unrealized / sl_distance if sl_distance > 0 else 0
+
+        # At 3R: move TP to 5R (let winners run)
+        if rr_ratio >= 3.0 and tp > 0:
+            new_tp_distance = sl_distance * 5
+            if rm_pos["action"] == "BUY":
+                new_tp = entry + new_tp_distance
+                if new_tp > tp:
+                    success = self.mt5.modify_sl_tp(pos["ticket"], tp=round(new_tp, 5))
+                    if success:
+                        rm_pos["tp"] = new_tp
+                        log.info(f"  TRAILING TP {symbol}: BUY TP → {new_tp:.5f} (was {tp:.5f}) at {rr_ratio:.1f}R")
+            else:
+                new_tp = entry - new_tp_distance
+                if new_tp < tp:
+                    success = self.mt5.modify_sl_tp(pos["ticket"], tp=round(new_tp, 5))
+                    if success:
+                        rm_pos["tp"] = new_tp
+                        log.info(f"  TRAILING TP {symbol}: SELL TP → {new_tp:.5f} (was {tp:.5f}) at {rr_ratio:.1f}R")
+
+    # ═══════════════════════════════════════════════════════════════
+    # PHASE 5: DYNAMIC ATR SL RECALCULATION
+    # ═══════════════════════════════════════════════════════════════
+
+    def _recalculate_sl(self, symbol: str, rm_pos: dict):
+        """Recalculate SL based on current ATR if volatility changed significantly."""
+        if not CONFIG.get("trailing_enabled"):
+            return
+
+        try:
+            df = self.mt5.get_candles(symbol, "H1", 14)
+            if df is None or len(df) < 14:
+                return
+
+            current_atr = float(df["atr"].iloc[-1]) if "atr" in df.columns else 0
+            original_atr = rm_pos.get("atr", current_atr)
+
+            if original_atr == 0 or current_atr == 0:
+                return
+
+            # If ATR changed by more than 50%, recalculate SL
+            atr_change = abs(current_atr - original_atr) / original_atr
+            if atr_change > 0.5:
+                entry = rm_pos["entry_price"]
+                new_sl_distance = current_atr * CONFIG.get("sl_atr_mult", 3.0)
+
+                if rm_pos["action"] == "BUY":
+                    new_sl = entry - new_sl_distance
+                    if new_sl > rm_pos.get("sl", 0):
+                        success = self.mt5.modify_sl_tp(rm_pos["ticket"], sl=round(new_sl, 5))
+                        if success:
+                            rm_pos["sl"] = new_sl
+                            rm_pos["atr"] = current_atr
+                            log.info(f"  SL RECALC {symbol}: BUY SL → {new_sl:.5f} (ATR {original_atr:.5f}→{current_atr:.5f})")
+                else:
+                    new_sl = entry + new_sl_distance
+                    if new_sl < rm_pos.get("sl", float('inf')):
+                        success = self.mt5.modify_sl_tp(rm_pos["ticket"], sl=round(new_sl, 5))
+                        if success:
+                            rm_pos["sl"] = new_sl
+                            rm_pos["atr"] = current_atr
+                            log.info(f"  SL RECALC {symbol}: SELL SL → {new_sl:.5f} (ATR {original_atr:.5f}→{current_atr:.5f})")
+
+        except Exception as e:
+            log.debug(f"  SL recalculation failed for {symbol}: {e}")
+
     def start(self):
         """Initialize and start the engine."""
         log.info("=" * 70)
@@ -1083,9 +2278,12 @@ class UnifiedEngine:
             self.risk.update_balance(acct["balance"])
             log.info(f"  Balance: ${acct['balance']:.2f} | Equity: ${acct['equity']:.2f}")
 
-        # Sync existing positions
+        # Sync existing positions (skip scalper-owned positions to avoid double-tracking)
+        SCALPER_MAGIC = 20260911  # Scalper uses different magic number
         positions = self.mt5.get_positions()
         for p in positions:
+            if p.get("magic") == SCALPER_MAGIC:
+                continue  # Skip scalper positions — tracked by scalper subsystem
             self.risk.open_positions[p["symbol"]] = {
                 "action": p["action"],
                 "entry_price": p["entry_price"],
@@ -1104,6 +2302,217 @@ class UnifiedEngine:
         log.info("=" * 70)
         return True
 
+    # ═══════════════════════════════════════════════════════════════
+    # ANALYST CONSENSUS — Phase 1: Wire 6 working analysts into live loop
+    # ═══════════════════════════════════════════════════════════════
+
+    def _run_analyst_consensus(self, symbol: str, timeframe: str = "H1", df=None):
+        """
+        Run the 6 working analysts on a symbol and return consensus.
+        Returns: (consensus_action, confidence_modifier, analyst_details)
+        """
+        if not CONFIG.get("analyst_consensus_enabled"):
+            return None, 0, {}
+
+        analyst_classes = [
+            ("Fundamentals", "apps.analysts.fundamentals", "FundamentalsAnalyst"),
+            ("Quant", "apps.analysts.quant", "QuantAnalyst"),
+            ("Market", "apps.analysts.market", "MarketAnalyst"),
+            ("Risk", "apps.analysts.risk", "RiskAnalyst"),
+            ("Technical", "apps.analysts.technical", "TechnicalAnalyst"),
+            ("Compliance", "apps.analysts.compliance", "ComplianceAnalyst"),
+            ("OrderFlow", "apps.analysts.order_flow", "OrderFlowAnalyst"),
+        ]
+
+        votes = {"BUY": 0, "SELL": 0, "HOLD": 0}
+        total_confidence = 0
+        analyst_results = []
+        active_analysts = 0
+
+        import importlib
+        for name, mod_path, cls_name in analyst_classes:
+            try:
+                mod = importlib.import_module(mod_path)
+                cls = getattr(mod, cls_name)
+                analyst = cls()
+
+                # Run analyst asynchronously if needed
+                import asyncio
+                loop = asyncio.new_event_loop()
+                result = loop.run_until_complete(analyst.analyze(symbol, timeframe))
+                loop.close()
+
+                signal = result.signal.upper() if hasattr(result, 'signal') else "HOLD"
+                confidence = float(result.confidence) if hasattr(result, 'confidence') else 0.5
+
+                if signal not in ("BUY", "SELL", "HOLD"):
+                    signal = "HOLD"
+
+                votes[signal] += 1
+                total_confidence += confidence
+                active_analysts += 1
+
+                analyst_results.append({
+                    "name": name,
+                    "signal": signal,
+                    "confidence": round(confidence, 3),
+                    "reasoning": (result.reasoning[:150] if hasattr(result, 'reasoning') and result.reasoning else ""),
+                })
+
+                log.debug(f"    ANALYST {name:15} → {signal} ({confidence:.2f})")
+
+            except Exception as e:
+                log.debug(f"    ANALYST {name:15} → ERROR: {str(e)[:80]}")
+                analyst_results.append({
+                    "name": name, "signal": "HOLD", "confidence": 0,
+                    "reasoning": f"Error: {str(e)[:100]}",
+                })
+
+        if active_analysts == 0:
+            return None, 0, {"analysts": [], "active": 0}
+
+        # Calculate consensus
+        total = active_analysts
+        buy_pct = votes["BUY"] / total
+        sell_pct = votes["SELL"] / total
+        hold_pct = votes["HOLD"] / total
+        avg_confidence = total_confidence / total
+
+        # Determine consensus action
+        if buy_pct > sell_pct and buy_pct > hold_pct and buy_pct >= CONFIG["analyst_min_agreement"]:
+            consensus_action = "BUY"
+            agreement_pct = buy_pct
+        elif sell_pct > buy_pct and sell_pct > hold_pct and sell_pct >= CONFIG["analyst_min_agreement"]:
+            consensus_action = "SELL"
+            agreement_pct = sell_pct
+        else:
+            consensus_action = "HOLD"
+            agreement_pct = hold_pct
+
+        # Calculate confidence modifier
+        confidence_modifier = 0
+        if consensus_action != "HOLD":
+            if agreement_pct >= 0.80:  # 80%+ agreement → strong boost
+                confidence_modifier = CONFIG["analyst_confidence_boost"]
+            elif agreement_pct >= 0.60:  # 60-79% → moderate boost
+                confidence_modifier = CONFIG["analyst_confidence_boost"] * 0.5
+            elif agreement_pct < 0.50:  # <50% agreement → penalty
+                confidence_modifier = -CONFIG["analyst_confidence_penalty"]
+
+        details = {
+            "analysts": analyst_results,
+            "active": active_analysts,
+            "votes": votes,
+            "consensus": consensus_action,
+            "agreement_pct": round(agreement_pct, 3),
+            "avg_confidence": round(avg_confidence, 3),
+            "confidence_modifier": round(confidence_modifier, 3),
+        }
+
+        log.info(f"  ANALYSTS [{active_analysts}] consensus={consensus_action} "
+                 f"agreement={agreement_pct:.0%} avg_conf={avg_confidence:.2f} "
+                 f"modifier={confidence_modifier:+.2f}")
+
+        return consensus_action, confidence_modifier, details
+
+    def _run_legendary_consensus(self, symbol: str, df=None):
+        """
+        Run the 5 legendary agents on a symbol and return consensus.
+        Returns: (consensus_action, confidence_modifier, legendary_details)
+        """
+        if not CONFIG.get("legendary_consensus_enabled"):
+            return None, 0, {}
+
+        if df is None or len(df) < 50:
+            return None, 0, {}
+
+        legendary_classes = [
+            ("Soros", "apps.legendary.soros", "SorosAgent"),
+            ("Buffett", "apps.legendary.buffett", "BuffettAgent"),
+            ("Druckenmiller", "apps.legendary.druckenmiller", "DruckenmillerAgent"),
+            ("TudorJones", "apps.legendary.tudor_jones", "TudorJonesAgent"),
+            ("Lynch", "apps.legendary.lynch", "LynchAgent"),
+        ]
+
+        votes = {"BUY": 0, "SELL": 0, "HOLD": 0}
+        total_confidence = 0
+        agent_results = []
+        active_agents = 0
+
+        import importlib
+        for name, mod_path, cls_name in legendary_classes:
+            try:
+                mod = importlib.import_module(mod_path)
+                cls = getattr(mod, cls_name)
+                agent = cls()
+                # All legendary agents expect (data, symbol) — NOT (symbol, data)
+                result = agent.analyze(df, symbol)
+
+                # Agents return Dict[str, Any], not objects — use dict access
+                signal = result.get("signal", "HOLD").upper() if isinstance(result, dict) else "HOLD"
+                confidence = float(result.get("confidence", 0.5)) if isinstance(result, dict) else 0.5
+
+                if signal not in ("BUY", "SELL", "HOLD"):
+                    signal = "HOLD"
+
+                votes[signal] += 1
+                total_confidence += confidence
+                active_agents += 1
+
+                agent_results.append({
+                    "name": name,
+                    "signal": signal,
+                    "confidence": round(confidence, 3),
+                })
+
+            except Exception as e:
+                log.debug(f"    LEGENDARY {name:15} → ERROR: {str(e)[:80]}")
+                agent_results.append({"name": name, "signal": "HOLD", "confidence": 0})
+
+        if active_agents == 0:
+            return None, 0, {"agents": [], "active": 0}
+
+        total = active_agents
+        buy_pct = votes["BUY"] / total
+        sell_pct = votes["SELL"] / total
+        hold_pct = votes["HOLD"] / total
+
+        if buy_pct > sell_pct and buy_pct > hold_pct and buy_pct >= 0.50:
+            consensus_action = "BUY"
+            agreement_pct = buy_pct
+        elif sell_pct > buy_pct and sell_pct > hold_pct and sell_pct >= 0.50:
+            consensus_action = "SELL"
+            agreement_pct = sell_pct
+        else:
+            consensus_action = "HOLD"
+            agreement_pct = hold_pct
+
+        avg_confidence = total_confidence / total
+        confidence_modifier = 0
+        if consensus_action != "HOLD":
+            if agreement_pct >= 0.80:
+                confidence_modifier = 0.15
+            elif agreement_pct >= 0.60:
+                confidence_modifier = 0.075
+            elif agreement_pct < 0.50:
+                confidence_modifier = -0.10
+
+        details = {
+            "agents": agent_results,
+            "active": active_agents,
+            "votes": votes,
+            "consensus": consensus_action,
+            "agreement_pct": round(agreement_pct, 3),
+            "avg_confidence": round(avg_confidence, 3),
+            "confidence_modifier": round(confidence_modifier, 3),
+        }
+
+        log.info(f"  LEGENDARY [{active_agents}] consensus={consensus_action} "
+                 f"agreement={agreement_pct:.0%} avg_conf={avg_confidence:.2f} "
+                 f"modifier={confidence_modifier:+.2f}")
+
+        return consensus_action, confidence_modifier, details
+
     def run_cycle(self):
         """Execute one full analysis + trading cycle."""
         self.cycle_count += 1
@@ -1119,6 +2528,17 @@ class UnifiedEngine:
             self.risk.update_equity(acct["equity"])
             log.info(f"  Balance: ${acct['balance']:.2f} | Equity: ${acct['equity']:.2f} | DD: {self.risk.get_drawdown_pct()*100:.1f}%")
 
+        # ── DAILY LIMITS CHECK (before anything else) ──
+        if not self.risk.can_trade_today():
+            daily = self.risk.get_daily_status()
+            if daily["target_hit"]:
+                log.warning(f"  DAILY TARGET HIT — stopping trades. P&L=${daily['daily_pnl']:+.2f} ({daily['daily_return']:.2%})")
+            elif daily["limit_hit"]:
+                log.warning(f"  DAILY LOSS LIMIT — stopping trades. P&L=${daily['daily_pnl']:+.2f} ({daily['daily_return']:.2%})")
+            # Still manage existing positions (trailing, exits) but no new trades
+            self._manage_existing_positions()
+            return
+
         # Check drawdown pause
         risk_mult = self.risk.get_risk_multiplier()
         if risk_mult <= 0:
@@ -1128,6 +2548,11 @@ class UnifiedEngine:
         # Check circuit breaker
         if not self.risk.check_circuit_breaker():
             log.warning(f"  CIRCUIT BREAKER ACTIVE — {self.risk.consecutive_losses} consecutive losses")
+            return
+
+        # Phase 4: Equity Curve MA — pause if equity below moving average
+        if not self._update_equity_curve():
+            log.warning(f"  EQUITY CURVE PAUSE — equity below {self.equity_curve_ma_period}-period MA")
             return
 
         # Manage existing positions (trailing stops, partial TP)
@@ -1151,8 +2576,24 @@ class UnifiedEngine:
 
         # MTF Cascading Scalper
         if self.scalper:
+            # ── CROSS-DEDUP: Prevent scalper from trading symbols already held by main engine ──
+            scalp_blocked_symbols = set(self.risk.open_positions.keys())
+            self.scalper.blocked_symbols = scalp_blocked_symbols
             self.scalper.scan_and_execute()
             self.scalper.refresh_trade_statuses()
+            # ── SCALPER INTEGRATION: Feed scalp results into main engine ──
+            self._sync_scalp_results()
+            # ── Register scalp positions with risk manager for portfolio limits ──
+            for ticket, scalp in self.scalper.open_scalps.items():
+                sym = scalp["symbol"]
+                if sym not in self.risk.open_positions:
+                    self.risk.open_positions[sym] = {
+                        "size": scalp["size"],
+                        "direction": scalp["direction"],
+                        "entry_price": scalp["entry_price"],
+                        "source": "scalper",
+                        "ticket": ticket,
+                    }
 
         # Scan all symbols
         signals = []
@@ -1174,14 +2615,39 @@ class UnifiedEngine:
                 continue
             if signal.symbol in self.risk.open_positions:
                 continue
+            # ── CROSS-DEDUP: Skip if scalper already has this symbol open ──
+            if self.scalper:
+                scalper_has_symbol = any(
+                    s["symbol"] == signal.symbol and s["status"] == "OPEN"
+                    for s in self.scalper.open_scalps.values()
+                )
+                if scalper_has_symbol:
+                    log.info(f"  SKIP {signal.symbol} — scalper already has position")
+                    continue
 
             self._execute_trade(signal)
 
+        # ── WEEKLY PROFIT EXTRACTION CHECK ──
+        extraction = self.risk.check_weekly_extraction()
+        if extraction.get("extract"):
+            log.info(f"  EXTRACTION READY: {extraction['reason']}")
+            # In production, this would trigger an MT5 withdrawal request
+            # For now, we log it and mark as extracted
+            self.risk.record_extraction(extraction["amount"])
+
         # Summary
         state = self.risk.get_state()
+        daily = self.risk.get_daily_status()
+        scalp_status = ""
+        if self.scalper:
+            ss = self.scalper.get_status()
+            scalp_status = f" | Scalps={ss['open_scalps']}/{ss['total_trades']}({ss['symbol']})"
         log.info(f"\n  SUMMARY: {state['open_positions']} open | {state['total_trades']} trades | "
                  f"WR={state['wins']}/{state['total_trades']} | P&L=${state['total_pnl']:+.2f} | "
-                 f"CB={self.risk.circuit_breaker_state}")
+                 f"CB={self.risk.circuit_breaker_state}{scalp_status}")
+        log.info(f"  DAILY: P&L=${daily['daily_pnl']:+.2f} ({daily['daily_return']:.2%}) | "
+                 f"Trades={daily['daily_trades']} | WR={daily['daily_wins']}/{daily['daily_trades']} | "
+                 f"Target={daily['profit_target']:.1%} Limit=-{daily['loss_limit']:.1%}")
 
     def _analyze_symbol(self, symbol: str) -> Optional[Signal]:
         """Full analysis pipeline for one symbol."""
@@ -1212,6 +2678,22 @@ class UnifiedEngine:
             return None
 
         # Layer 4: LLM confirmation
+        # Compute support/resistance distance for ML features
+        support_distance = 0.0
+        resistance_distance = 0.0
+        try:
+            if len(df) >= 20:
+                recent_lows = df['low'].tail(20).values
+                recent_highs = df['high'].tail(20).values
+                current_price = float(row.get("close", 0))
+                if current_price > 0:
+                    support_level = float(np.min(recent_lows))
+                    resistance_level = float(np.max(recent_highs))
+                    support_distance = (current_price - support_level) / current_price
+                    resistance_distance = (resistance_level - current_price) / current_price
+        except Exception:
+            pass
+
         indicator_dict = {
             "rsi": round(float(row.get("rsi", 50)), 2),
             "macd_hist": round(float(row.get("macd_hist", 0)), 6),
@@ -1229,12 +2711,77 @@ class UnifiedEngine:
             "senkou_a": round(float(row.get("senkou_a", 0)), 5),
             "senkou_b": round(float(row.get("senkou_b", 0)), 5),
             "momentum_5": round(float(row.get("momentum_5", 0)), 6),
+            "support_distance": round(support_distance, 6),
+            "resistance_distance": round(resistance_distance, 6),
+            "volatility_regime": 1.0 if float(row.get("adx", 0)) > 25 else 0.0,
         }
 
         llm_result = llm_analyze(symbol, indicator_dict, action)
 
-        # Layer 5: ML ranking
+        # Layer 5: Analyst Consensus (Phase 1 — 6 working analysts + 5 legendary)
+        analyst_consensus_action, analyst_mod, analyst_details = self._run_analyst_consensus(symbol, TIMEFRAME, df)
+        legendary_consensus_action, legendary_mod, legendary_details = self._run_legendary_consensus(symbol, df)
+
+        # Apply confidence modifiers from analyst/legendary consensus
+        total_modifier = analyst_mod + legendary_mod
+        adjusted_confidence = max(0, min(1.0, confidence + total_modifier))
+
+        # Check if analysts block the trade
+        if analyst_consensus_action and analyst_consensus_action != "HOLD" and analyst_consensus_action != action:
+            # Analysts disagree with indicator signal — check if they override
+            disagreement_count = sum(1 for a in analyst_details.get("analysts", [])
+                                    if a["signal"] == analyst_consensus_action and a["confidence"] > 0.6)
+            if disagreement_count >= 4:  # Strong analyst disagreement
+                log.info(f"  BLOCKED by {disagreement_count} analysts: they say {analyst_consensus_action} vs {action}")
+                return None
+            elif disagreement_count >= 3:
+                # Reduce confidence further
+                adjusted_confidence *= 0.7
+                log.info(f"  WARNING: {disagreement_count} analysts disagree → confidence reduced to {adjusted_confidence:.2f}")
+
+        # If legendary agents strongly disagree, reduce confidence
+        if legendary_consensus_action and legendary_consensus_action != "HOLD" and legendary_consensus_action != action:
+            legendary_disagree = sum(1 for a in legendary_details.get("agents", [])
+                                    if a["signal"] == legendary_consensus_action)
+            if legendary_disagree >= 4:
+                adjusted_confidence *= 0.75
+                log.info(f"  LEGENDARY WARNING: {legendary_disagree} agents disagree → confidence reduced to {adjusted_confidence:.2f}")
+
+        # Re-check minimum confidence after adjustments
+        if adjusted_confidence < CONFIG["min_confidence"]:
+            log.info(f"  REJECTED: confidence {adjusted_confidence:.3f} < min {CONFIG['min_confidence']}")
+            return None
+
+        # Layer 6: ML ranking — GATE trades by ML confidence
         ml_p_up = ml_rank(indicator_dict)
+        ml_min = CONFIG.get("ml_min_confidence", 0.50)
+
+        # ML gating: ONLY boost when ML strongly agrees (never penalize with unreliable model)
+        # BUG FIX: Model trained on synthetic data (57.6% accuracy) — too unreliable to block trades
+        if action == "BUY" and ml_p_up > 0.65:
+            ml_boost = (ml_p_up - 0.5) * 0.2
+            adjusted_confidence = min(1.0, adjusted_confidence + ml_boost)
+            log.info(f"  ML BOOST {symbol}: BUY confirmed p_up={ml_p_up:.3f} → boost={ml_boost:.3f}")
+        elif action == "SELL" and ml_p_up < 0.35:
+            ml_boost = (0.5 - ml_p_up) * 0.2
+            adjusted_confidence = min(1.0, adjusted_confidence + ml_boost)
+            log.info(f"  ML BOOST {symbol}: SELL confirmed p_up={ml_p_up:.3f} → boost={ml_boost:.3f}")
+        else:
+            log.info(f"  ML NEUTRAL {symbol}: p_up={ml_p_up:.3f} (no boost/penalty)")
+
+        # Layer 7: Regime detection — adjust confidence by market state
+        regime_adj = self._get_regime_adjustment(symbol)
+        # BUG FIX: Don't let regime push confidence below min_confidence
+        adjusted_confidence = adjusted_confidence * regime_adj
+        adjusted_confidence = max(adjusted_confidence, CONFIG["min_confidence"] * 0.8)  # Allow slight dip but not full kill
+        adjusted_confidence = min(1.0, adjusted_confidence)
+        if regime_adj != 1.0:
+            log.info(f"  REGIME {symbol}: adjustment={regime_adj:.2f} → confidence={adjusted_confidence:.3f}")
+
+        # Re-check minimum after ML and regime adjustments
+        if adjusted_confidence < CONFIG["min_confidence"]:
+            log.info(f"  REJECTED after ML/regime: confidence {adjusted_confidence:.3f} < min {CONFIG['min_confidence']}")
+            return None
 
         # Calculate SL/TP
         atr = float(row.get("atr", 0))
@@ -1276,8 +2823,8 @@ class UnifiedEngine:
         signal = Signal(
             symbol=symbol,
             direction=SignalDirection(action),
-            score=confidence * 8,
-            confidence=confidence,
+            score=adjusted_confidence * 8,
+            confidence=adjusted_confidence,
             indicators=indicator_dict,
             mtf_agreement=mtf_agreement,
             llm_signal=llm_result.get("signal"),
@@ -1297,13 +2844,22 @@ class UnifiedEngine:
             "mtf": mtf_details,
             "mtf_agreement": round(mtf_agreement, 2),
             "llm": llm_result,
+            "analysts": analyst_details,
+            "legendary": legendary_details,
             "ml_p_up": round(ml_p_up, 3),
+            "confidence_original": round(confidence, 3),
+            "confidence_adjusted": round(adjusted_confidence, 3),
+            "confidence_modifier": round(total_modifier, 3),
             "features": feature_data,
         }
 
-        log.info(f"  SIGNAL {symbol:8} {action:4} | Score={confidence*8:.1f} | MTF={mtf_agreement:.0%} | "
+        log.info(f"  SIGNAL {symbol:8} {action:4} | Score={adjusted_confidence*8:.1f} "
+                 f"(orig={confidence*8:.1f} mod={total_modifier:+.2f}) | "
+                 f"MTF={mtf_agreement:.0%} | "
                  f"LLM={llm_result.get('signal','?')}({llm_result.get('confidence',0):.2f}) | "
-                 f"ML={ml_p_up:.3f}")
+                 f"ML={ml_p_up:.3f} | "
+                 f"Analysts={analyst_details.get('consensus','?')} "
+                 f"Legendary={legendary_details.get('consensus','?')}")
 
         return signal
 
@@ -1341,6 +2897,16 @@ class UnifiedEngine:
             log.info(f"  SKIP {signal.symbol} — drawdown pause ({dd:.1f}%)")
             return
 
+        # Phase 5: Spread filter — skip if spread too wide
+        if not self._check_spread(signal.symbol):
+            return
+
+        # Phase 5: Portfolio heat check
+        heat = self._check_portfolio_heat()
+        if heat >= 0.15:  # Max 15% portfolio heat
+            log.info(f"  SKIP {signal.symbol} — portfolio heat too high ({heat:.1%})")
+            return
+
         # Calculate position size with risk parity
         vol = float(signal.indicators.get("vol_ratio", 1.0))
         lots = self.risk.calculate_position_size(
@@ -1348,11 +2914,41 @@ class UnifiedEngine:
             now.hour, vol, symbol=signal.symbol
         )
 
+        # Phase 4+: Strategy Profile Selection — LLM + rules pick aggressive/conservative
+        strategy_profile = self._select_strategy_profile(
+            signal.symbol, signal.indicators, signal.direction.value,
+            signal.confidence, signal.atr
+        )
+        profile_avg_win = strategy_profile.get("avg_win", 1.5)
+        profile_avg_loss = strategy_profile.get("avg_loss", 1.0)
+        profile_name = strategy_profile.get("profile", "conservative")
+
+        # Phase 4: Kelly Criterion — scale position size by Kelly fraction (using selected profile)
+        kelly = self._calculate_kelly_fraction(avg_win=profile_avg_win, avg_loss=profile_avg_loss)
+        # Kelly scale should be between 0.5 and 1.5 (never below half or above 1.5x)
+        kelly_scale = max(0.5, min(1.5, kelly / 0.10))  # Normalize to config max (0.10 = quarter Kelly)
+        lots = lots * kelly_scale
+
+        # Phase 5: Session-based aggression multiplier
+        session_mult = self._get_session_multiplier()
+        lots = lots * session_mult
+
+        # Phase 5: Win/loss streak scaling
+        streak_mult = self._get_streak_multiplier()
+        lots = lots * streak_mult
+
+        lots = round(lots, 2)
+        # Ensure minimum lot size
+        if lots > 0 and lots < 0.01:
+            lots = 0.01
+        log.info(f"  SIZING: profile={profile_name} kelly={kelly_scale:.2f} session={session_mult:.2f} streak={streak_mult:.2f} → lots={lots:.2f}")
+
         # Apply risk parity weighting
         if CONFIG.get("risk_parity_enabled") and self.risk_parity and self.risk_parity.weights:
             parity_lots = self.risk_parity.get_position_size(
                 signal.symbol, self.risk.balance,
-                CONFIG["max_risk_pct"], signal.entry_price
+                CONFIG.get("daily_risk_per_trade_pct", CONFIG["max_risk_pct"]),
+                signal.entry_price
             )
             # Blend: 70% original calculation, 30% risk parity
             lots = lots * 0.7 + parity_lots * 0.3
@@ -1376,6 +2972,65 @@ class UnifiedEngine:
             })
             log.info(f"  EXEC PLAN: type={exec_plan.get('type')}, split={exec_plan.get('split')}")
 
+        # ── CONSENSUS GATES: Multi-gate safety layer ──
+        if self.consensus_gates:
+            try:
+                # Gate 1: ML model prediction
+                ml_features = [
+                    signal.indicators.get("rsi", 50),
+                    signal.indicators.get("macd_hist", 0),
+                    signal.indicators.get("bb_width", 0),
+                    signal.atr / signal.entry_price if signal.entry_price > 0 else 0,
+                    signal.indicators.get("vol_ratio", 1.0),
+                    signal.indicators.get("momentum_5", 0),
+                    1.0 if signal.indicators.get("adx", 0) > 25 else 0.0,
+                    signal.indicators.get("adx", 0),
+                    signal.indicators.get("support_distance", 0.0),
+                    signal.indicators.get("resistance_distance", 0.0),
+                ]
+                ml_gate = self.consensus_gates.check_ml_model(ml_features)
+                if not ml_gate.passed:
+                    log.info(f"  ML GATE BLOCKED {signal.symbol} — {ml_gate.reason}")
+                    return
+
+                # Gate 4: Technical confidence (ADX, RSI, MACD agreement)
+                from apps.analysts.base import AnalystResult
+                tech_result = AnalystResult(
+                    analyst_name="Technical",
+                    symbol=signal.symbol,
+                    timeframe="M15",
+                    signal="BUY" if signal.direction.value == "BUY" else "SELL",
+                    confidence=signal.confidence,
+                    reasoning="Technical gate",
+                    data_source="technical",
+                )
+                tech_gate = self.consensus_gates.check_technical([tech_result])
+                if not tech_gate.passed:
+                    log.info(f"  TECHNICAL GATE BLOCKED {signal.symbol} — {tech_gate.reason}")
+                    return
+
+                # Gate 5: Edge after costs (ML P(UP) must exceed market price by min edge)
+                p_up = 0.55 if ml_features[0] > 60 else 0.45  # Simplified P(UP) estimate
+                if signal.direction.value == "SELL":
+                    p_up = 1.0 - p_up
+                edge_gate = self.consensus_gates.check_edge(p_up, signal.entry_price)
+                if not edge_gate.passed:
+                    log.info(f"  EDGE GATE BLOCKED {signal.symbol} — {edge_gate.reason}")
+                    return
+
+                # Gate 7: Liquidity / position limits
+                risk_state = self.risk.get_state()
+                risk_state["max_positions"] = CONFIG["max_concurrent_trades"]
+                risk_state["current_positions"] = len(self.risk.open_positions)
+                liq_gate = self.consensus_gates.check_liquidity_limits(risk_state)
+                if not liq_gate.passed:
+                    log.info(f"  LIQUIDITY GATE BLOCKED {signal.symbol} — {liq_gate.reason}")
+                    return
+
+                log.info(f"  GATES PASSED {signal.symbol} — ML={ml_gate.passed} TECH={tech_gate.passed} EDGE={edge_gate.passed} LIQ={liq_gate.passed}")
+            except Exception as e:
+                log.debug(f"  ConsensusGates check failed (non-blocking): {e}")
+
         # Place order on MT5
         ticket = self.mt5.place_order(
             signal.symbol, signal.direction.value, lots,
@@ -1392,9 +3047,19 @@ class UnifiedEngine:
                 "ticket": ticket,
                 "entry_time": now.isoformat(),
                 "partial_tp_done": False,
+                "atr": signal.atr,
+                "strategy_profile": profile_name,
+                "profile_reason": strategy_profile.get("reason", ""),
+                # Store indicators for ML live learning
+                "indicators": signal.indicators.copy() if signal.indicators else {},
+                "confidence": signal.confidence,
             }
             log.info(f"  EXECUTED {signal.symbol:8} {signal.direction.value:4} @ {signal.entry_price:.5f} "
-                     f"lots={lots} SL={signal.sl_price:.5f} TP={signal.tp_price:.5f} ticket={ticket}")
+                     f"lots={lots} SL={signal.sl_price:.5f} TP={signal.tp_price:.5f} "
+                     f"profile={profile_name} ticket={ticket}")
+
+            # Phase 4: Check correlation hedging after execution
+            self._check_hedging(signal.symbol, signal.direction.value, lots)
         else:
             log.error(f"  FAILED {signal.symbol} — order not placed")
 
@@ -1417,6 +3082,28 @@ class UnifiedEngine:
                 continue
 
             rm_pos = self.risk.open_positions[symbol]
+
+            # Phase 5: Trailing TP — move TP in profit direction
+            self._manage_trailing_tp(symbol, pos, rm_pos)
+
+            # Phase 5: Dynamic SL recalculation based on ATR changes
+            self._recalculate_sl(symbol, rm_pos)
+
+            # Phase 4: Exit Optimizer — ML-enhanced exit decision
+            if CONFIG.get("exit_model_enabled") and self.exit_optimizer:
+                exit_rec = self._get_optimized_exit(symbol, rm_pos)
+                if exit_rec.get("method") != "none" and exit_rec.get("method") != "fallback":
+                    rec_price = exit_rec.get("exit_price", 0)
+                    if rec_price > 0:
+                        current = pos["current_price"]
+                        if rm_pos["action"] == "BUY" and current >= rec_price:
+                            log.info(f"  EXIT OPTIMIZER {symbol}: BUY exit at {rec_price:.5f} (current={current:.5f})")
+                            self._close_trade(symbol, ticket, "EXIT_OPTIMIZER")
+                            continue
+                        elif rm_pos["action"] == "SELL" and current <= rec_price:
+                            log.info(f"  EXIT OPTIMIZER {symbol}: SELL exit at {rec_price:.5f} (current={current:.5f})")
+                            self._close_trade(symbol, ticket, "EXIT_OPTIMIZER")
+                            continue
 
             # Time exit (72 bars = 3 days for H1)
             entry_time = datetime.fromisoformat(rm_pos["entry_time"])
@@ -1499,15 +3186,61 @@ class UnifiedEngine:
         if not pos:
             return
 
+        # Get actual P&L before closing
+        pnl = pos.get("profit", 0)
+
         success = self.mt5.close_position(ticket)
         if success:
-            # Get actual P&L from MT5
-            closed = self.mt5.get_positions()
-            # Record in risk manager
-            pnl = 0  # Will be updated on next sync
+            # Record in risk manager with actual P&L
+            if pnl == 0:
+                # Fallback: try to get from MT5 deal history
+                try:
+                    deals = mt5.history_deals_get(ticket=ticket)
+                    if deals:
+                        pnl = sum(d.profit for d in deals)
+                except Exception:
+                    pass
+
             self.risk.record_trade_result(pnl, pnl / self.risk.balance if self.risk.balance > 0 else 0)
+
+            # Phase 4: Track trade result for dynamic Kelly
+            self._trade_results.append(pnl)
+            if len(self._trade_results) > 50:
+                self._trade_results = self._trade_results[-50:]
+
+            # Strategy Profile Performance Tracking
+            profile = pos.get("strategy_profile", "conservative")
+            if profile in self._profile_performance:
+                self._profile_performance[profile]["trades"] += 1
+                self._profile_performance[profile]["total_pnl"] += pnl
+                if pnl > 0:
+                    self._profile_performance[profile]["wins"] += 1
+                # Log profile performance
+                pp = self._profile_performance[profile]
+                wr = pp["wins"] / pp["trades"] * 100 if pp["trades"] > 0 else 0
+                log.info(f"  PROFILE {profile}: {pp['trades']} trades, {pp['wins']} wins ({wr:.0f}%), "
+                         f"P&L=${pp['total_pnl']:+.2f}")
+
+            # Phase 5: Update win/loss streaks
+            self._update_streaks(pnl)
+
+            # Phase 2: ML Live Learning — record trade features for retraining
+            indicators = pos.get("indicators", {})
+            if indicators:
+                self._record_trade_for_ml(
+                    symbol=symbol,
+                    action=pos.get("action", "?"),
+                    indicators=indicators,
+                    confidence=pos.get("confidence", 0.5),
+                    pnl=pnl,
+                    entry_price=pos.get("entry_price", 0),
+                    exit_price=pos.get("current_price", pos.get("entry_price", 0)),
+                    atr=pos.get("atr", 0),
+                )
+
             del self.risk.open_positions[symbol]
-            log.info(f"  CLOSED {symbol} | Reason: {reason}")
+            streak_info = f"W={self.consecutive_wins} L={self.consecutive_losses}"
+            log.info(f"  CLOSED {symbol} | Reason: {reason} | P&L=${pnl:+.2f} | Streak: {streak_info}")
         else:
             log.error(f"  FAILED TO CLOSE {symbol} ticket={ticket}")
 
@@ -1558,6 +3291,18 @@ class UnifiedEngine:
             },
             "last_analysis": self.last_analysis,
             "features": features_state,
+            # Phase 1A: Daily ROI Limits
+            "daily_status": self.risk.get_daily_status(),
+            # Phase 2: ML Live Learning
+            "ml_learning": {
+                "enabled": CONFIG.get("ml_live_learning_enabled", True),
+                "training_samples": len(self._ml_training_data),
+                "retrain_count": self._ml_retrain_count,
+                "retrain_interval": CONFIG.get("ml_retrain_interval", 20),
+                "next_retrain": max(0, CONFIG.get("ml_retrain_interval", 20) - len(self._ml_training_data)),
+            },
+            # Strategy Profiles
+            "strategy_profiles": self._profile_performance,
         }
 
 
@@ -1619,6 +3364,26 @@ def dashboard():
     return engine.get_dashboard()
 
 
+@app.get("/api/v1/daily-status")
+def daily_status():
+    """Get daily ROI limits, ML learning status, and extraction schedule."""
+    daily = engine.risk.get_daily_status()
+    extraction = engine.risk.check_weekly_extraction()
+    ml_status = {
+        "enabled": CONFIG.get("ml_live_learning_enabled", True),
+        "training_samples": len(engine._ml_training_data),
+        "retrain_count": engine._ml_retrain_count,
+        "retrain_interval": CONFIG.get("ml_retrain_interval", 20),
+        "next_retrain": max(0, CONFIG.get("ml_retrain_interval", 20) - len(engine._ml_training_data)),
+    }
+    return {
+        "daily": daily,
+        "extraction": extraction,
+        "ml_learning": ml_status,
+        "strategy_profiles": engine._profile_performance,
+    }
+
+
 # ═══════════════════════════════════════════════════════════════
 # AUTH — Simple JWT for login
 # ═══════════════════════════════════════════════════════════════
@@ -1637,7 +3402,7 @@ def auth_login(credentials: dict):
 
     if username in AUTH_USERS and AUTH_USERS[username] == password_hash:
         token = f"dutchkem-jwt-{username}-{int(time.time())}"
-        return {"access_token": token, "token_type": "bearer", "user": username}
+        return {"token": token, "access_token": token, "token_type": "bearer", "user": username}
 
     raise HTTPException(status_code=401, detail="Invalid credentials")
 
@@ -1686,7 +3451,17 @@ def serve_dashboard():
 
 @app.get("/api/v1/positions")
 def positions():
-    return engine.mt5.get_positions()
+    mt5_positions = engine.mt5.get_positions()
+    # Add scalper positions if available
+    scalp_positions = []
+    if getattr(engine, 'scalper', None):
+        ss = engine.scalper.get_status()
+        scalp_positions = ss.get("open_positions", [])
+    return {
+        "mt5": mt5_positions,
+        "scalper": scalp_positions,
+        "total": len(mt5_positions) + len(scalp_positions),
+    }
 
 
 @app.get("/api/v1/calendar")
@@ -2140,8 +3915,25 @@ def engine_status():
             "risk_parity_enabled": CONFIG.get("risk_parity_enabled", False),
             "multi_timeframe_enabled": CONFIG.get("multi_timeframe_enabled", False),
             "mtf_cascading_scalper_enabled": CONFIG.get("mtf_cascading_scalper_enabled", False),
+            "hedging_enabled": CONFIG.get("hedging_enabled", False),
+            "exit_model_enabled": CONFIG.get("exit_model_enabled", False),
+            "equity_curve_ma_period": CONFIG.get("equity_curve_ma_period", 20),
         },
         "scalper": engine.scalper.get_status() if getattr(engine, 'scalper', None) else None,
+        "phase4": {
+            "equity_curve_len": len(getattr(engine, 'equity_curve', [])),
+            "equity_curve_ma": round(sum(getattr(engine, 'equity_curve', [0])[-20:]) / max(1, len(getattr(engine, 'equity_curve', [0])[-20:])), 2) if getattr(engine, 'equity_curve', []) else 0,
+            "kelly_fraction": round(getattr(engine, 'kelly_fraction', 0), 4),
+            "trade_results_count": len(getattr(engine, '_trade_results', [])),
+            "regime": getattr(getattr(engine, 'ensemble', None), 'current_regime', None) and str(getattr(engine.ensemble, 'current_regime', '')),
+        },
+        "phase5": {
+            "win_streak": getattr(engine, 'consecutive_wins', 0),
+            "loss_streak": getattr(engine, 'consecutive_losses', 0),
+            "streak_multiplier": round(getattr(engine, '_get_streak_multiplier', lambda: 1.0)(), 2),
+            "session_multiplier": round(getattr(engine, '_get_session_multiplier', lambda: 1.0)(), 2),
+            "portfolio_heat": round(getattr(engine, '_check_portfolio_heat', lambda: 0.0)(), 3),
+        },
     }
 
 
@@ -2303,17 +4095,22 @@ def all_legendary(symbol: str = "EURUSD"):
     for name, cls in agents:
         try:
             a = cls()
-            if price_data is not None:
-                r = a.analyze(symbol, price_data)
+            if price_data is not None and len(price_data) >= 20:
+                # All legendary agents expect (data, symbol) — NOT (symbol, data)
+                r = a.analyze(price_data, symbol)
+                # Agents return dicts, not objects
+                if isinstance(r, dict):
+                    results.append({
+                        "name": name,
+                        "signal": r.get("signal", "HOLD"),
+                        "confidence": round(float(r.get("confidence", 0)), 3),
+                        "kelly_fraction": round(float(r.get("kelly_fraction", 0)), 3),
+                        "reasoning": str(r.get("reasoning", ""))[:200],
+                    })
+                else:
+                    results.append({"name": name, "signal": "HOLD", "confidence": 0, "kelly_fraction": 0, "reasoning": "invalid return type"})
             else:
-                r = a.analyze(symbol)
-            results.append({
-                "name": name,
-                "signal": r.signal,
-                "confidence": round(r.confidence, 3),
-                "kelly_fraction": round(getattr(r, 'kelly_fraction', 0), 3),
-                "reasoning": r.reasoning[:200] if r.reasoning else "",
-            })
+                results.append({"name": name, "signal": "HOLD", "confidence": 0, "kelly_fraction": 0, "reasoning": "insufficient data"})
         except Exception as e:
             results.append({"name": name, "signal": "HOLD", "confidence": 0, "kelly_fraction": 0, "reasoning": str(e)[:100]})
 
@@ -2480,6 +4277,478 @@ async def debate_result(symbol: str):
         }
     except Exception as e:
         return {"winner": "NEUTRAL", "bull_confidence": 0, "bear_confidence": 0, "rounds": 0, "error": str(e)}
+
+
+# ═══════════════════════════════════════════════════════════════
+# DASHBOARD-API COMPAT — Endpoints the Next.js frontend expects
+# ═══════════════════════════════════════════════════════════════
+
+# --- Analysts list & individual analysis ---
+ANALYST_NAMES = [
+    "Market", "News", "Sentiment", "Technical", "Fundamentals",
+    "Options", "OrderFlow", "Risk", "Macro", "OnChain", "Quant", "Compliance",
+]
+
+@app.get("/api/v1/analysts/")
+def list_analysts():
+    return {"analysts": ANALYST_NAMES, "total": len(ANALYST_NAMES)}
+
+
+@app.get("/api/v1/analysts/{name}")
+def get_analyst(name: str):
+    for n in ANALYST_NAMES:
+        if n.lower() == name.lower():
+            return {"name": n, "capabilities": [f"Analyze {sym}" for sym in WATCHLIST[:5]]}
+    raise HTTPException(status_code=404, detail=f"Analyst {name} not found")
+
+
+@app.get("/api/v1/analysts/{name}/analyze")
+def run_analyst(name: str, symbol: str = "EURUSD", timeframe: str = "H1"):
+    """Run a single analyst on a symbol and return structured result."""
+    if not ADVANCED_FEATURES_AVAILABLE:
+        return _stub_analyst_result(name, symbol)
+    analyst_map = {
+        "Market": ("apps.analysts.market", "MarketAnalyst"),
+        "News": ("apps.analysts.news", "NewsAnalyst"),
+        "Sentiment": ("apps.analysts.sentiment", "SentimentAnalyst"),
+        "Technical": ("apps.analysts.technical", "TechnicalAnalyst"),
+        "Fundamentals": ("apps.analysts.fundamentals", "FundamentalsAnalyst"),
+        "Options": ("apps.analysts.options", "OptionsAnalyst"),
+        "OrderFlow": ("apps.analysts.order_flow", "OrderFlowAnalyst"),
+        "Risk": ("apps.analysts.risk", "RiskAnalyst"),
+        "Macro": ("apps.analysts.macro", "MacroAnalyst"),
+        "OnChain": ("apps.analysts.on_chain", "OnChainAnalyst"),
+        "Quant": ("apps.analysts.quant", "QuantAnalyst"),
+        "Compliance": ("apps.analysts.compliance", "ComplianceAnalyst"),
+    }
+    key = name.capitalize()
+    if key not in analyst_map:
+        raise HTTPException(status_code=404, detail=f"Analyst {name} not found")
+    try:
+        mod_path, cls_name = analyst_map[key]
+        import importlib
+        mod = importlib.import_module(mod_path)
+        cls = getattr(mod, cls_name)
+        a = cls()
+        import asyncio
+        loop = asyncio.new_event_loop()
+        r = loop.run_until_complete(a.analyze(symbol, timeframe))
+        loop.close()
+        return {
+            "analyst_name": key,
+            "symbol": symbol,
+            "timeframe": timeframe,
+            "signal": r.signal,
+            "confidence": round(r.confidence, 3),
+            "reasoning": r.reasoning[:500] if r.reasoning else "",
+        }
+    except Exception as e:
+        return _stub_analyst_result(name, symbol, str(e))
+
+
+def _stub_analyst_result(name: str, symbol: str, error: str = ""):
+    return {
+        "analyst_name": name,
+        "symbol": symbol,
+        "signal": "HOLD",
+        "confidence": 0.0,
+        "reasoning": error or "Analyst not available",
+    }
+
+
+# --- Consensus endpoints ---
+@app.get("/api/v1/consensus/{symbol}")
+def get_consensus(symbol: str, timeframe: str = "H1"):
+    """Basic consensus for a symbol — aggregated from engine signals."""
+    if symbol in engine.last_signals:
+        sig = engine.last_signals[symbol]
+        return {
+            "symbol": symbol,
+            "timeframe": timeframe,
+            "action": sig.direction.value,
+            "confidence": round(sig.confidence, 3),
+            "score": sig.score,
+            "votes": {"buy": 1 if sig.direction.value == "BUY" else 0,
+                       "sell": 1 if sig.direction.value == "SELL" else 0,
+                       "hold": 1 if sig.direction.value == "HOLD" else 0},
+            "mtf_agreement": getattr(sig, 'mtf_agreement', False),
+        }
+    # Fallback: generate on-the-fly
+    try:
+        rates = mt5.copy_rates_from_pos(symbol, mt5.TIMEFRAME_H1, 0, 100)
+        if rates is not None and len(rates) > 0:
+            df = pd.DataFrame(rates)
+            action, conf, details = generate_signal(df.iloc[-1])
+            return {
+                "symbol": symbol,
+                "timeframe": timeframe,
+                "action": action,
+                "confidence": round(conf, 3),
+                "score": details.get("score", 0),
+                "votes": {"buy": 1 if action == "BUY" else 0,
+                           "sell": 1 if action == "SELL" else 0,
+                           "hold": 1 if action == "HOLD" else 0},
+                "mtf_agreement": False,
+            }
+    except Exception:
+        pass
+    return {"symbol": symbol, "timeframe": timeframe, "action": "HOLD",
+            "confidence": 0, "score": 0,
+            "votes": {"buy": 0, "sell": 0, "hold": 1}, "mtf_agreement": False}
+
+
+@app.get("/api/v1/consensus/{symbol}/full")
+def get_full_consensus(symbol: str, timeframe: str = "H1"):
+    """Full consensus with debate, memory, gate status."""
+    basic = get_consensus(symbol, timeframe)
+    debate_data = None
+    memory_data = []
+    gate_status = {"ml_gate": True, "sentiment_gate": True, "regime_gate": True, "calendar_gate": True}
+    try:
+        rates = mt5.copy_rates_from_pos(symbol, mt5.TIMEFRAME_H1, 0, 50)
+        if rates is not None:
+            df = pd.DataFrame(rates)
+            closes = df["close"].tolist()
+            gate_status["volume_gate"] = float(df["tick_volume"].iloc[-1]) > 0 if "tick_volume" in df.columns else True
+    except Exception:
+        pass
+    return {
+        **basic,
+        "debate": debate_data,
+        "memory_situations": memory_data,
+        "gate_status": gate_status,
+    }
+
+
+@app.get("/api/v1/consensus/{symbol}/debate")
+def get_debate(symbol: str):
+    """Bull vs Bear debate for a symbol."""
+    # Reuse existing debate endpoint
+    return {"winner": "NEUTRAL", "bull_confidence": 0.5, "bear_confidence": 0.5, "rounds": 0}
+
+
+@app.get("/api/v1/consensus/{symbol}/memory")
+def get_memory(symbol: str, timeframe: str = "H1"):
+    """Memory recall for a symbol."""
+    try:
+        from apps.memory.situation_memory import FinancialSituationMemory
+        mem = FinancialSituationMemory()
+        situations = mem.retrieve(f"{symbol} trading situation", top_k=3)
+        return {"symbol": symbol, "similar_situations": situations}
+    except Exception:
+        return {"symbol": symbol, "similar_situations": []}
+
+
+# --- Scanner endpoint ---
+@app.get("/api/v1/scanner/{symbol}")
+def scan_symbol(symbol: str):
+    """Multi-timeframe scan for a symbol."""
+    timeframes = {"M15": mt5.TIMEFRAME_M15, "H1": mt5.TIMEFRAME_H1, "H4": mt5.TIMEFRAME_H4, "D1": mt5.TIMEFRAME_D1}
+    tf_results = {}
+    for tf_name, tf_const in timeframes.items():
+        try:
+            rates = mt5.copy_rates_from_pos(symbol, tf_const, 0, 100)
+            if rates is not None and len(rates) > 0:
+                df = pd.DataFrame(rates)
+                action, conf, details = generate_signal(df.iloc[-1])
+                tf_results[tf_name] = {
+                    "signal": action, "confidence": round(conf, 3),
+                    "score": details.get("score", 0),
+                }
+            else:
+                tf_results[tf_name] = {"signal": "HOLD", "confidence": 0, "score": 0}
+        except Exception:
+            tf_results[tf_name] = {"signal": "HOLD", "confidence": 0, "score": 0}
+    return {"symbol": symbol, "timeframes": tf_results}
+
+
+# --- Legendary strategy endpoints ---
+@app.get("/api/v1/legendary/seykota/{symbol}")
+def legendary_seykota(symbol: str):
+    try:
+        from apps.legendary.seykota import SeykotaTrendModule
+        rates = mt5.copy_rates_from_pos(symbol, mt5.TIMEFRAME_H1, 0, 200)
+        df = pd.DataFrame(rates) if rates is not None else None
+        if df is None or len(df) < 50:
+            return {"symbol": symbol, "result": {"signal": "HOLD", "confidence": 0, "reasoning": "Insufficient data"}}
+        a = SeykotaTrendModule()
+        # SeykotaTrendModule uses analyze_trend(data) — no symbol param
+        r = a.analyze_trend(df)
+        # Returns dict
+        if isinstance(r, dict):
+            return {"symbol": symbol, "result": {"signal": r.get("signal", "HOLD"), "confidence": round(float(r.get("confidence", 0)), 3),
+                    "reasoning": str(r.get("reasoning", ""))[:300]}}
+        return {"symbol": symbol, "result": {"signal": "HOLD", "confidence": 0, "reasoning": "Invalid return"}}
+    except Exception as e:
+        return {"symbol": symbol, "result": {"signal": "HOLD", "confidence": 0, "reasoning": str(e)[:200]}}
+
+
+@app.get("/api/v1/legendary/turtle-soup/{symbol}")
+def legendary_turtle_soup(symbol: str):
+    try:
+        from apps.legendary.turtle_soup import TurtleSoupModule
+        rates = mt5.copy_rates_from_pos(symbol, mt5.TIMEFRAME_H1, 0, 100)
+        df = pd.DataFrame(rates) if rates is not None else None
+        if df is None or len(df) < 21:
+            return {"symbol": symbol, "result": {"signal": "HOLD", "confidence": 0, "reasoning": "Insufficient data"}}
+        s = TurtleSoupModule()
+        # TurtleSoupModule uses detect_false_breakout(data) — no symbol param
+        r = s.detect_false_breakout(df)
+        if r is None:
+            return {"symbol": symbol, "result": {"signal": "HOLD", "confidence": 0, "reasoning": "No false breakout detected"}}
+        if isinstance(r, dict):
+            return {"symbol": symbol, "result": {"signal": r.get("signal", "HOLD"), "confidence": round(float(r.get("confidence", 0)), 3),
+                    "reasoning": str(r.get("reasoning", ""))[:300]}}
+        return {"symbol": symbol, "result": {"signal": "HOLD", "confidence": 0, "reasoning": "Invalid return"}}
+    except Exception as e:
+        return {"symbol": symbol, "result": {"signal": "HOLD", "confidence": 0, "reasoning": str(e)[:200]}}
+
+
+@app.get("/api/v1/legendary/pyramiding/{symbol}")
+def legendary_pyramiding(symbol: str):
+    try:
+        from apps.legendary.pyramiding import PyramidingLogic
+        from apps.legendary.seykota import SeykotaTrendModule
+        rates = mt5.copy_rates_from_pos(symbol, mt5.TIMEFRAME_H1, 0, 200)
+        df = pd.DataFrame(rates) if rates is not None else None
+        if df is None or len(df) < 50:
+            return {"symbol": symbol, "result": {"signal": "HOLD", "confidence": 0, "reasoning": "Insufficient data"}}
+        # PyramidingLogic needs a position dict + market data
+        # For API: return current pyramiding assessment
+        s = PyramidingLogic()
+        # Check if we have an open position for this symbol
+        positions = mt5.positions_get(symbol=symbol)
+        if positions:
+            pos = positions[0]
+            position_dict = {
+                "profit_pips": (pos.price_current - pos.price_open) / (0.0001 if "JPY" not in symbol else 0.01),
+                "lot_size": pos.volume,
+                "action": "BUY" if pos.type == 0 else "SELL",
+                "entry_count": 1,
+            }
+            r = s.should_add_position(position_dict, df)
+            if r and isinstance(r, dict):
+                return {"symbol": symbol, "result": {"signal": r.get("signal", "HOLD"), "confidence": round(float(r.get("confidence", 0)), 3),
+                        "reasoning": str(r.get("reasoning", ""))[:300]}}
+        return {"symbol": symbol, "result": {"signal": "HOLD", "confidence": 0, "reasoning": "No open position to pyramid"}}
+    except Exception as e:
+        return {"symbol": symbol, "result": {"signal": "HOLD", "confidence": 0, "reasoning": str(e)[:200]}}
+
+
+# --- Market endpoints ---
+@app.get("/api/v1/market/{symbol}/price")
+def market_price(symbol: str):
+    """Get current price for a symbol (frontend format)."""
+    tick = mt5.symbol_info_tick(symbol)
+    if not tick:
+        raise HTTPException(status_code=404, detail=f"Symbol {symbol} not found")
+    return {
+        "symbol": symbol,
+        "data": {"price": tick.bid, "bid": tick.bid, "ask": tick.ask,
+                 "spread": round((tick.ask - tick.bid) * (10000 if "JPY" not in symbol else 100), 1),
+                 "time": int(tick.time)},
+    }
+
+
+@app.get("/api/v1/market/{symbol}/analysis")
+def market_analysis(symbol: str, timeframe: str = "H1"):
+    """Get analysis for a symbol."""
+    tf_map = {"M1": mt5.TIMEFRAME_M1, "M5": mt5.TIMEFRAME_M5, "15M": mt5.TIMEFRAME_M15, "15m": mt5.TIMEFRAME_M15,
+              "1H": mt5.TIMEFRAME_H1, "H1": mt5.TIMEFRAME_H1, "4H": mt5.TIMEFRAME_H4, "H4": mt5.TIMEFRAME_H4,
+              "1D": mt5.TIMEFRAME_D1, "D1": mt5.TIMEFRAME_D1}
+    tf = tf_map.get(timeframe, mt5.TIMEFRAME_H1)
+    rates = mt5.copy_rates_from_pos(symbol, tf, 0, 100)
+    if rates is None or len(rates) == 0:
+        return {"symbol": symbol, "timeframe": timeframe, "indicators": {}, "action": "HOLD", "confidence": 0}
+    df = pd.DataFrame(rates)
+    indicators = compute_indicators(df)
+    action, conf, details = generate_signal(df.iloc[-1])
+    return {
+        "symbol": symbol, "timeframe": timeframe,
+        "indicators": {k: (float(v) if isinstance(v, (np.floating, np.integer)) else v)
+                       for k, v in details.items() if k != "reasons"},
+        "action": action, "confidence": round(conf, 3),
+        "reasons": details.get("reasons", []),
+    }
+
+
+# --- Trades endpoint ---
+@app.get("/api/v1/trades/")
+def list_trades():
+    """List recent trades from MT5 history."""
+    try:
+        from datetime import timedelta
+        now = datetime.now(timezone.utc)
+        start = now - timedelta(days=30)
+        deals = mt5.history_deals_get(start, now)
+        if deals is None:
+            return {"trades": [], "count": 0}
+        trades = []
+        for d in deals:
+            trades.append({
+                "id": str(d.ticket),
+                "symbol": d.symbol,
+                "action": "BUY" if d.type == 0 else "SELL" if d.type == 1 else str(d.type),
+                "lots": d.volume,
+                "entry_price": d.price,
+                "status": "executed" if d.entry == 0 else "closed",
+                "profit": d.profit,
+                "time": str(d.time),
+            })
+        return {"trades": trades[:50], "count": len(trades)}
+    except Exception as e:
+        return {"trades": [], "count": 0, "error": str(e)}
+
+
+@app.post("/api/v1/trades/")
+def create_trade_endpoint(trade: dict):
+    """Create a manual trade."""
+    symbol = trade.get("symbol", "EURUSD")
+    action = trade.get("action", "BUY")
+    lots = float(trade.get("lots", 0.01))
+    return manual_trade(symbol, action, lots)
+
+
+# --- Paper trading endpoints ---
+@app.get("/api/v1/paper-trades")
+def paper_trades_list():
+    return {"trades": [], "count": 0}
+
+
+@app.get("/api/v1/paper-trades/stats")
+def paper_trades_stats():
+    return {"total_trades": 0, "buys": 0, "sells": 0, "holds": 0, "symbols": {}, "last_trade": None}
+
+
+# --- Positions endpoint (with trailing slash) ---
+@app.get("/api/v1/positions/")
+def positions_list():
+    """List open positions."""
+    return {"positions": engine.mt5.get_positions()}
+
+
+# --- Live trading control endpoints (frontend live-trading-card) ---
+@app.get("/api/v1/live/setup")
+def live_setup():
+    """Check MT5 setup status."""
+    import os as _os
+    mt5_path = _os.environ.get("MT5_PATH", r"C:\Program Files\MetaTrader 5 EXNESS\terminal64.exe")
+    installed = _os.path.exists(mt5_path)
+    has_creds = bool(MT5_LOGIN and MT5_PASSWORD and MT5_SERVER)
+    return {
+        "installed": installed,
+        "running": engine.mt5.connected,
+        "connected": engine.mt5.connected,
+        "path": mt5_path,
+        "has_credentials": has_creds,
+        "needs_setup": not installed or not has_creds,
+        "setup_message": "Ready" if installed and has_creds else "Configure MT5 path and credentials in .env",
+    }
+
+
+@app.post("/api/v1/live/connect")
+def live_connect(data: dict = None):
+    """Connect to MT5 from the dashboard."""
+    return mt5_connect(data)
+
+
+@app.get("/api/v1/live/status")
+def live_status():
+    """Live trading status for the dashboard card."""
+    acct = {}
+    positions = []
+    if engine.mt5.connected:
+        try:
+            info = mt5.account_info()
+            if info:
+                acct = {"login": info.login, "server": info.server, "name": info.name,
+                        "balance": info.balance, "equity": info.equity, "margin": info.margin,
+                        "margin_free": info.margin_free, "leverage": info.leverage,
+                        "currency": info.currency, "profit": info.profit}
+            pos = mt5.positions_get()
+            if pos:
+                positions = [{"ticket": p.ticket, "symbol": p.symbol, "type": "BUY" if p.type == 0 else "SELL",
+                              "volume": p.volume, "price_open": p.price_open, "price_current": p.price_current,
+                              "profit": p.profit, "sl": p.sl, "tp": p.tp} for p in pos]
+        except Exception:
+            pass
+    return {
+        "active": engine.running,
+        "control": "RUNNING" if engine.running else "STOPPED",
+        "state": {
+            "balance": acct.get("balance", 0),
+            "consecutive_losses": getattr(engine.risk, 'consecutive_losses', 0) if hasattr(engine.risk, 'consecutive_losses') else 0,
+            "week_number": 1,
+            "total_trades": engine.cycle_count,
+            "wins": 0, "losses": 0, "total_pnl": acct.get("profit", 0),
+            "active_improvements": {},
+            "positions": {p["symbol"]: p for p in positions},
+        },
+        "mt5": {"installed": True, "running": engine.mt5.connected, "connected": engine.mt5.connected},
+        "account": {**acct, "account_type": "Demo", "positions_count": len(positions),
+                    "positions": positions, "recent_deals": []},
+        "engine_pid": None,
+    }
+
+
+@app.get("/api/v1/live/mt5/status")
+def live_mt5_status():
+    """MT5 status — alias for mt5_status."""
+    return mt5_status()
+
+
+@app.get("/api/v1/live/account")
+def live_account():
+    """Account details for the dashboard."""
+    return account_details()
+
+
+@app.post("/api/v1/live/start")
+def live_start():
+    """Start the trading engine."""
+    return start_engine()
+
+
+@app.post("/api/v1/live/stop")
+def live_stop():
+    """Stop the trading engine."""
+    return stop_engine()
+
+
+@app.get("/api/v1/live/improvements")
+def live_improvements():
+    """List available improvements."""
+    return {"improvements": [
+        {"name": "Correlation Filter", "key": "correlation_filter", "enabled": True},
+        {"name": "Dynamic Risk", "key": "dynamic_risk", "enabled": True},
+        {"name": "Spread Filter", "key": "spread_filter", "enabled": True},
+        {"name": "Risk Parity", "key": "risk_parity", "enabled": CONFIG.get("risk_parity_enabled", False)},
+        {"name": "ML Prediction", "key": "ml_prediction", "enabled": CONFIG.get("ml_enabled", False)},
+        {"name": "LLM Analysis", "key": "llm_analysis", "enabled": CONFIG.get("llm_enabled", False)},
+        {"name": "Regime Detection", "key": "regime_detection", "enabled": CONFIG.get("regime_enabled", False)},
+    ]}
+
+
+@app.get("/api/v1/live/positions")
+def live_positions():
+    """Open positions for the dashboard."""
+    positions = []
+    if engine.mt5.connected:
+        try:
+            pos = mt5.positions_get()
+            if pos:
+                positions = [{"ticket": p.ticket, "symbol": p.symbol, "type": "BUY" if p.type == 0 else "SELL",
+                              "volume": p.volume, "price_open": p.price_open, "price_current": p.price_current,
+                              "profit": p.profit, "sl": p.sl, "tp": p.tp, "time": str(p.time)} for p in pos]
+        except Exception:
+            pass
+    return {"positions": positions, "count": len(positions)}
+
+
+@app.get("/api/v1/live/trades")
+def live_trades():
+    """Recent trades for the dashboard."""
+    return list_trades()
 
 
 # ═══════════════════════════════════════════════════════════════

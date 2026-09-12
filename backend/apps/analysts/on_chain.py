@@ -31,7 +31,8 @@ class OnChainAnalyst(BaseAnalyst):
                 signal='HOLD',
                 confidence=0.0,
                 reasoning='No on-chain API configured — requires Glassnode/CryptoQuant API',
-                data={'error': 'no_onchain_api', 'data_source': 'none'}
+                data={'error': 'no_onchain_api', 'data_source': 'none'},
+                data_source='none'
             )
         else:
             return AnalystResult(
@@ -41,7 +42,8 @@ class OnChainAnalyst(BaseAnalyst):
                 signal='HOLD',
                 confidence=0.0,
                 reasoning='On-chain data not applicable for forex pairs',
-                data={'error': 'not_applicable', 'data_source': 'none'}
+                data={'error': 'not_applicable', 'data_source': 'none'},
+                data_source='none'
             )
 
     def get_capabilities(self) -> list[str]:

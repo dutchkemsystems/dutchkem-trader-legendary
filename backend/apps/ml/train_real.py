@@ -34,40 +34,30 @@ MODELS_DIR = Path(__file__).parent.parent.parent / "models"
 
 
 async def fetch_from_akshare(symbol: str, timeframe: str, limit: int) -> pd.DataFrame:
-    """Fetch historical data using AKShare."""
+    """Fetch historical data using real providers (AKShare via MarketDataManager).
+    
+    Tries real market data first. Only falls back to synthetic if all providers fail.
+    """
     try:
-        import akshare as ak
+        from apps.ml.data_loader import MLDataLoader
+        loader = MLDataLoader()
         
-        # Map timeframe to AKShare interval
-        tf_map = {
-            "1M": "1", "5M": "5", "15M": "15", "30M": "30",
-            "1H": "60", "4H": "240", "1D": "D"
-        }
-        interval = tf_map.get(timeframe, "60")
+        logger.info(f"Fetching {symbol} from real data providers (timeframe={timeframe}, limit={limit})")
         
-        # AKShare forex data
-        # Try different symbol formats
-        ak_symbol = symbol.upper()
-        if len(ak_symbol) == 6 and ak_symbol.isalpha():
-            # Format as forex pair: EUR/USD
-            base = ak_symbol[:3]
-            quote = ak_symbol[3:]
-            ak_symbol = f"{base}/{quote}"
+        # MLDataLoader.load_training_data returns (X, y) — we need raw OHLCV
+        # So use fetch_candles directly
+        df = await loader.fetch_candles(symbol, timeframe, limit)
         
-        logger.info(f"Fetching {symbol} from AKShare (interval={interval}, limit={limit})")
-        
-        # Use MT5 or other available data source
-        # For now, generate realistic synthetic data based on actual market characteristics
-        df = generate_realistic_forex_data(symbol, limit, timeframe)
-        
-        logger.info(f"Generated {len(df)} candles for {symbol}")
-        return df
+        if df is not None and len(df) > 50:
+            logger.info(f"Loaded {len(df)} real candles for {symbol}")
+            return df
+        else:
+            logger.warning(f"Real data insufficient for {symbol} ({len(df) if df is not None else 0} candles), using synthetic fallback")
+            return generate_realistic_forex_data(symbol, limit, timeframe)
         
     except Exception as e:
-        logger.warning(f"AKShare fetch failed for {symbol}: {e}")
-        # Fallback to realistic synthetic data
-        df = generate_realistic_forex_data(symbol, limit, timeframe)
-        return df
+        logger.warning(f"Real data fetch failed for {symbol}: {e}, using synthetic fallback")
+        return generate_realistic_forex_data(symbol, limit, timeframe)
 
 
 def generate_realistic_forex_data(symbol: str, limit: int, timeframe: str) -> pd.DataFrame:
@@ -182,9 +172,17 @@ def train_single_symbol(symbol: str, timeframe: str, limit: int, model_type: str
     train_pred = model.predict(X_train.values)
     test_pred = model.predict(X_test.values)
     
-    # Calculate accuracy
-    train_accuracy = (train_pred.direction == "UP").mean() if len(X_train) > 0 else 0
-    test_accuracy = (test_pred.direction == "UP").mean() if len(X_test) > 0 else 0
+    # Calculate accuracy using proper metrics
+    from sklearn.metrics import accuracy_score, precision_score, recall_score
+    
+    # Get raw predictions from model (not Prediction dataclass)
+    train_pred_raw = model.model.predict(X_train.values)
+    test_pred_raw = model.model.predict(X_test.values)
+    
+    train_accuracy = accuracy_score(y_train, train_pred_raw)
+    test_accuracy = accuracy_score(y_test, test_pred_raw)
+    test_precision = precision_score(y_test, test_pred_raw, zero_division=0)
+    test_recall = recall_score(y_test, test_pred_raw, zero_division=0)
     
     # Cross-validation score
     from sklearn.model_selection import cross_val_score

@@ -1,3 +1,30 @@
+"""DEPRECATED: This RiskManager is not used by the unified trading engine.
+
+The single source of truth for risk management is the RiskManager class
+in unified_engine.py. That class handles:
+- Kelly criterion position sizing
+- Circuit breaker (3-state machine)
+- Drawdown throttle (warning/critical/pause)
+- Daily ROI limits (profit target + loss limit)
+- Weekly profit extraction
+- Correlation filtering
+- Session-based risk multipliers
+- ATR-based SL/TP calculation
+
+This file is kept for backward compatibility with the Django ORM API routes
+but should NOT be used for live trading decisions.
+
+To use risk management in new code, import from unified_engine instead:
+    from unified_engine import RiskManager
+"""
+
+import warnings
+warnings.warn(
+    "execution.risk_manager.RiskManager is deprecated. "
+    "Use unified_engine.RiskManager instead (the single source of truth).",
+    DeprecationWarning, stacklevel=2
+)
+
 from decimal import Decimal
 from typing import Optional, Tuple
 

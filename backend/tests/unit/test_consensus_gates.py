@@ -272,8 +272,8 @@ def test_evaluate_all_all_pass():
         risk_status={"current_positions": 5, "max_positions": 10},
     )
     assert result["trade_allowed"] is True
-    assert result["passed_count"] == 7
-    assert result["total_gates"] == 7
+    assert result["passed_count"] == 8
+    assert result["total_gates"] == 8
 
 
 def test_evaluate_all_regime_blocks():
@@ -308,7 +308,7 @@ def test_evaluate_all_low_edge_blocks():
 def test_evaluate_all_gates_dict_structure():
     gates = ConsensusGates()
     result = gates.evaluate_all()
-    expected_keys = {"ml_model", "llm_consensus", "sentiment", "technical", "edge", "regime", "liquidity"}
+    expected_keys = {"ml_model", "llm_consensus", "sentiment", "technical", "edge", "regime", "liquidity", "llm_analysis"}
     assert set(result["gates"].keys()) == expected_keys
     for gk, gv in result["gates"].items():
         assert "passed" in gv

@@ -30,7 +30,8 @@ class SentimentAnalyst(BaseAnalyst):
             signal='HOLD',
             confidence=0.0,
             reasoning='No sentiment API configured — requires Twitter/Reddit/Alternative.me APIs',
-            data={'error': 'no_sentiment_api', 'data_source': 'none'}
+            data={'error': 'no_sentiment_api', 'data_source': 'none'},
+            data_source='none'
         )
 
     def get_capabilities(self) -> list[str]:

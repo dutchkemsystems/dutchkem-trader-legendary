@@ -30,7 +30,8 @@ class OptionsAnalyst(BaseAnalyst):
             signal='HOLD',
             confidence=0.0,
             reasoning='No options API configured — requires CBOE/IBKR API',
-            data={'error': 'no_options_api', 'data_source': 'none'}
+            data={'error': 'no_options_api', 'data_source': 'none'},
+            data_source='none'
         )
 
     def get_capabilities(self) -> list[str]:
