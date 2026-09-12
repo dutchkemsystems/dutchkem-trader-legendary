@@ -17,12 +17,12 @@ class TestOrderFlowData:
         assert "15000 + int((tick.bid - 1.1) * 100000)" not in content
         assert "12000 + int((1.1 - tick.ask) * 100000)" not in content
 
-    def test_uses_copy_ticks_from_pos(self):
-        """OrderFlow should use mt5.copy_ticks_from_pos for real tick data."""
+    def test_uses_copy_ticks_from(self):
+        """OrderFlow should use mt5.copy_ticks_from for real tick data."""
         from pathlib import Path
         order_flow_path = Path(__file__).parent.parent.parent / "apps" / "analysts" / "order_flow.py"
         content = order_flow_path.read_text(encoding="utf-8")
-        assert "copy_ticks_from_pos" in content
+        assert "copy_ticks_from" in content
 
     def test_classifies_ticks_by_direction(self):
         """OrderFlow should classify ticks as buyer/seller initiated."""

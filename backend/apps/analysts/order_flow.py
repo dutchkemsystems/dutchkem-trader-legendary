@@ -59,6 +59,7 @@ class OrderFlowAnalyst(BaseAnalyst):
         try:
             import MetaTrader5 as mt5
             import numpy as np
+            from datetime import datetime, timedelta
             
             tick = mt5.symbol_info_tick(symbol)
             if not tick:
@@ -68,8 +69,11 @@ class OrderFlowAnalyst(BaseAnalyst):
             if not info:
                 return None
             
-            # Get real tick data (last 1000 ticks)
-            ticks = mt5.copy_ticks_from_pos(symbol, 0, 1000, mt5.COPY_TICKS_ALL)
+            # Get real tick data (last ~1000 ticks from past hour)
+            # copy_ticks_from(symbol, datetime, count, flags) is the correct API
+            now = datetime.now()
+            one_hour_ago = now - timedelta(hours=1)
+            ticks = mt5.copy_ticks_from(symbol, one_hour_ago, 1000, mt5.COPY_TICKS_ALL)
             
             if ticks is None or len(ticks) < 10:
                 # Fallback: use M1 bar volumes as approximation

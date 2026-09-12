@@ -38,7 +38,9 @@ class MLPredictor:
                 return str(model_file)
         return None
 
-    def predict_from_features(self, features: np.ndarray) -> MLPrediction:
+    def predict_from_features(self, features) -> MLPrediction:
+        # Accept list, numpy array, or any array-like
+        features = np.array(features, dtype=float)
         if features.ndim == 1:
             features = features.reshape(1, -1)
         pred = self.model.predict(features)

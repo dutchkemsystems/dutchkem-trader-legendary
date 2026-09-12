@@ -2993,7 +2993,8 @@ class UnifiedEngine:
                     log.info(f"  ML GATE BLOCKED {signal.symbol} — {ml_gate.reason}")
                     return
 
-                # Gate 4: Technical confidence (ADX, RSI, MACD agreement)
+                # Gate 4: Technical confidence — use engine's min_confidence (0.25)
+                # not the gate's default 0.70, since signal.confidence is already filtered
                 from apps.analysts.base import AnalystResult
                 tech_result = AnalystResult(
                     analyst_name="Technical",
@@ -3004,16 +3005,21 @@ class UnifiedEngine:
                     reasoning="Technical gate",
                     data_source="technical",
                 )
+                # Override threshold to match engine's min_confidence
+                old_threshold = self.consensus_gates.MIN_TECHNICAL_CONFIDENCE
+                self.consensus_gates.MIN_TECHNICAL_CONFIDENCE = CONFIG.get("min_confidence", 0.25)
                 tech_gate = self.consensus_gates.check_technical([tech_result])
+                self.consensus_gates.MIN_TECHNICAL_CONFIDENCE = old_threshold  # restore
                 if not tech_gate.passed:
                     log.info(f"  TECHNICAL GATE BLOCKED {signal.symbol} — {tech_gate.reason}")
                     return
 
-                # Gate 5: Edge after costs (ML P(UP) must exceed market price by min edge)
-                p_up = 0.55 if ml_features[0] > 60 else 0.45  # Simplified P(UP) estimate
-                if signal.direction.value == "SELL":
-                    p_up = 1.0 - p_up
-                edge_gate = self.consensus_gates.check_edge(p_up, signal.entry_price)
+                # Gate 5: Edge after costs
+                # Edge = ML confidence - 0.5 (null hypothesis). Must exceed MIN_EDGE_AFTER_COSTS.
+                # For forex, the "edge" is how much better than random (50/50) the ML predicts.
+                ml_confidence = ml_gate.value if ml_gate.value else 0.5
+                edge_value = ml_confidence - 0.5
+                edge_gate = self.consensus_gates.check_edge(ml_confidence, 0.5)
                 if not edge_gate.passed:
                     log.info(f"  EDGE GATE BLOCKED {signal.symbol} — {edge_gate.reason}")
                     return
