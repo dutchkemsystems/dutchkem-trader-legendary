@@ -2380,32 +2380,38 @@ class UnifiedEngine:
         if active_analysts == 0:
             return None, 0, {"analysts": [], "active": 0}
 
-        # Calculate consensus
+        # Calculate consensus — compare BUY vs SELL only (HOLDs don't block)
         total = active_analysts
         buy_pct = votes["BUY"] / total
         sell_pct = votes["SELL"] / total
         hold_pct = votes["HOLD"] / total
+        directional = votes["BUY"] + votes["SELL"]  # analysts with a view
         avg_confidence = total_confidence / total
 
         # Determine consensus action
-        if buy_pct > sell_pct and buy_pct > hold_pct and buy_pct >= CONFIG["analyst_min_agreement"]:
+        # Rule: if BUY > SELL and BUY >= 3 analysts (or >30% of total) → BUY
+        #       if SELL > BUY and SELL >= 3 analysts (or >30% of total) → SELL
+        #       otherwise → HOLD
+        min_directional = max(3, int(total * 0.25))  # at least 3 or 25%
+
+        if votes["BUY"] > votes["SELL"] and votes["BUY"] >= min_directional:
             consensus_action = "BUY"
             agreement_pct = buy_pct
-        elif sell_pct > buy_pct and sell_pct > hold_pct and sell_pct >= CONFIG["analyst_min_agreement"]:
+        elif votes["SELL"] > votes["BUY"] and votes["SELL"] >= min_directional:
             consensus_action = "SELL"
             agreement_pct = sell_pct
         else:
             consensus_action = "HOLD"
-            agreement_pct = hold_pct
+            agreement_pct = max(buy_pct, sell_pct)
 
         # Calculate confidence modifier
         confidence_modifier = 0
         if consensus_action != "HOLD":
-            if agreement_pct >= 0.80:  # 80%+ agreement → strong boost
+            if directional >= total * 0.70:  # 70%+ have a view → strong
                 confidence_modifier = CONFIG["analyst_confidence_boost"]
-            elif agreement_pct >= 0.60:  # 60-79% → moderate boost
+            elif directional >= total * 0.50:  # 50-69% have a view → moderate
                 confidence_modifier = CONFIG["analyst_confidence_boost"] * 0.5
-            elif agreement_pct < 0.50:  # <50% agreement → penalty
+            elif directional < total * 0.30:  # <30% have a view → penalty
                 confidence_modifier = -CONFIG["analyst_confidence_penalty"]
 
         details = {

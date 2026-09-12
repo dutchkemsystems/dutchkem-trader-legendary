@@ -81,7 +81,7 @@ class SentimentAnalyst(BaseAnalyst):
         else:
             data["vix"] = None
 
-        # 2) Crypto Fear & Greed Index — risk-on / risk-off proxy
+        # 2) Crypto Fear & Greed Index — risk-on / risk-off proxy (with short timeout)
         fng = self._fetch_fear_greed()
         if fng is not None:
             data["fear_greed_index"] = fng
@@ -189,17 +189,21 @@ class SentimentAnalyst(BaseAnalyst):
         return None
 
     def _fetch_fear_greed(self) -> Optional[int]:
-        """Fetch Crypto Fear & Greed Index from Alternative.me (free, no key)."""
+        """Fetch Crypto Fear & Greed Index.
+
+        Uses alternative.me with a very short timeout (3s).
+        If it fails, returns None — the VIX is the primary fear gauge anyway.
+        """
         try:
             resp = requests.get(
                 "https://api.alternative.me/fng/?limit=1&format=json",
-                timeout=5,
+                timeout=3,
             )
             data = resp.json()
             return int(data["data"][0]["value"])
-        except Exception as e:
-            log.warning(f"Fear & Greed fetch failed: {e}")
-        return None
+        except Exception:
+            # Not critical — VIX is the primary fear gauge
+            return None
 
     def _fetch_dxy_momentum(self) -> Optional[float]:
         """Fetch DXY 5-day price change as momentum signal."""

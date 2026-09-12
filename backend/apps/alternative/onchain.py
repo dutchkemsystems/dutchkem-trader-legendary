@@ -110,16 +110,8 @@ class AlternativeData:
             if datetime.now(timezone.utc) - cached["timestamp"] < self.cache_ttl:
                 return cached
 
-        # Try StockTwits API (free)
-        try:
-            data = self._fetch_stocktwits(symbol)
-            if data:
-                self.cache[cache_key] = {**data, "timestamp": datetime.now(timezone.utc)}
-                return data
-        except Exception as e:
-            log.warning(f"StockTwits fetch failed: {e}")
-
-        return {"available": False, "reason": "no_data"}
+        # StockTwits API is dead (DNS fails). Skip entirely.
+        return {"available": False, "reason": "stocktwits_discontinued"}
 
     def _fetch_stocktwits(self, symbol: str) -> Dict:
         """Fetch from StockTwits API."""

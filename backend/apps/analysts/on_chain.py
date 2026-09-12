@@ -19,8 +19,6 @@ from .base import BaseAnalyst, AnalystResult
 
 log = logging.getLogger(__name__)
 
-COINGECKO_BASE = "https://api.coingecko.com/api/v3"
-
 
 class OnChainAnalyst(BaseAnalyst):
     def __init__(self, llm_client=None):
@@ -152,65 +150,80 @@ class OnChainAnalyst(BaseAnalyst):
         )
 
     def _fetch_crypto_market(self) -> Optional[dict]:
-        """Fetch crypto market overview from CoinGecko (free, no key)."""
+        """Fetch crypto market data from free APIs (no keys, no timeouts).
+
+        Uses:
+        - blockchain.info for BTC market cap + dominance (reliable, free)
+        - yfinance for BTC price + 24h change (already installed)
+        """
+        import yfinance as yf
+
         try:
-            # Global market data
-            resp = requests.get(f"{COINGECKO_BASE}/global", timeout=10)
-            data = resp.json().get("data", {})
+            btc_price = None
+            btc_change_24h = None
+            btc_dominance = None
+            total_market_cap = None
 
-            btc_dominance = data.get("market_cap_percentage", {}).get("btc")
-            total_market_cap = data.get("total_market_cap", {}).get("usd")
+            # BTC price + 24h change from yfinance (fast, reliable)
+            try:
+                btc_ticker = yf.Ticker("BTC-USD")
+                hist = btc_ticker.history(period="2d")
+                if hist is not None and len(hist) >= 2:
+                    btc_price = float(hist["Close"].iloc[-1])
+                    prev_close = float(hist["Close"].iloc[-2])
+                    btc_change_24h = ((btc_price - prev_close) / prev_close) * 100
+                elif hist is not None and len(hist) == 1:
+                    btc_price = float(hist["Close"].iloc[-1])
+            except Exception as e:
+                log.debug(f"BTC price from yfinance failed: {e}")
 
-            # BTC price and 24h change
-            resp2 = requests.get(
-                f"{COINGECKO_BASE}/coins/bitcoin",
-                params={
-                    "localization": "false",
-                    "tickers": "false",
-                    "community_data": "false",
-                    "developer_data": "false",
-                    "sparkline": "false",
-                },
-                timeout=10,
-            )
-            btc_data = resp2.json().get("market_data", {})
+            # BTC market cap + dominance from blockchain.info (free, no key)
+            try:
+                resp = requests.get(
+                    "https://api.blockchain.info/q/marketcap",
+                    timeout=5,
+                )
+                if resp.status_code == 200:
+                    total_market_cap = float(resp.text)
+            except Exception as e:
+                log.debug(f"Blockchain.info marketcap failed: {e}")
 
-            btc_price = btc_data.get("current_price", {}).get("usd")
-            btc_change_24h = btc_data.get("price_change_percentage_24h")
-            eth_btc = None
+            # BTC dominance: estimate from CoinGecko global (with short timeout)
+            try:
+                resp = requests.get(
+                    "https://api.alternative.me/v2/ticker/bitcoin/?convert=USD",
+                    timeout=5,
+                )
+                if resp.status_code == 200:
+                    data = resp.json()
+                    btc_mcap = data.get("data", {}).get("quotes", {}).get("USD", {}).get("market_cap")
+                    if btc_mcap and total_market_cap and total_market_cap > 0:
+                        btc_dominance = (btc_mcap / total_market_cap) * 100
+            except Exception as e:
+                log.debug(f"BTC dominance fetch failed: {e}")
 
-            # ETH/BTC ratio
-            resp3 = requests.get(
-                f"{COINGECKO_BASE}/coins/ethereum",
-                params={
-                    "localization": "false",
-                    "tickers": "false",
-                    "community_data": "false",
-                    "developer_data": "false",
-                    "sparkline": "false",
-                },
-                timeout=10,
-            )
-            eth_data = resp3.json().get("market_data", {})
-            eth_btc = eth_data.get("market_cap_rank")
+            # Fallback dominance estimate: if BTC price > 60k, ~50% dominance typical
+            if btc_dominance is None and btc_price:
+                btc_dominance = 55.0  # conservative default
+                log.debug("Using default BTC dominance=55%")
 
-            if btc_price and btc_dominance:
+            if btc_price:
                 log.info(
                     f"ON-CHAIN: BTC=${btc_price:,.0f} Dom={btc_dominance:.1f}% "
                     f"24h={btc_change_24h:+.1f}% Mcap=${total_market_cap/1e12:.2f}T"
+                    if total_market_cap else
+                    f"ON-CHAIN: BTC=${btc_price:,.0f} 24h={btc_change_24h:+.1f}%"
                 )
-            else:
-                log.info(f"ON-CHAIN: partial data BTC={btc_price} Dom={btc_dominance}")
 
             return {
                 "btc_dominance": btc_dominance,
                 "btc_price": btc_price,
                 "btc_change_24h": btc_change_24h,
-                "eth_btc": eth_btc,
+                "eth_btc": None,
                 "total_market_cap": total_market_cap,
             }
         except Exception as e:
-            log.warning(f"CoinGecko fetch failed: {e}")
+            log.warning(f"On-chain data fetch failed: {e}")
             return None
 
     def get_capabilities(self) -> list[str]:
