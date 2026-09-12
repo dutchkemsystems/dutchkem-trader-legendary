@@ -230,6 +230,7 @@ tr:hover{background:rgba(0,102,255,0.02)}
   <button class="tab-btn" data-tab="account" onclick="switchTab('account')">Account</button>
   <button class="tab-btn" data-tab="history" onclick="switchTab('history')">History</button>
   <button class="tab-btn" data-tab="monitor" onclick="switchTab('monitor')">Monitor</button>
+  <button class="tab-btn" data-tab="performance" onclick="switchTab('performance')">Performance</button>
 </div>
 
 <!-- ===== TAB: OVERVIEW ===== -->
@@ -587,6 +588,49 @@ tr:hover{background:rgba(0,102,255,0.02)}
   </div>
 </div>
 
+<!-- ===== TAB: PERFORMANCE ===== -->
+<div class="tab-content" id="tab-performance">
+  <div class="row row-4" style="margin-bottom:16px">
+    <div class="card">
+      <div class="card-title">&#128176; Account</div>
+      <div class="info-grid">
+        <div class="info-item"><span class="label">Balance</span><span class="value" id="perf-balance">-</span></div>
+        <div class="info-item"><span class="label">Equity</span><span class="value" id="perf-equity">-</span></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">&#127919; Win Rate</div>
+      <div class="info-grid">
+        <div class="info-item"><span class="label">Win Rate</span><span class="value" id="perf-winrate">-</span></div>
+        <div class="info-item"><span class="label">Total Trades</span><span class="value" id="perf-trades">-</span></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">&#128200; P/L</div>
+      <div class="info-grid">
+        <div class="info-item"><span class="label">Total P/L</span><span class="value" id="perf-pnl">-</span></div>
+        <div class="info-item"><span class="label">Avg P/L</span><span class="value" id="perf-avgpnl">-</span></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">&#128179; Costs</div>
+      <div class="info-grid">
+        <div class="info-item"><span class="label">Commission</span><span class="value" id="perf-commission">-</span></div>
+        <div class="info-item"><span class="label">Swap</span><span class="value" id="perf-swap">-</span></div>
+      </div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-title">&#128202; Trade History <span style="font-weight:400;color:var(--ts);font-size:12px" id="perf-count"></span></div>
+    <div style="margin-bottom:12px"><button class="btn btn-blue btn-sm" onclick="loadPerformance()">Refresh</button></div>
+    <div class="table-wrap">
+      <table><thead><tr><th>Time</th><th>Symbol</th><th>Type</th><th>Volume</th><th>Price</th><th>P/L</th><th>Commission</th><th>Swap</th></tr></thead>
+        <tbody id="perf-body"></tbody></table>
+      <div class="empty-state" id="perf-empty"><div class="icon">&#128202;</div>No trades yet — waiting for market open</div>
+    </div>
+  </div>
+</div>
+
 <script>
 var BASE='http://localhost:8888/api/v1';
 var SYMBOLS=['XAUUSD','EURUSD','GBPUSD','USDJPY','USDCHF','AUDUSD','USDCAD','NZDUSD','EURGBP','EURJPY'];
@@ -625,6 +669,7 @@ function switchTab(id){
   else if(id==='account') loadAccountDetails();
   else if(id==='history') loadHistory();
   else if(id==='monitor') loadMonitor();
+  else if(id==='performance') loadPerformance();
 }
 
 function doLogout(){localStorage.removeItem('dutchkem_user');window.location.href='/login';}
@@ -1350,6 +1395,37 @@ function clearMonitor(){
 function startMonitorAutoRefresh(){
   if(monitorTimer) clearInterval(monitorTimer);
   monitorTimer=setInterval(function(){if(document.getElementById('tab-monitor').classList.contains('active'))loadMonitor();},5000);
+}
+
+/* ===== PERFORMANCE ===== */
+function loadPerformance(){
+  api('/performance').then(function(d){
+    if(d.error){console.error('Perf error:',d.error);return;}
+    document.getElementById('perf-balance').textContent='$'+fmt(d.balance,2);
+    document.getElementById('perf-equity').textContent='$'+fmt(d.equity,2);
+    document.getElementById('perf-winrate').textContent=d.win_rate+'%';
+    document.getElementById('perf-trades').textContent=d.total_trades+' ('+d.wins+'W/'+d.losses+'L)';
+    var pnlClass=d.total_pnl>=0?'profit-pos':'profit-neg';
+    document.getElementById('perf-pnl').innerHTML='<span class="'+pnlClass+'">'+profitVal(d.total_pnl)+'</span>';
+    document.getElementById('perf-avgpnl').innerHTML='<span class="'+(d.avg_pnl>=0?'profit-pos':'profit-neg')+'">'+profitVal(d.avg_pnl)+'</span>';
+    document.getElementById('perf-commission').textContent='$'+fmt(d.total_commission,2);
+    document.getElementById('perf-swap').textContent='$'+fmt(d.total_swap,2);
+    document.getElementById('perf-count').textContent='('+d.total_trades+' trades)';
+    var trades=d.trades||[];
+    if(trades.length===0){
+      document.getElementById('perf-empty').style.display='block';
+      document.getElementById('perf-body').innerHTML='';
+    } else {
+      document.getElementById('perf-empty').style.display='none';
+      var html='';
+      trades.forEach(function(t){
+        var cls=t.pnl>=0?'profit-pos':'profit-neg';
+        html+='<tr><td>'+t.time+'</td><td>'+t.symbol+'</td><td>'+t.type+'</td><td>'+t.volume+'</td><td>'+t.price+'</td>';
+        html+='<td class="'+cls+'">'+profitVal(t.pnl)+'</td><td>$'+fmt(t.commission,2)+'</td><td>$'+fmt(t.swap,2)+'</td></tr>';
+      });
+      document.getElementById('perf-body').innerHTML=html;
+    }
+  }).catch(function(e){console.error('Performance load failed:',e);});
 }
 
 </body>

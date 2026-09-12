@@ -3955,6 +3955,71 @@ def live_prices():
     return {"prices": prices, "count": len(prices)}
 
 
+@app.get("/api/v1/performance")
+def performance():
+    """Historical performance: trades, win rate, P&L, drawdown."""
+    try:
+        import MetaTrader5 as mt5
+        # Get account info
+        acct = mt5.account_info()
+        # Get deals (closed trades) from last 30 days
+        from datetime import datetime, timedelta
+        end = datetime.now()
+        start = end - timedelta(days=30)
+        deals = mt5.history_deals_get(start, end)
+        if deals is None:
+            deals = []
+        
+        # Calculate stats
+        wins = 0
+        losses = 0
+        total_pnl = 0
+        total_commission = 0
+        total_swap = 0
+        trade_history = []
+        
+        for deal in deals:
+            if deal.type == mt5.DEAL_TYPE_BUY or deal.type == mt5.DEAL_TYPE_SELL:
+                pnl = deal.profit + deal.swap + deal.commission
+                total_pnl += pnl
+                total_commission += deal.commission
+                total_swap += deal.swap
+                if pnl > 0:
+                    wins += 1
+                elif pnl < 0:
+                    losses += 1
+                trade_history.append({
+                    "ticket": deal.ticket,
+                    "time": deal.time.strftime("%Y-%m-%d %H:%M") if hasattr(deal.time, 'strftime') else str(deal.time),
+                    "symbol": deal.symbol,
+                    "type": "BUY" if deal.type == mt5.DEAL_TYPE_BUY else "SELL",
+                    "volume": deal.volume,
+                    "price": deal.price,
+                    "pnl": round(pnl, 2),
+                    "commission": round(deal.commission, 2),
+                    "swap": round(deal.swap, 2),
+                })
+        
+        total_trades = wins + losses
+        win_rate = (wins / total_trades * 100) if total_trades > 0 else 0
+        
+        return {
+            "balance": round(acct.balance, 2) if acct else 0,
+            "equity": round(acct.equity, 2) if acct else 0,
+            "total_trades": total_trades,
+            "wins": wins,
+            "losses": losses,
+            "win_rate": round(win_rate, 1),
+            "total_pnl": round(total_pnl, 2),
+            "total_commission": round(total_commission, 2),
+            "total_swap": round(total_swap, 2),
+            "avg_pnl": round(total_pnl / total_trades, 2) if total_trades > 0 else 0,
+            "trades": trade_history[-20:],  # Last 20 trades
+        }
+    except Exception as e:
+        return {"error": str(e)}
+
+
 @app.get("/api/v1/monitor")
 def monitor():
     """Pipeline monitoring: signals, gates, orders — real-time view."""
