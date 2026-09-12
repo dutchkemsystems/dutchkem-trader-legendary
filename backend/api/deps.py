@@ -108,8 +108,7 @@ def get_consensus_engine():
     chart_analyzer = get_chart_analyzer()
     ml_predictor = get_ml_predictor()
     llm_client = get_llm_client()
-    # Only include analysts with real data sources (exclude stubs)
-    # Stubs (News, Sentiment, Macro, Options, OnChain) return HOLD/0.0 and poison consensus
+    # All analysts now provide real data (no stubs remain)
     analysts = [
         MarketAnalyst(),           # MT5 technical data
         FundamentalsAnalyst(),     # yfinance (DXY, yields, commodities)
@@ -117,7 +116,12 @@ def get_consensus_engine():
         OrderFlowAnalyst(),        # MT5 tick data
         RiskAnalyst(),             # MT5 account + price data
         QuantAnalyst(),            # MT5 statistical analysis
-        ComplianceAnalyst()        # MT5 position checks
+        ComplianceAnalyst(),       # MT5 position checks
+        NewsAnalyst(),             # RSS feeds (ForexLive, DailyFX, etc.)
+        SentimentAnalyst(),        # VIX + Fear&Greed + DXY momentum
+        MacroAnalyst(),            # yfinance (DXY, yields, commodities, VIX)
+        OptionsAnalyst(),          # SPY/QQQ options chain (put/call, IV)
+        OnChainAnalyst(),          # CoinGecko BTC dominance (risk-on/off)
     ]
     debate_engine = DebateEngine(llm_client=llm_client, max_rounds=1)
     memory = FinancialSituationMemory()

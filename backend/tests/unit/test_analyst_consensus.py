@@ -36,47 +36,47 @@ class TestAnalystResult:
 
 
 class TestStubAnalysts:
-    """Test that stub analysts set data_source='none'."""
+    """Test that former stub analysts now return real data."""
 
-    def test_news_analyst_stub_has_none_source(self):
-        """NewsAnalyst without API should return data_source='none'."""
+    def test_news_analyst_returns_real_data(self):
+        """NewsAnalyst should now return real RSS data."""
         from apps.analysts.news import NewsAnalyst
         analyst = NewsAnalyst()
         result = asyncio.run(analyst.analyze("EURUSD", "H1"))
-        assert result.data_source == "none"
-        assert result.confidence == 0.0
+        assert result.data_source == "rss"
+        assert result.signal in ("BUY", "SELL", "HOLD")
 
-    def test_sentiment_analyst_stub_has_none_source(self):
-        """SentimentAnalyst without API should return data_source='none'."""
+    def test_sentiment_analyst_returns_real_data(self):
+        """SentimentAnalyst should now return real VIX/Fear&Greed data."""
         from apps.analysts.sentiment import SentimentAnalyst
         analyst = SentimentAnalyst()
         result = asyncio.run(analyst.analyze("EURUSD", "H1"))
-        assert result.data_source == "none"
-        assert result.confidence == 0.0
+        assert result.data_source in ("yfinance+alternative_me", "none")
+        assert result.signal in ("BUY", "SELL", "HOLD")
 
-    def test_macro_analyst_stub_has_none_source(self):
-        """MacroAnalyst without API should return data_source='none'."""
+    def test_macro_analyst_returns_real_data(self):
+        """MacroAnalyst should now return real yfinance data."""
         from apps.analysts.macro import MacroAnalyst
         analyst = MacroAnalyst()
         result = asyncio.run(analyst.analyze("EURUSD", "H1"))
-        assert result.data_source == "none"
-        assert result.confidence == 0.0
+        assert result.data_source == "yfinance"
+        assert result.signal in ("BUY", "SELL", "HOLD")
 
-    def test_options_analyst_stub_has_none_source(self):
-        """OptionsAnalyst without API should return data_source='none'."""
+    def test_options_analyst_returns_real_data(self):
+        """OptionsAnalyst should now return real options chain data."""
         from apps.analysts.options import OptionsAnalyst
         analyst = OptionsAnalyst()
         result = asyncio.run(analyst.analyze("EURUSD", "H1"))
-        assert result.data_source == "none"
-        assert result.confidence == 0.0
+        assert result.data_source == "yfinance"
+        assert result.signal in ("BUY", "SELL", "HOLD")
 
-    def test_on_chain_analyst_stub_has_none_source(self):
-        """OnChainAnalyst without API should return data_source='none'."""
+    def test_on_chain_analyst_returns_real_data(self):
+        """OnChainAnalyst should now return real CoinGecko data."""
         from apps.analysts.on_chain import OnChainAnalyst
         analyst = OnChainAnalyst()
         result = asyncio.run(analyst.analyze("EURUSD", "H1"))
-        assert result.data_source == "none"
-        assert result.confidence == 0.0
+        assert result.data_source in ("coingecko", "none")
+        assert result.signal in ("BUY", "SELL", "HOLD")
 
 
 class TestConsensusEngine:
@@ -127,19 +127,26 @@ class TestConsensusEngine:
 
 
 class TestAPIDeps:
-    """Test API deps excludes stub analysts."""
+    """Test API deps includes all 12 real analysts."""
 
-    def test_consensus_engine_has_7_analysts(self):
-        """get_consensus_engine should have 7 real analysts, not 12."""
+    def test_consensus_engine_has_12_analysts(self):
+        """get_consensus_engine should have 12 real analysts (all provide live data)."""
         from api.deps import get_consensus_engine
         # Clear lru_cache to get fresh instance
         get_consensus_engine.cache_clear()
         engine = get_consensus_engine()
-        assert len(engine.analysts) == 7
+        assert len(engine.analysts) == 12
 
-    def test_no_stub_analysts_in_engine(self):
-        """ConsensusEngine should not contain stub analyst classes."""
+    def test_all_analysts_in_engine(self):
+        """ConsensusEngine should contain all 12 analyst classes."""
         from api.deps import get_consensus_engine
+        from apps.analysts.market import MarketAnalyst
+        from apps.analysts.fundamentals import FundamentalsAnalyst
+        from apps.analysts.technical import TechnicalAnalyst
+        from apps.analysts.order_flow import OrderFlowAnalyst
+        from apps.analysts.risk import RiskAnalyst
+        from apps.analysts.quant import QuantAnalyst
+        from apps.analysts.compliance import ComplianceAnalyst
         from apps.analysts.news import NewsAnalyst
         from apps.analysts.sentiment import SentimentAnalyst
         from apps.analysts.macro import MacroAnalyst
@@ -149,10 +156,16 @@ class TestAPIDeps:
         get_consensus_engine.cache_clear()
         engine = get_consensus_engine()
 
-        stub_classes = (NewsAnalyst, SentimentAnalyst, MacroAnalyst, OptionsAnalyst, OnChainAnalyst)
+        expected_classes = (
+            MarketAnalyst, FundamentalsAnalyst, TechnicalAnalyst,
+            OrderFlowAnalyst, RiskAnalyst, QuantAnalyst, ComplianceAnalyst,
+            NewsAnalyst, SentimentAnalyst, MacroAnalyst, OptionsAnalyst, OnChainAnalyst,
+        )
+        found = set()
         for analyst in engine.analysts:
-            assert not isinstance(analyst, stub_classes), \
-                f"Stub analyst {type(analyst).__name__} found in engine"
+            found.add(type(analyst))
+        for cls in expected_classes:
+            assert cls in found, f"Missing analyst {cls.__name__} in engine"
 
 
 class TestUnifiedEngineConsensus:

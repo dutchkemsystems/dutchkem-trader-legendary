@@ -42,7 +42,7 @@ def test_fundamentals_analyst():
     from apps.analysts.fundamentals import FundamentalsAnalyst
     analyst = FundamentalsAnalyst()
     assert hasattr(analyst, 'analyze')
-    assert 'financial_ratios' in analyst.get_capabilities()
+    assert 'dollar_index' in analyst.get_capabilities()
 
 
 def test_sentiment_analyst():
@@ -138,14 +138,14 @@ def test_macro_analyst():
     from apps.analysts.macro import MacroAnalyst
     analyst = MacroAnalyst()
     assert hasattr(analyst, 'analyze')
-    assert 'gdp' in analyst.get_capabilities()
+    assert 'economic_indicators' in analyst.get_capabilities()
 
 
 def test_on_chain_analyst():
     from apps.analysts.on_chain import OnChainAnalyst
     analyst = OnChainAnalyst()
     assert hasattr(analyst, 'analyze')
-    assert 'hash_rate' in analyst.get_capabilities()
+    assert 'blockchain_data' in analyst.get_capabilities()
 
 
 def test_quant_analyst():
