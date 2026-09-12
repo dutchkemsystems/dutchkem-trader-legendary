@@ -1329,6 +1329,10 @@ class UnifiedEngine:
         self.last_signals = {}  # symbol -> Signal
         self.last_analysis = {}  # symbol -> analysis details
 
+        # ── Monitoring: structured pipeline events (last 200) ──
+        self.monitor_events = []  # list of {time, symbol, event, detail, cycle}
+        self.monitor_max_events = 200
+
         # Initialize new features
         if NEW_FEATURES_AVAILABLE:
             self.ensemble = StrategyEnsemble()
@@ -2861,6 +2865,10 @@ class UnifiedEngine:
                  f"Analysts={analyst_details.get('consensus','?')} "
                  f"Legendary={legendary_details.get('consensus','?')}")
 
+        # ── Monitor: log signal event ──
+        self.monitor_log(symbol, "signal",
+                         f"{action} score={adjusted_confidence*8:.1f} ML={ml_p_up:.3f} LLM={llm_result.get('signal','?')}({llm_result.get('confidence',0):.2f})")
+
         return signal
 
     def _execute_trade(self, signal: Signal):
@@ -2991,6 +2999,7 @@ class UnifiedEngine:
                 ml_gate = self.consensus_gates.check_ml_model(ml_features)
                 if not ml_gate.passed:
                     log.info(f"  ML GATE BLOCKED {signal.symbol} — {ml_gate.reason}")
+                    self.monitor_log(signal.symbol, "gate_blocked", f"ML: {ml_gate.reason}")
                     return
 
                 # Gate 4: Technical confidence — use engine's min_confidence (0.25)
@@ -3012,6 +3021,7 @@ class UnifiedEngine:
                 self.consensus_gates.MIN_TECHNICAL_CONFIDENCE = old_threshold  # restore
                 if not tech_gate.passed:
                     log.info(f"  TECHNICAL GATE BLOCKED {signal.symbol} — {tech_gate.reason}")
+                    self.monitor_log(signal.symbol, "gate_blocked", f"TECH: {tech_gate.reason}")
                     return
 
                 # Gate 5: Edge after costs
@@ -3022,6 +3032,7 @@ class UnifiedEngine:
                 edge_gate = self.consensus_gates.check_edge(ml_confidence, 0.5)
                 if not edge_gate.passed:
                     log.info(f"  EDGE GATE BLOCKED {signal.symbol} — {edge_gate.reason}")
+                    self.monitor_log(signal.symbol, "gate_blocked", f"EDGE: {edge_gate.reason}")
                     return
 
                 # Gate 7: Liquidity / position limits
@@ -3031,9 +3042,12 @@ class UnifiedEngine:
                 liq_gate = self.consensus_gates.check_liquidity_limits(risk_state)
                 if not liq_gate.passed:
                     log.info(f"  LIQUIDITY GATE BLOCKED {signal.symbol} — {liq_gate.reason}")
+                    self.monitor_log(signal.symbol, "gate_blocked", f"LIQ: {liq_gate.reason}")
                     return
 
                 log.info(f"  GATES PASSED {signal.symbol} — ML={ml_gate.passed} TECH={tech_gate.passed} EDGE={edge_gate.passed} LIQ={liq_gate.passed}")
+                self.monitor_log(signal.symbol, "gate_all_passed",
+                                 f"ML={ml_gate.value:.3f} TECH={tech_gate.value:.3f} EDGE={edge_gate.value:.3f}")
             except Exception as e:
                 log.debug(f"  ConsensusGates check failed (non-blocking): {e}")
 
@@ -3063,11 +3077,14 @@ class UnifiedEngine:
             log.info(f"  EXECUTED {signal.symbol:8} {signal.direction.value:4} @ {signal.entry_price:.5f} "
                      f"lots={lots} SL={signal.sl_price:.5f} TP={signal.tp_price:.5f} "
                      f"profile={profile_name} ticket={ticket}")
+            self.monitor_log(signal.symbol, "order_placed",
+                             f"{signal.direction.value} lots={lots} @ {signal.entry_price:.5f} ticket={ticket}")
 
             # Phase 4: Check correlation hedging after execution
             self._check_hedging(signal.symbol, signal.direction.value, lots)
         else:
             log.error(f"  FAILED {signal.symbol} — order not placed")
+            self.monitor_log(signal.symbol, "order_failed", "MT5 rejected or market closed")
 
     def _manage_existing_positions(self):
         """Check trailing stops, partial TP, and time exits."""
@@ -3249,6 +3266,67 @@ class UnifiedEngine:
             log.info(f"  CLOSED {symbol} | Reason: {reason} | P&L=${pnl:+.2f} | Streak: {streak_info}")
         else:
             log.error(f"  FAILED TO CLOSE {symbol} ticket={ticket}")
+
+    def monitor_log(self, symbol: str, event: str, detail: str = ""):
+        """Log a structured monitoring event."""
+        import threading
+        entry = {
+            "time": datetime.now(timezone.utc).strftime("%H:%M:%S"),
+            "symbol": symbol,
+            "event": event,
+            "detail": detail,
+            "cycle": self.cycle_count,
+        }
+        self.monitor_events.append(entry)
+        if len(self.monitor_events) > self.monitor_max_events:
+            self.monitor_events = self.monitor_events[-self.monitor_max_events:]
+
+    def get_monitor(self) -> Dict:
+        """Get monitoring pipeline state for the dashboard."""
+        # Group events by symbol
+        by_symbol = {}
+        for ev in self.monitor_events:
+            sym = ev["symbol"]
+            if sym not in by_symbol:
+                by_symbol[sym] = []
+            by_symbol[sym].append(ev)
+
+        # Last 5 events per symbol (most recent first)
+        recent = {}
+        for sym, events in by_symbol.items():
+            recent[sym] = list(reversed(events[-5:]))
+
+        # Pipeline summary: last signal, gate result, order result per symbol
+        pipeline = {}
+        for sym, events in by_symbol.items():
+            last_signal = next((e for e in reversed(events) if e["event"] == "signal"), None)
+            last_gate = next((e for e in reversed(events) if e["event"].startswith("gate_")), None)
+            last_order = next((e for e in reversed(events) if e["event"] in ("order_placed", "order_failed", "order_closed")), None)
+            pipeline[sym] = {
+                "signal": last_signal,
+                "gate": last_gate,
+                "order": last_order,
+            }
+
+        # Overall stats
+        signals = [e for e in self.monitor_events if e["event"] == "signal"]
+        gates_passed = [e for e in self.monitor_events if e["event"] == "gate_all_passed"]
+        orders_placed = [e for e in self.monitor_events if e["event"] == "order_placed"]
+        orders_failed = [e for e in self.monitor_events if e["event"] == "order_failed"]
+
+        return {
+            "cycle": self.cycle_count,
+            "uptime_seconds": (datetime.now(timezone.utc) - self.start_time).total_seconds(),
+            "total_events": len(self.monitor_events),
+            "stats": {
+                "signals_generated": len(signals),
+                "gates_passed": len(gates_passed),
+                "orders_placed": len(orders_placed),
+                "orders_failed": len(orders_failed),
+            },
+            "pipeline": pipeline,
+            "recent_events": list(reversed(self.monitor_events[-30:])),
+        }
 
     def get_dashboard(self) -> Dict:
         """Get current engine state for API/dashboard."""
@@ -3864,6 +3942,19 @@ def live_prices():
                 "time": int(tick.time),
             }
     return {"prices": prices, "count": len(prices)}
+
+
+@app.get("/api/v1/monitor")
+def monitor():
+    """Pipeline monitoring: signals, gates, orders — real-time view."""
+    return engine.get_monitor()
+
+
+@app.get("/api/v1/monitor/clear")
+def monitor_clear():
+    """Clear monitoring events."""
+    engine.monitor_events = []
+    return {"status": "cleared", "events": 0}
 
 
 @app.get("/api/v1/engine/status")

@@ -229,6 +229,7 @@ tr:hover{background:rgba(0,102,255,0.02)}
   <button class="tab-btn" data-tab="agents" onclick="switchTab('agents')">Agents</button>
   <button class="tab-btn" data-tab="account" onclick="switchTab('account')">Account</button>
   <button class="tab-btn" data-tab="history" onclick="switchTab('history')">History</button>
+  <button class="tab-btn" data-tab="monitor" onclick="switchTab('monitor')">Monitor</button>
 </div>
 
 <!-- ===== TAB: OVERVIEW ===== -->
@@ -294,6 +295,80 @@ tr:hover{background:rgba(0,102,255,0.02)}
         <div class="info-item"><span class="label">Margin Level</span><span class="value" id="ov-margin-level">&mdash;</span></div>
       </div>
       <div style="margin-top:16px"><div class="label" style="font-size:12px;color:var(--ts);margin-bottom:8px">Latest Signals</div><div id="ov-signals-preview"></div></div>
+    </div>
+  </div>
+  <div class="row row-3">
+    <div class="card">
+      <div class="card-title">&#128200; Daily ROI Limits</div>
+      <div id="dailyStatusContent">
+        <div class="info-grid">
+          <div class="info-item"><span class="label">Status</span><span class="value" id="ds-status">&mdash;</span></div>
+          <div class="info-item"><span class="label">Date</span><span class="value" id="ds-date">&mdash;</span></div>
+          <div class="info-item"><span class="label">Daily P&L</span><span class="value" id="ds-pnl">&mdash;</span></div>
+          <div class="info-item"><span class="label">Return</span><span class="value" id="ds-return">&mdash;</span></div>
+          <div class="info-item"><span class="label">Trades</span><span class="value" id="ds-trades">&mdash;</span></div>
+          <div class="info-item"><span class="label">Win Rate</span><span class="value" id="ds-winrate">&mdash;</span></div>
+          <div class="info-item"><span class="label">Profit Target</span><span class="value" id="ds-target">&mdash;</span></div>
+          <div class="info-item"><span class="label">Loss Limit</span><span class="value" id="ds-limit">&mdash;</span></div>
+        </div>
+        <div style="margin-top:12px">
+          <div class="label" style="font-size:11px;color:var(--ts);margin-bottom:4px">Daily Progress</div>
+          <div style="background:#f0f4f8;border-radius:6px;height:8px;overflow:hidden;position:relative">
+            <div id="ds-progress-bar" style="height:100%;border-radius:6px;transition:width .5s;background:var(--green);width:0%"></div>
+          </div>
+          <div style="display:flex;justify-content:space-between;font-size:10px;color:var(--ts);margin-top:2px">
+            <span>0%</span><span id="ds-progress-pct">0%</span><span id="ds-progress-target">2%</span>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">&#129302; ML Live Learning</div>
+      <div id="mlLearningContent">
+        <div class="info-grid">
+          <div class="info-item"><span class="label">Status</span><span class="value" id="ml-status">&mdash;</span></div>
+          <div class="info-item"><span class="label">Samples</span><span class="value" id="ml-samples">&mdash;</span></div>
+          <div class="info-item"><span class="label">Retrains</span><span class="value" id="ml-retrains">&mdash;</span></div>
+          <div class="info-item"><span class="label">Interval</span><span class="value" id="ml-interval">&mdash;</span></div>
+        </div>
+        <div style="margin-top:12px">
+          <div class="label" style="font-size:11px;color:var(--ts);margin-bottom:4px">Next Retrain</div>
+          <div style="background:#f0f4f8;border-radius:6px;height:8px;overflow:hidden;position:relative">
+            <div id="ml-progress-bar" style="height:100%;border-radius:6px;transition:width .5s;background:var(--blue);width:0%"></div>
+          </div>
+          <div style="display:flex;justify-content:space-between;font-size:10px;color:var(--ts);margin-top:2px">
+            <span id="ml-progress-samples">0</span><span id="ml-progress-next">Next: 20</span><span id="ml-progress-interval">20</span>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">&#9878; Strategy Profiles</div>
+      <div id="strategyProfilesContent">
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px">
+          <div style="text-align:center;padding:8px;border-radius:8px;background:rgba(255,107,107,0.08)">
+            <div style="font-size:11px;font-weight:700;color:var(--coral);text-transform:uppercase">Aggressive</div>
+            <div style="font-size:18px;font-weight:800;color:var(--text)" id="sp-agg-trades">0</div>
+            <div style="font-size:10px;color:var(--ts)">trades</div>
+            <div style="font-size:12px;font-weight:600;margin-top:4px" id="sp-agg-wr">0%</div>
+            <div style="font-size:11px;font-weight:600;margin-top:2px" id="sp-agg-pnl">$0</div>
+          </div>
+          <div style="text-align:center;padding:8px;border-radius:8px;background:rgba(0,102,255,0.08)">
+            <div style="font-size:11px;font-weight:700;color:var(--blue);text-transform:uppercase">Neutral</div>
+            <div style="font-size:18px;font-weight:800;color:var(--text)" id="sp-neu-trades">0</div>
+            <div style="font-size:10px;color:var(--ts)">trades</div>
+            <div style="font-size:12px;font-weight:600;margin-top:4px" id="sp-neu-wr">0%</div>
+            <div style="font-size:11px;font-weight:600;margin-top:2px" id="sp-neu-pnl">$0</div>
+          </div>
+          <div style="text-align:center;padding:8px;border-radius:8px;background:rgba(0,204,136,0.08)">
+            <div style="font-size:11px;font-weight:700;color:var(--green);text-transform:uppercase">Conservative</div>
+            <div style="font-size:18px;font-weight:800;color:var(--text)" id="sp-con-trades">0</div>
+            <div style="font-size:10px;color:var(--ts)">trades</div>
+            <div style="font-size:12px;font-weight:600;margin-top:4px" id="sp-con-wr">0%</div>
+            <div style="font-size:11px;font-weight:600;margin-top:2px" id="sp-con-pnl">$0</div>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
   <div class="card" style="position:relative">
@@ -397,6 +472,11 @@ tr:hover{background:rgba(0,102,255,0.02)}
     <div id="legendaryContent"><div class="empty-state"><div class="icon">Loading legendary agents...</div></div></div>
   </div>
 
+  <div class="card" style="margin-bottom:16px" id="scalperCard">
+    <div class="card-title">&#9889; MTF Scalper</div>
+    <div id="scalperContent"><div class="empty-state"><div class="icon">Loading scalper...</div></div></div>
+  </div>
+
   <div class="row row-2">
     <div class="card" id="memoryCard">
       <div class="card-title">&#129504; Memory Context</div>
@@ -476,6 +556,37 @@ tr:hover{background:rgba(0,102,255,0.02)}
   </div>
 </div>
 
+<!-- ===== TAB: MONITOR ===== -->
+<div class="tab-content" id="tab-monitor">
+  <div class="row row-2" style="margin-bottom:16px">
+    <div class="card">
+      <div class="card-title">&#128200; Pipeline Stats</div>
+      <div class="info-grid">
+        <div class="info-item"><span class="label">Signals Generated</span><span class="value" id="mon-signals">0</span></div>
+        <div class="info-item"><span class="label">Gates Passed</span><span class="value" id="mon-gates">0</span></div>
+        <div class="info-item"><span class="label">Orders Placed</span><span class="value" id="mon-orders">0</span></div>
+        <div class="info-item"><span class="label">Orders Failed</span><span class="value" id="mon-failed">0</span></div>
+        <div class="info-item"><span class="label">Cycle</span><span class="value" id="mon-cycle">0</span></div>
+        <div class="info-item"><span class="label">Uptime</span><span class="value" id="mon-uptime">-</span></div>
+      </div>
+      <div style="margin-top:12px;display:flex;gap:8px">
+        <button class="btn btn-blue btn-sm" onclick="loadMonitor()">Refresh</button>
+        <button class="btn btn-red btn-sm" onclick="clearMonitor()">Clear</button>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">&#128269; Per-Symbol Pipeline</div>
+      <div id="mon-pipeline" style="font-size:13px">Loading...</div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-title">&#128221; Live Event Log <span style="font-weight:400;color:var(--ts);font-size:12px" id="mon-count"></span></div>
+    <div style="max-height:400px;overflow-y:auto" id="mon-events">
+      <div class="empty-state" id="mon-empty"><div class="icon">&#128221;</div>Waiting for events...</div>
+    </div>
+  </div>
+</div>
+
 <script>
 var BASE='http://localhost:8888/api/v1';
 var SYMBOLS=['XAUUSD','EURUSD','GBPUSD','USDJPY','USDCHF','AUDUSD','USDCAD','NZDUSD','EURGBP','EURJPY'];
@@ -513,6 +624,7 @@ function switchTab(id){
   else if(id==='agents'){loadAllAgents();startAgentsAutoRefresh();}
   else if(id==='account') loadAccountDetails();
   else if(id==='history') loadHistory();
+  else if(id==='monitor') loadMonitor();
 }
 
 function doLogout(){localStorage.removeItem('dutchkem_user');window.location.href='/login';}
@@ -597,7 +709,68 @@ function loadOverviewAccount(){
   }).catch(function(){});
 }
 
-function loadOverview(){Promise.all([loadMT5Status(),loadEngineStatus(),loadOverviewAccount(),loadOverviewSignals()]);}
+function loadDailyStatus(){
+  return api('/daily-status').then(function(d){
+    // Daily ROI Limits
+    var ds=d.daily||{};
+    var canTrade=ds.can_trade!==false;
+    var stEl=document.getElementById('ds-status');
+    stEl.textContent=canTrade?'Trading':'STOPPED';
+    stEl.className='value '+(canTrade?'green':'red');
+    document.getElementById('ds-date').textContent=ds.date||'\u2014';
+    var pnl=ds.daily_pnl||0;var pnlEl=document.getElementById('ds-pnl');
+    pnlEl.textContent=(pnl>=0?'+':'')+ '$'+pnl.toFixed(2);pnlEl.className='value '+(pnl>=0?'green':'red');
+    var ret=((ds.daily_return||0)*100).toFixed(2);var retEl=document.getElementById('ds-return');
+    retEl.textContent=(ret>=0?'+':'')+ret+'%';retEl.className='value '+(ret>=0?'green':'red');
+    document.getElementById('ds-trades').textContent=(ds.daily_trades||0)+' ('+(ds.daily_wins||0)+'W)';
+    var wr=ds.daily_win_rate!=null?(ds.daily_win_rate*100).toFixed(0)+'%':'\u2014';
+    document.getElementById('ds-winrate').textContent=wr;
+    document.getElementById('ds-target').textContent='+'+((ds.profit_target||0.02)*100).toFixed(1)+'%';
+    document.getElementById('ds-limit').textContent='-'+((ds.loss_limit||0.015)*100).toFixed(1)+'%';
+    // Progress bar
+    var targetPct=(ds.profit_target||0.02)*100;
+    var curPct=Math.abs(ret);
+    var barPct=Math.min(100,(curPct/targetPct)*100);
+    document.getElementById('ds-progress-bar').style.width=barPct+'%';
+    document.getElementById('ds-progress-bar').style.background=ds.target_hit?'var(--gold)':ds.limit_hit?'var(--coral)':'var(--green)';
+    document.getElementById('ds-progress-pct').textContent=ret+'%';
+    document.getElementById('ds-progress-target').textContent=targetPct.toFixed(1)+'%';
+
+    // ML Learning
+    var ml=d.ml_learning||{};
+    var mlStEl=document.getElementById('ml-status');
+    mlStEl.textContent=ml.enabled?'Active':'Off';
+    mlStEl.className='value '+(ml.enabled?'green':'');
+    document.getElementById('ml-samples').textContent=ml.training_samples||0;
+    document.getElementById('ml-retrains').textContent=ml.retrain_count||0;
+    document.getElementById('ml-interval').textContent='Every '+(ml.retrain_interval||20)+' trades';
+    var mlNext=ml.next_retrain!=null?ml.next_retrain:(ml.retrain_interval||20);
+    var mlProg=ml.training_samples||0;
+    var mlInterval=ml.retrain_interval||20;
+    var mlBarPct=Math.min(100,(mlProg/mlInterval)*100);
+    document.getElementById('ml-progress-bar').style.width=mlBarPct+'%';
+    document.getElementById('ml-progress-samples').textContent=mlProg+' samples';
+    document.getElementById('ml-progress-next').textContent='Next: '+mlNext;
+    document.getElementById('ml-progress-interval').textContent=mlInterval;
+
+    // Strategy Profiles
+    var sp=d.strategy_profiles||{};
+    var profiles=[{key:'aggressive',pre:'agg',color:'var(--coral)'},{key:'neutral',pre:'neu',color:'var(--blue)'},{key:'conservative',pre:'con',color:'var(--green)'}];
+    profiles.forEach(function(p){
+      var data=sp[p.key]||{trades:0,wins:0,total_pnl:0};
+      document.getElementById('sp-'+p.pre+'-trades').textContent=data.trades||0;
+      var wr=data.trades>0?((data.wins/data.trades)*100).toFixed(0)+'%':'0%';
+      document.getElementById('sp-'+p.pre+'-wr').textContent=wr;
+      document.getElementById('sp-'+p.pre+'-wr').style.color=p.color;
+      var pnl=data.total_pnl||0;
+      var pnlEl=document.getElementById('sp-'+p.pre+'-pnl');
+      pnlEl.textContent=(pnl>=0?'+':'')+ '$'+pnl.toFixed(2);
+      pnlEl.style.color=pnl>=0?'var(--green)':'var(--coral)';
+    });
+  }).catch(function(){});
+}
+
+function loadOverview(){Promise.all([loadMT5Status(),loadEngineStatus(),loadOverviewAccount(),loadOverviewSignals(),loadDailyStatus()]);}
 
 function engineStart(){var b=document.getElementById('btnEngineStart');b.disabled=true;b.innerHTML='<span class="spinner"></span> Starting...';api('/engine/start',{method:'POST'}).then(function(){toast('Engine started','success');loadOverview();}).catch(function(e){toast('Failed: '+e.message,'error');}).then(function(){b.disabled=false;b.innerHTML='&#9654; Start';});}
 function engineStop(){var b=document.getElementById('btnEngineStop');b.disabled=true;b.innerHTML='<span class="spinner"></span> Stopping...';api('/engine/stop',{method:'POST'}).then(function(){toast('Engine stopped','success');loadOverview();}).catch(function(e){toast('Failed: '+e.message,'error');}).then(function(){b.disabled=false;b.innerHTML='&#9632; Stop';});}
@@ -786,6 +959,70 @@ function loadLegendary(symbol){
   }).catch(function(){document.getElementById('legendaryContent').innerHTML='<div class="empty-state">Failed to load legendary agents</div>';});
 }
 
+function loadScalper(){
+  return api('/scalper/status').then(function(d){
+    var positions=d.open_positions||[];
+    var groups=d.groups||[];
+    var lastScan=d.last_scan?new Date(d.last_scan).toLocaleTimeString():'Never';
+    var statusBadge=d.enabled?
+      '<span style="color:var(--green);font-weight:700">ENABLED</span>':
+      '<span style="color:var(--red);font-weight:700">DISABLED</span>';
+    var multiBadge=d.multi_symbol?
+      '<span style="color:var(--blue);font-weight:600">MULTI-SYMBOL</span>':
+      '<span style="color:var(--ts);font-weight:600">SINGLE</span>';
+    var trailingBadge=d.trailing_enabled?
+      '<span style="color:var(--green);font-size:11px">Trailing ON</span>':
+      '<span style="color:var(--ts);font-size:11px">Trailing OFF</span>';
+
+    var html='<div style="display:flex;align-items:center;gap:16px;margin-bottom:16px;flex-wrap:wrap">'+
+      '<div style="font-size:14px;font-weight:700">'+statusBadge+'</div>'+
+      '<div style="font-size:12px">'+multiBadge+'</div>'+
+      '<div style="font-size:12px">'+trailingBadge+'</div>'+
+      '<div style="font-size:12px;color:var(--ts)">Scan: '+lastScan+'</div>'+
+      '<div style="font-size:12px;color:var(--ts)">Symbol: <strong>'+(d.symbol||'--')+'</strong></div>'+
+      '</div>';
+
+    html+='<div style="display:flex;gap:16px;margin-bottom:16px;flex-wrap:wrap">'+
+      '<div style="font-size:12px;color:var(--ts)">TP: <strong>'+d.tp_pips+'p</strong></div>'+
+      '<div style="font-size:12px;color:var(--ts)">SL: <strong>'+d.sl_pips+'p</strong></div>'+
+      '<div style="font-size:12px;color:var(--ts)">Max Concurrent: <strong>'+d.max_concurrent+'</strong></div>'+
+      '<div style="font-size:12px;color:var(--ts)">Groups: <strong>'+(d.prefer_groups||[]).join(', ')+'</strong></div>'+
+      '<div style="font-size:12px;color:var(--ts)">Open: <strong style="color:var(--green)">'+positions.length+'</strong> / Total: <strong>'+d.total_trades+'</strong></div>'+
+      '</div>';
+
+    if(d.last_error){
+      html+='<div style="padding:8px 12px;background:rgba(255,80,80,0.1);border:1px solid var(--red);border-radius:6px;margin-bottom:12px;font-size:12px;color:var(--red)">Error: '+d.last_error+'</div>';
+    }
+
+    if(positions.length){
+      html+='<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:8px">';
+      positions.forEach(function(p){
+        var dirColor=p.direction==='BUY'?'var(--green)':'var(--red)';
+        var dirIcon=p.direction==='BUY'?'&#128200;':'&#128196;';
+        html+='<div style="padding:12px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.08);border-radius:8px">'+
+          '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">'+
+            '<span style="font-weight:700;color:'+dirColor+'">'+dirIcon+' '+p.symbol+' '+p.direction+'</span>'+
+            '<span style="font-size:10px;color:var(--ts)">#'+p.ticket+'</span>'+
+          '</div>'+
+          '<div style="display:grid;grid-template-columns:1fr 1fr;gap:4px;font-size:11px;color:var(--ts)">'+
+            '<div>Entry: <strong>'+p.entry+'</strong></div>'+
+            '<div>Group: <strong style="color:var(--blue)">'+p.group+'</strong></div>'+
+            '<div>SL: <strong style="color:var(--red)">'+p.sl+'</strong></div>'+
+            '<div>TP: <strong style="color:var(--green)">'+p.tp+'</strong></div>'+
+          '</div>'+
+          '<div style="margin-top:6px;font-size:10px;color:'+(p.breakeven?'var(--green)':'var(--ts)')+'">'+
+            (p.breakeven?'&#9989; Breakeven hit':'&#9201; Breakeven pending')+'</div>'+
+        '</div>';
+      });
+      html+='</div>';
+    } else {
+      html+='<div class="empty-state" style="padding:16px"><div class="icon">&#9889; No active scalps</div></div>';
+    }
+
+    document.getElementById('scalperContent').innerHTML=html;
+  }).catch(function(){document.getElementById('scalperContent').innerHTML='<div class="empty-state">Failed to load scalper</div>';});
+}
+
 function loadMemory(){
   return api('/memory/recent').then(function(d){
     var situations=d.situations||[];
@@ -829,6 +1066,7 @@ function loadAllAgents(){
     loadDebate(symbol),
     loadAnalysts(symbol),
     loadLegendary(symbol),
+    loadScalper(),
     loadMemory()
   ]).then(function(){renderGates();});
 }
@@ -1051,5 +1289,68 @@ document.addEventListener('DOMContentLoaded',function(){
 <footer style="text-align:center;padding:20px;color:#888;font-size:12px;border-top:1px solid #e2e8f0;margin-top:20px;">
   Built by <strong style="background:linear-gradient(135deg,#0066FF,#00CC88);-webkit-background-clip:text;-webkit-text-fill-color:transparent;">Dutchkem Ventures</strong> &copy; 2026
 </footer>
+/* ===== MONITOR ===== */
+var monitorTimer=null;
+function loadMonitor(){
+  api('/monitor').then(function(d){
+    document.getElementById('mon-signals').textContent=d.stats.signals_generated;
+    document.getElementById('mon-gates').textContent=d.stats.gates_passed;
+    document.getElementById('mon-orders').textContent=d.stats.orders_placed;
+    document.getElementById('mon-failed').textContent=d.stats.orders_failed;
+    document.getElementById('mon-cycle').textContent=d.cycle;
+    var mins=Math.floor(d.uptime_seconds/60);
+    document.getElementById('mon-uptime').textContent=mins+'m';
+    // Pipeline per symbol
+    var pipeHtml='';
+    Object.keys(d.pipeline).forEach(function(sym){
+      var p=d.pipeline[sym];
+      var sig=p.signal?(p.signal.detail.split(' ').slice(0,2).join(' ')):'-';
+      var gate=p.gate?(p.gate.event==='gate_all_passed'?'PASSED':'BLOCKED'):'-';
+      var gateColor=gate==='PASSED'?'var(--green)':gate==='BLOCKED'?'var(--coral)':'var(--ts)';
+      var order=p.order?(p.order.detail.substring(0,30)):'-';
+      var orderColor=p.order&&p.order.event==='order_placed'?'var(--green)':p.order&&p.order.event==='order_failed'?'var(--coral)':'var(--ts)';
+      pipeHtml+='<div style="display:grid;grid-template-columns:80px 1fr 70px 1fr;gap:8px;padding:6px 0;border-bottom:1px solid var(--border)">';
+      pipeHtml+='<strong>'+sym+'</strong>';
+      pipeHtml+='<span style="color:var(--ts)">'+sig+'</span>';
+      pipeHtml+='<span style="color:'+gateColor+';font-weight:600">'+gate+'</span>';
+      pipeHtml+='<span style="color:'+orderColor+'">'+order+'</span>';
+      pipeHtml+='</div>';
+    });
+    if(!pipeHtml) pipeHtml='<div style="color:var(--ts);padding:12px">No symbols processed yet. Waiting for market open...</div>';
+    document.getElementById('mon-pipeline').innerHTML=pipeHtml;
+    // Event log
+    var evHtml='';
+    var events=d.recent_events||[];
+    document.getElementById('mon-count').textContent='('+events.length+')';
+    if(events.length===0){
+      document.getElementById('mon-empty').style.display='block';
+    } else {
+      document.getElementById('mon-empty').style.display='none';
+      events.forEach(function(ev){
+        var color='var(--ts)';
+        if(ev.event==='signal') color='var(--blue)';
+        else if(ev.event==='gate_all_passed') color='var(--green)';
+        else if(ev.event==='gate_blocked') color='var(--coral)';
+        else if(ev.event==='order_placed') color='var(--green)';
+        else if(ev.event==='order_failed') color='var(--coral)';
+        evHtml+='<div style="display:grid;grid-template-columns:70px 80px 100px 1fr;gap:8px;padding:5px 8px;border-bottom:1px solid var(--border);font-size:12px">';
+        evHtml+='<span style="color:var(--ts);font-family:monospace">'+ev.time+'</span>';
+        evHtml+='<strong>'+ev.symbol+'</strong>';
+        evHtml+='<span style="color:'+color+';font-weight:600">'+ev.event+'</span>';
+        evHtml+='<span style="color:var(--ts)">'+ev.detail+'</span>';
+        evHtml+='</div>';
+      });
+    }
+    document.getElementById('mon-events').innerHTML='<div id="mon-empty" style="display:none"></div>'+evHtml;
+  }).catch(function(e){console.error('Monitor load failed:',e);});
+}
+function clearMonitor(){
+  api('/monitor/clear').then(function(){loadMonitor();});
+}
+function startMonitorAutoRefresh(){
+  if(monitorTimer) clearInterval(monitorTimer);
+  monitorTimer=setInterval(function(){if(document.getElementById('tab-monitor').classList.contains('active'))loadMonitor();},5000);
+}
+
 </body>
 </html>
