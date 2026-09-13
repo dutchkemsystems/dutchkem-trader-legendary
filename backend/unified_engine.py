@@ -251,9 +251,23 @@ CONFIG = {
 
     # ── Indicators ──
     "adx_threshold": 20,
-    "sl_atr_mult": 3.0,
-    "tp_atr_mult": 5.0,
+    "sl_atr_mult": 1.5,              # V3: default SL (per-symbol overrides below)
+    "tp_atr_mult": 4.0,              # V3: default TP (per-symbol overrides below)
     "vol_sizing": True,
+
+    # ── V3 Per-Symbol SL/TP/Trail/Risk Configs (optimized backtest) ──
+    "v3_symbol_configs": {
+        "EURUSD": {"sl": 1.5, "tp": 4.0, "trail": 1.0, "risk": 0.03, "cooldown": 3},
+        "GBPUSD": {"sl": 1.5, "tp": 4.0, "trail": 2.0, "risk": 0.03, "cooldown": 5},
+        "USDJPY": {"sl": 2.0, "tp": 3.0, "trail": 1.0, "risk": 0.03, "cooldown": 3},
+        "XAUUSD": {"sl": 1.5, "tp": 3.0, "trail": 2.0, "risk": 0.02, "cooldown": 5},
+        "USDCHF": {"sl": 2.0, "tp": 3.0, "trail": 2.0, "risk": 0.02, "cooldown": 3},
+        "AUDUSD": {"sl": 1.5, "tp": 4.0, "trail": 2.0, "risk": 0.03, "cooldown": 3},
+        "USDCAD": {"sl": 2.0, "tp": 4.0, "trail": 1.0, "risk": 0.03, "cooldown": 5},
+        "NZDUSD": {"sl": 2.5, "tp": 4.0, "trail": 1.0, "risk": 0.03, "cooldown": 3},
+        "EURGBP": {"sl": 2.0, "tp": 3.0, "trail": 1.0, "risk": 0.03, "cooldown": 3},
+        "EURJPY": {"sl": 1.5, "tp": 4.0, "trail": 2.0, "risk": 0.03, "cooldown": 3},
+    },
 
     # ── Portfolio Limits ──
     "max_concurrent_trades": 6,
@@ -276,6 +290,9 @@ CONFIG = {
     "trailing_breakeven_rr": 1.0,
     "trailing_step_rr": 2.0,
     "trailing_atr_mult": 2.0,
+
+    # ── DDFX Bollinger Band Stop ──
+    "bbstop_enabled": True,
 
     # ── LLM Integration ──
     "llm_enabled": True,
@@ -485,6 +502,22 @@ def compute_indicators(df: pd.DataFrame) -> pd.DataFrame:
     df["momentum_5"] = pd.Series(c).pct_change(5).values
     df["volatility_10"] = pd.Series(c).pct_change().rolling(10).std().values
 
+    # ── PPO (Percentage Price Oscillator) ──
+    # PPO = (EMA12 - EMA26) / EMA26 * 100 — percentage-normalized MACD
+    ema_12 = pd.Series(c).ewm(span=12).mean()
+    ema_26 = pd.Series(c).ewm(span=26).mean()
+    df["ppo"] = ((ema_12 - ema_26) / ema_26 * 100).values
+    df["ppo_signal"] = pd.Series(df["ppo"]).ewm(span=9).mean().values
+    df["ppo_hist"] = (df["ppo"] - df["ppo_signal"])
+
+    # ── DDFX Bollinger Band Stop (3-band system) ──
+    # BB1 = 1.0 std (tight stop), BB2 = 1.5 std (medium), BB3 = 2.0 std (wide stop)
+    bb_sma = pd.Series(c).rolling(20).mean()
+    bb_std_20 = pd.Series(c).rolling(20).std()
+    df["bbstop_upper"] = (bb_sma + 1.5 * bb_std_20).values   # Stop level for BUY (close above = exit)
+    df["bbstop_lower"] = (bb_sma - 1.5 * bb_std_20).values   # Stop level for SELL (close below = exit)
+    df["bbstop_mid"] = bb_sma.values
+
     # Volume Ratio (MT5 uses 'tick_volume', not 'volume')
     vol_col = "tick_volume" if "tick_volume" in df.columns else "volume" if "volume" in df.columns else None
     if vol_col and df[vol_col].sum() > 0:
@@ -494,6 +527,34 @@ def compute_indicators(df: pd.DataFrame) -> pd.DataFrame:
         df["vol_ratio"] = 1.0
 
     return df
+
+
+# ── Daily Pivot Points (computed from previous day's OHLC via MT5) ──
+def compute_daily_pivots(symbol: str) -> dict:
+    """Compute pivot points from previous day's OHLC. Returns PP, R1-R3, S1-S3."""
+    try:
+        rates = mt5.copy_rates_from_pos(symbol, mt5.TIMEFRAME_D1, 1, 1)
+        if rates is None or len(rates) == 0:
+            return {}
+        prev = rates[0]
+        high, low, close = prev["high"], prev["low"], prev["close"]
+
+        pp = (high + low + close) / 3
+        r1 = 2 * pp - low
+        s1 = 2 * pp - high
+        r2 = pp + (high - low)
+        s2 = pp - (high - low)
+        r3 = high + 2 * (pp - low)
+        s3 = low - 2 * (high - pp)
+
+        return {
+            "pivot": round(pp, 5),
+            "r1": round(r1, 5), "r2": round(r2, 5), "r3": round(r3, 5),
+            "s1": round(s1, 5), "s2": round(s2, 5), "s3": round(s3, 5),
+            "prev_high": round(high, 5), "prev_low": round(low, 5),
+        }
+    except Exception:
+        return {}
 
 
 # ═══════════════════════════════════════════════════════════════
@@ -603,7 +664,50 @@ def generate_signal(row) -> Tuple[str, float, Dict[str, float]]:
     else:
         details["bollinger"] = "inside"
 
-    max_score = 8
+    # ── PPO (Percentage Price Oscillator) ──
+    # PPO histogram positive = bullish momentum (percentage-normalized)
+    ppo_hist = row.get("ppo_hist", 0)
+    if ppo_hist > 0.05:
+        score += 1
+        details["ppo"] = f"bullish({ppo_hist:.3f})"
+    elif ppo_hist < -0.05:
+        score -= 1
+        details["ppo"] = f"bearish({ppo_hist:.3f})"
+    else:
+        details["ppo"] = f"neutral({ppo_hist:.3f})"
+
+    # ── Daily Pivot Points ──
+    # Price relative to pivot determines intraday bias
+    # Cached per-symbol in pivot_cache to avoid recomputing every bar
+    close = row["close"]
+    _pivot_cache = getattr(generate_signal, '_pivot_cache', {})
+    _pivot_cache_time = getattr(generate_signal, '_pivot_cache_time', {})
+    now_ts = pd.Timestamp.now().timestamp()
+    cache_key = getattr(row, '_symbol', 'unknown') if hasattr(row, '_symbol') else 'unknown'
+    pivots = _pivot_cache.get(cache_key)
+    cache_age = now_ts - _pivot_cache_time.get(cache_key, 0) if cache_key in _pivot_cache_time else 99999
+
+    if cache_age > 3600 or pivots is None:  # Recompute every hour
+        pivots = compute_daily_pivots(cache_key if cache_key != 'unknown' else 'EURUSD')
+        _pivot_cache[cache_key] = pivots
+        _pivot_cache_time[cache_key] = now_ts
+        generate_signal._pivot_cache = _pivot_cache
+        generate_signal._pivot_cache_time = _pivot_cache_time
+
+    if pivots:
+        pp = pivots.get("pivot", close)
+        r1 = pivots.get("r1", close * 1.005)
+        s1 = pivots.get("s1", close * 0.995)
+        if close < s1:
+            score += 1  # Below S1 = oversold, bounce potential
+            details["pivots"] = f"below_S1({s1:.5f})"
+        elif close > r1:
+            score -= 1  # Above R1 = overbought, pullback potential
+            details["pivots"] = f"above_R1({r1:.5f})"
+        else:
+            details["pivots"] = f"between_S1_R1(PP={pp:.5f})"
+
+    max_score = 10
     if score >= CONFIG["min_score"]:
         return "BUY", min(score / max_score, 1.0), details
     if score <= -CONFIG["min_score"]:
@@ -854,6 +958,7 @@ class RiskManager:
         self.circuit_breaker_state = "CLOSED"  # CLOSED, OPEN, HALF_OPEN
         self.cb_opened_at = None
         self.cb_recoveries = 0
+        self.last_trade_time = {}  # V3: symbol -> last trade timestamp (for cooldown)
 
         # ── Daily ROI Tracking ──
         self.daily_start_balance = 10000.0  # Balance at start of day
@@ -1077,9 +1182,12 @@ class RiskManager:
 
         # Base risk = EQUITY × risk percentage (always use equity, not balance)
         equity = getattr(self, 'equity', self.balance)
-        # Use daily_risk_per_trade_pct for conservative per-trade sizing (0.5%)
-        # Fall back to max_risk_pct if daily_risk_per_trade_pct not set
-        risk_pct = CONFIG.get("daily_risk_per_trade_pct", CONFIG["max_risk_pct"])
+        # V3: Use per-symbol risk if available
+        v3_configs = CONFIG.get("v3_symbol_configs", {})
+        if symbol and symbol in v3_configs:
+            risk_pct = v3_configs[symbol]["risk"]
+        else:
+            risk_pct = CONFIG.get("daily_risk_per_trade_pct", CONFIG["max_risk_pct"])
         base_risk = equity * risk_pct
 
         # Apply safety multipliers (these only REDUCE size)
@@ -1108,10 +1216,17 @@ class RiskManager:
 
         return round(lots, 2)
 
-    def calculate_sl_tp(self, price: float, atr: float, action: str) -> Tuple[float, float]:
-        """ATR-based SL/TP."""
-        sl_distance = atr * CONFIG["sl_atr_mult"]
-        tp_distance = atr * CONFIG["tp_atr_mult"]
+    def calculate_sl_tp(self, price: float, atr: float, action: str, symbol: str = None) -> Tuple[float, float]:
+        """ATR-based SL/TP with V3 per-symbol configs."""
+        # V3: Use per-symbol config if available
+        v3_configs = CONFIG.get("v3_symbol_configs", {})
+        if symbol and symbol in v3_configs:
+            sc = v3_configs[symbol]
+            sl_distance = atr * sc["sl"]
+            tp_distance = atr * sc["tp"]
+        else:
+            sl_distance = atr * CONFIG["sl_atr_mult"]
+            tp_distance = atr * CONFIG["tp_atr_mult"]
 
         if action == "BUY":
             sl = price - sl_distance
@@ -2630,6 +2745,17 @@ class UnifiedEngine:
                 continue
             if signal.symbol in self.risk.open_positions:
                 continue
+            # V3: Per-symbol cooldown check (cooldown in hours = bars on H1)
+            v3_configs = CONFIG.get("v3_symbol_configs", {})
+            if signal.symbol in v3_configs:
+                cd_hours = v3_configs[signal.symbol].get("cooldown", 3)
+                last_t = self.risk.last_trade_time.get(signal.symbol)
+                if last_t:
+                    from datetime import timezone as _tz
+                    now_utc = datetime.now(_tz.utc)
+                    elapsed_h = (now_utc - last_t).total_seconds() / 3600
+                    if elapsed_h < cd_hours:
+                        continue  # Still in cooldown
             # ── CROSS-DEDUP: Skip if scalper already has this symbol open ──
             if self.scalper:
                 scalper_has_symbol = any(
@@ -2679,6 +2805,7 @@ class UnifiedEngine:
             return None
 
         row = df.iloc[-1]
+        row._symbol = symbol  # Attach symbol for pivot point cache
         action, confidence, details = generate_signal(row)
 
         if action == "HOLD" or confidence < CONFIG["min_confidence"]:
@@ -2729,6 +2856,11 @@ class UnifiedEngine:
             "support_distance": round(support_distance, 6),
             "resistance_distance": round(resistance_distance, 6),
             "volatility_regime": 1.0 if float(row.get("adx", 0)) > 25 else 0.0,
+            # ── New indicators ──
+            "ppo": round(float(row.get("ppo", 0)), 4),
+            "ppo_hist": round(float(row.get("ppo_hist", 0)), 4),
+            "bbstop_upper": round(float(row.get("bbstop_upper", 0)), 5),
+            "bbstop_lower": round(float(row.get("bbstop_lower", 0)), 5),
         }
 
         llm_result = llm_analyze(symbol, indicator_dict, action)
@@ -2832,7 +2964,7 @@ class UnifiedEngine:
             if CONFIG.get("alternative_data_enabled") and self.alternative_data:
                 alt_signal = self.alternative_data.get_signal(symbol)
                 feature_data["alternative"] = alt_signal
-        sl, tp = self.risk.calculate_sl_tp(price, atr, action)
+        sl, tp = self.risk.calculate_sl_tp(price, atr, action, symbol)
 
         # Create signal
         signal = Signal(
@@ -3090,6 +3222,8 @@ class UnifiedEngine:
                      f"profile={profile_name} ticket={ticket}")
             self.monitor_log(signal.symbol, "order_placed",
                              f"{signal.direction.value} lots={lots} @ {signal.entry_price:.5f} ticket={ticket}")
+            # V3: Record last trade time for per-symbol cooldown
+            self.risk.last_trade_time[signal.symbol] = now
 
             # Phase 4: Check correlation hedging after execution
             self._check_hedging(signal.symbol, signal.direction.value, lots)
@@ -3198,7 +3332,10 @@ class UnifiedEngine:
 
                 # ── TRAILING STOP: Trail by ATR after 2:1 R:R ──
                 if rr_ratio >= CONFIG["trailing_step_rr"] and atr > 0:
-                    trail_distance = atr * CONFIG["trailing_atr_mult"]
+                    # V3: Use per-symbol trail multiplier if available
+                    v3_configs = CONFIG.get("v3_symbol_configs", {})
+                    trail_mult = v3_configs.get(symbol, {}).get("trail", CONFIG["trailing_atr_mult"])
+                    trail_distance = atr * trail_mult
                     if rm_pos["action"] == "BUY":
                         new_sl = current - trail_distance
                         if new_sl > rm_pos["sl"]:
@@ -3213,6 +3350,33 @@ class UnifiedEngine:
                             if success:
                                 rm_pos["sl"] = new_sl
                                 log.info(f"  TRAILING ATR {symbol} — SL → {new_sl:.5f} (ATR={atr:.5f}, dist={trail_distance:.5f})")
+
+                # ── DDFX BBStop: Volatility-adaptive trailing using Bollinger Band ──
+                # If price closes beyond the 1.5-std BB stop level, tighten trail
+                if CONFIG.get("bbstop_enabled", True) and rr_ratio >= 1.0:
+                    try:
+                        sym_rates = mt5.copy_rates_from_pos(symbol, mt5.TIMEFRAME_H1, 0, 20)
+                        if sym_rates is not None and len(sym_rates) >= 20:
+                            closes_h1 = np.array([r['close'] for r in sym_rates])
+                            bb_sma = float(np.mean(closes_h1[-20:]))
+                            bb_std = float(np.std(closes_h1[-20:]))
+                            if rm_pos["action"] == "BUY":
+                                # BB stop = mid - 1.5*std (tighter than normal trailing)
+                                bb_stop = bb_sma - 1.5 * bb_std
+                                if bb_stop > rm_pos["sl"] and bb_stop < current:
+                                    success = self.mt5.modify_sl_tp(ticket, sl=round(bb_stop, 5))
+                                    if success:
+                                        rm_pos["sl"] = round(bb_stop, 5)
+                                        log.info(f"  DDFX BBSTOP {symbol} — SL → {bb_stop:.5f} (BB tight stop, RR={rr_ratio:.1f})")
+                            else:
+                                bb_stop = bb_sma + 1.5 * bb_std
+                                if bb_stop < rm_pos["sl"] or rm_pos["sl"] == 0 and bb_stop > current:
+                                    success = self.mt5.modify_sl_tp(ticket, sl=round(bb_stop, 5))
+                                    if success:
+                                        rm_pos["sl"] = round(bb_stop, 5)
+                                        log.info(f"  DDFX BBSTOP {symbol} — SL → {bb_stop:.5f} (BB tight stop, RR={rr_ratio:.1f})")
+                    except Exception:
+                        pass  # Non-critical, continue with standard trailing
 
     def _close_trade(self, symbol: str, ticket: int, reason: str):
         """Close a trade and record result."""
@@ -4080,6 +4244,7 @@ def engine_status():
             "risk_pct": CONFIG["max_risk_pct"],
             "sl_atr": CONFIG["sl_atr_mult"],
             "tp_atr": CONFIG["tp_atr_mult"],
+            "v3_symbol_configs": CONFIG.get("v3_symbol_configs", {}),
             "cycle_interval": CONFIG.get("cycle_interval", 300),
             "llm_enabled": CONFIG.get("llm_enabled", False),
             "ml_enabled": CONFIG.get("ml_enabled", False),
@@ -4935,8 +5100,10 @@ if __name__ == "__main__":
     print("=" * 70)
     print(f"  Watchlist: {len(WATCHLIST)} symbols")
     print(f"  MTF Timeframes: {CONFIG['mtf_timeframes']}")
-    print(f"  Risk per trade: {CONFIG['max_risk_pct']*100:.0f}%")
-    print(f"  SL/TP: {CONFIG['sl_atr_mult']}x / {CONFIG['tp_atr_mult']}x ATR")
+    print(f"  Risk per trade: V3 per-symbol (2-3%)")
+    print(f"  SL/TP: V3 per-symbol optimized configs")
+    for sym, sc in CONFIG.get("v3_symbol_configs", {}).items():
+        print(f"    {sym}: SL={sc['sl']}x TP={sc['tp']}x Trail={sc['trail']}x Risk={sc['risk']*100:.0f}%")
     print(f"  LLM: {'Enabled' if CONFIG['llm_enabled'] else 'Disabled'}")
     print(f"  ML: {'Enabled' if CONFIG['ml_enabled'] else 'Disabled'}")
     print(f"  API Server: http://localhost:8888")
