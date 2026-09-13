@@ -269,6 +269,37 @@ class MTFCascadingScalper:
             return "SELL"
         return "HOLD"
 
+    def _compute_signal_details(self, symbol: str, df: pd.DataFrame) -> dict:
+        """Compute directional signal and return full indicator details."""
+        if df is None or len(df) < 60:
+            return {"direction": "HOLD", "rsi": 50.0, "macd": 0.0, "sma20": 0.0, "sma50": 0.0}
+
+        close = df["close"]
+        rsi = _compute_rsi(close, 14)
+        sma20 = float(close.rolling(20).mean().iloc[-1])
+        sma50 = float(close.rolling(50).mean().iloc[-1])
+        macd = _compute_macd(close)
+
+        bull_score = 0
+        if rsi < 70:
+            bull_score += 1
+        if close.iloc[-1] > sma20:
+            bull_score += 1
+        if sma20 > sma50:
+            bull_score += 1
+        if macd > 0:
+            bull_score += 1
+
+        if bull_score >= 3:
+            direction = "BUY"
+        elif bull_score <= 1:
+            direction = "SELL"
+        else:
+            direction = "HOLD"
+
+        return {"direction": direction, "rsi": round(rsi, 2), "macd": round(macd, 6),
+                "sma20": round(sma20, 5), "sma50": round(sma50, 5)}
+
     def _get_signals_for_group(self, symbol: str, group: dict) -> List[str]:
         """Fetch OHLCV for all timeframes in a group and compute signals."""
         timeframes = group.get("timeframes", [])
@@ -278,6 +309,117 @@ class MTFCascadingScalper:
             signal = self._compute_directional_signal(df)
             signals.append(signal)
         return signals
+
+    def _get_detailed_signals_for_group(self, symbol: str, group: dict) -> Tuple[List[str], dict, dict]:
+        """Fetch OHLCV for all timeframes in a group, compute signals + indicator details.
+
+        Returns (signals_list, tf_direction_map, last_tf_details) where last_tf_details
+        has RSI/MACD/SMA values from the highest timeframe in the group.
+        """
+        timeframes = group.get("timeframes", [])
+        signals = []
+        tf_map = {}
+        last_details = {"direction": "HOLD", "rsi": 50.0, "macd": 0.0, "sma20": 0.0, "sma50": 0.0}
+        for tf in timeframes:
+            df = self._fetch_ohlcv(symbol, tf)
+            sig = self._compute_signal_details(symbol, df)
+            signals.append(sig["direction"])
+            tf_map[tf] = sig["direction"]
+            last_details = sig
+        return signals, tf_map, last_details
+
+    def scan_all_symbols(self) -> List[dict]:
+        """Scan ALL symbols across ALL groups and return quality trade candidates.
+
+        Does NOT execute trades — returns analysis for dashboard display.
+        Skips symbols that are blocked or already have open scalps.
+        """
+        candidates = []
+
+        symbols = self._get_symbols_to_scan()
+        blocked = getattr(self, 'blocked_symbols', set())
+        symbols = [s for s in symbols if s not in blocked]
+
+        # Symbols that already have open scalps
+        open_symbols = {s["symbol"] for s in self.open_scalps.values()}
+
+        all_groups = self.config.get("scalper_groups", [])
+
+        for symbol in symbols:
+            if symbol in open_symbols:
+                continue
+
+            # Pre-fetch symbol info once
+            symbol_info = mt5.symbol_info(symbol)
+            if symbol_info is None:
+                continue
+
+            for group in all_groups:
+                try:
+                    signals, tf_map, last_details = self._get_detailed_signals_for_group(symbol, group)
+                    alignment = self._check_alignment(signals)
+
+                    if not alignment or alignment == "HOLD":
+                        continue
+
+                    entry_price = self._get_current_price(symbol, alignment)
+                    if entry_price is None:
+                        continue
+
+                    sl_pips = self.config.get("scalper_sl_pips", 5)
+                    tp_pips = self.config.get("scalper_tp_pips", 10)
+                    point = symbol_info.point if symbol_info.point else 0.0001
+                    digits = symbol_info.digits
+
+                    sl_dist = sl_pips * point * 10
+                    tp_dist = tp_pips * point * 10
+
+                    if alignment == "BUY":
+                        sl = round(entry_price - sl_dist, digits)
+                        tp = round(entry_price + tp_dist, digits)
+                    else:
+                        sl = round(entry_price + sl_dist, digits)
+                        tp = round(entry_price - tp_dist, digits)
+
+                    lot_size = self._select_scalper_lot_size(symbol, group["name"], alignment, entry_price, symbol_info)
+
+                    # Pip value estimation
+                    if symbol in ("XAUUSD",):
+                        pip_value_per_lot = 1.0
+                    elif "JPY" in symbol:
+                        pip_value_per_lot = 6.67
+                    else:
+                        pip_value_per_lot = 10.0
+
+                    expected_profit_usd = tp_pips * pip_value_per_lot * lot_size
+                    risk_reward = round(tp_pips / sl_pips, 2) if sl_pips > 0 else 0
+
+                    candidates.append({
+                        "symbol": symbol,
+                        "direction": alignment,
+                        "group": group["name"],
+                        "timeframes": group.get("timeframes", []),
+                        "signals_per_tf": tf_map,
+                        "rsi": last_details.get("rsi", 50.0),
+                        "macd": last_details.get("macd", 0.0),
+                        "sma20": last_details.get("sma20", 0.0),
+                        "sma50": last_details.get("sma50", 0.0),
+                        "entry_price": entry_price,
+                        "sl": sl,
+                        "tp": tp,
+                        "sl_pips": sl_pips,
+                        "tp_pips": tp_pips,
+                        "lot_size": lot_size,
+                        "expected_profit_usd": round(expected_profit_usd, 2),
+                        "risk_reward": risk_reward,
+                        "pip_value_per_lot": pip_value_per_lot,
+                    })
+                except Exception as e:
+                    log.debug(f"scan_all_symbols: {symbol} {group.get('name', '?')} error: {e}")
+                    continue
+
+        log.info(f"scan_all_symbols: found {len(candidates)} candidates across {len(symbols)} symbols")
+        return candidates
 
     def _check_alignment(self, signals: List[str]) -> Optional[str]:
         """All 3 signals same direction -> return it, else None."""
@@ -519,7 +661,7 @@ class MTFCascadingScalper:
 
     def get_status(self) -> dict:
         """Return status dict for dashboard display."""
-        return {
+        status = {
             "enabled": self.config.get("mtf_cascading_scalper_enabled", False),
             "multi_symbol": self.config.get("scalper_multi_symbol", False),
             "open_scalps": len(self.open_scalps),
@@ -549,3 +691,13 @@ class MTFCascadingScalper:
                 g["name"] for g in self.config.get("scalper_groups", [])
             ],
         }
+        # Include quality trades scan result for dashboard (non-blocking)
+        if self.config.get("mtf_cascading_scalper_enabled", False):
+            try:
+                status["quality_trades"] = self.scan_all_symbols()
+            except Exception as e:
+                log.debug(f"get_status quality_trades scan failed: {e}")
+                status["quality_trades"] = []
+        else:
+            status["quality_trades"] = []
+        return status

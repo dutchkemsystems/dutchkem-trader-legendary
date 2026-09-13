@@ -3257,6 +3257,21 @@ class UnifiedEngine:
 
             rm_pos = self.risk.open_positions[symbol]
 
+            # Skip positions without action key (old MT5 positions)
+            if "action" not in rm_pos:
+                # Infer action from MT5 position type
+                rm_pos["action"] = pos.get("action", "BUY")
+                if "entry_price" not in rm_pos:
+                    rm_pos["entry_price"] = pos.get("entry_price", 0)
+                if "sl" not in rm_pos:
+                    rm_pos["sl"] = pos.get("sl", 0)
+                if "tp" not in rm_pos:
+                    rm_pos["tp"] = pos.get("tp", 0)
+                if "entry_time" not in rm_pos:
+                    rm_pos["entry_time"] = pos.get("time", now.isoformat())
+                if "atr" not in rm_pos:
+                    rm_pos["atr"] = 0.001
+
             # Phase 5: Trailing TP — move TP in profit direction
             self._manage_trailing_tp(symbol, pos, rm_pos)
 
@@ -3832,6 +3847,8 @@ def toggle_feature(body: dict = Body(...)):
         "ml_prediction": "ml_enabled",
         "llm": "llm_enabled",
         "ml": "ml_enabled",
+        "mtf_scalper": "mtf_cascading_scalper_enabled",
+        "scalper_multi": "scalper_multi_symbol",
     }
 
     config_key = feature_map.get(feature)
@@ -4262,6 +4279,8 @@ def engine_status():
             "hedging_enabled": CONFIG.get("hedging_enabled", False),
             "exit_model_enabled": CONFIG.get("exit_model_enabled", False),
             "equity_curve_ma_period": CONFIG.get("equity_curve_ma_period", 20),
+            "scalper_multi_symbol": CONFIG.get("scalper_multi_symbol", False),
+            "scalper_trailing": CONFIG.get("scalper_trailing_enabled", False),
         },
         "scalper": engine.scalper.get_status() if getattr(engine, 'scalper', None) else None,
         "phase4": {
@@ -4289,6 +4308,59 @@ def scalper_status():
                 "last_scan": None, "last_error": None, "symbol": None,
                 "tp_pips": 0, "sl_pips": 0, "max_concurrent": 0, "groups": []}
     return engine.scalper.get_status()
+
+
+@app.post("/api/v1/scalper/toggle")
+def toggle_scalper(body: dict = Body(...)):
+    """Toggle MTF scalper features."""
+    feature = body.get("feature", "")
+    enabled = body.get("enabled")
+
+    feature_map = {
+        "enabled": "mtf_cascading_scalper_enabled",
+        "multi_symbol": "scalper_multi_symbol",
+        "trailing": "scalper_trailing_enabled",
+    }
+
+    config_key = feature_map.get(feature)
+    if not config_key:
+        return {"error": f"Unknown feature: {feature}", "valid": list(feature_map.keys())}
+
+    if enabled is None:
+        enabled = not CONFIG.get(config_key, False)
+
+    CONFIG[config_key] = bool(enabled)
+
+    # Sync to scalper if it exists
+    if getattr(engine, 'scalper', None):
+        engine.scalper.config[config_key] = bool(enabled)
+
+    log.info(f"Scalper feature '{feature}' ({config_key}) set to {enabled}")
+
+    return {
+        "feature": feature,
+        "enabled": CONFIG[config_key],
+        "status": engine.scalper.get_status() if getattr(engine, 'scalper', None) else None,
+    }
+
+
+@app.get("/api/v1/scalper/quality-trades")
+def scalper_quality_trades():
+    """Scan all symbols and return quality trade candidates with full analysis."""
+    if not getattr(engine, 'scalper', None):
+        return {"trades": [], "error": "Scalper not active"}
+
+    try:
+        trades = engine.scalper.scan_all_symbols()
+        return {
+            "trades": trades,
+            "count": len(trades),
+            "scan_time": datetime.now(timezone.utc).isoformat(),
+            "multi_symbol": CONFIG.get("scalper_multi_symbol", False),
+        }
+    except Exception as e:
+        log.error(f"Quality trades scan failed: {e}")
+        return {"trades": [], "error": str(e)}
 
 
 @app.get("/api/v1/live/tick/{symbol}")
