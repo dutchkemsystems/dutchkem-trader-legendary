@@ -97,10 +97,63 @@ class RiskAnalyst(BaseAnalyst):
         return None  # No risk data available
 
     def _evaluate_risk(self, var_95: float, max_dd: float, sharpe: float, correlation: float) -> tuple:
-        if sharpe > 1.5 and max_dd < 0.05:
-            return ('BUY', 0.7)
-        elif var_95 > 0.05 or max_dd > 0.20:
-            return ('SELL', 0.7)
+        """Evaluate risk conditions and produce directional lean.
+
+        Healthy account = favorable conditions for BUY signals
+        Stressed account = caution, lean SELL (reduce exposure)
+        """
+        # Score from -1 (very risky) to +1 (very safe)
+        risk_score = 0.0
+
+        # Sharpe contribution: positive = good, negative = bad
+        if sharpe > 2.0:
+            risk_score += 0.3
+        elif sharpe > 1.0:
+            risk_score += 0.2
+        elif sharpe > 0:
+            risk_score += 0.1
+        elif sharpe < -1.0:
+            risk_score -= 0.3
+        elif sharpe < 0:
+            risk_score -= 0.15
+
+        # Drawdown contribution
+        if max_dd < 0.02:
+            risk_score += 0.3  # Very healthy
+        elif max_dd < 0.05:
+            risk_score += 0.2
+        elif max_dd < 0.10:
+            risk_score += 0.1
+        elif max_dd > 0.15:
+            risk_score -= 0.2
+        elif max_dd > 0.10:
+            risk_score -= 0.1
+
+        # VaR contribution
+        if var_95 < 0.01:
+            risk_score += 0.2  # Low risk
+        elif var_95 < 0.02:
+            risk_score += 0.1
+        elif var_95 > 0.04:
+            risk_score -= 0.2  # High risk
+        elif var_95 > 0.03:
+            risk_score -= 0.1
+
+        # Correlation: high portfolio correlation = concentrated risk
+        if correlation > 0.8:
+            risk_score -= 0.15
+        elif correlation < 0.3:
+            risk_score += 0.1
+
+        # Convert to signal
+        if risk_score > 0.3:
+            return ('BUY', min(0.55 + risk_score * 0.3, 0.8))
+        elif risk_score < -0.3:
+            return ('SELL', min(0.55 + abs(risk_score) * 0.3, 0.8))
+        elif risk_score > 0.1:
+            return ('BUY', 0.55)
+        elif risk_score < -0.1:
+            return ('SELL', 0.55)
         return ('HOLD', 0.5)
 
     def get_capabilities(self) -> list[str]:

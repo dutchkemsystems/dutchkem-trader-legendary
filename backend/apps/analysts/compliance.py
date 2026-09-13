@@ -93,11 +93,19 @@ class ComplianceAnalyst(BaseAnalyst):
             return None
 
     def _evaluate_compliance(self, regulatory_ok: bool, position_ok: bool, exposure_ok: bool, violations: list) -> tuple:
+        """Compliance check: mostly HOLD but with margin-based lean."""
         if not regulatory_ok or len(violations) > 0:
-            return ('SELL', 0.8)
-        elif position_ok and exposure_ok:
-            return ('HOLD', 0.6)
-        return ('HOLD', 0.5)
+            # Violations = strong SELL signal (reduce exposure immediately)
+            return ('SELL', 0.85)
+        elif not position_ok:
+            # Position limit breach = moderate SELL
+            return ('SELL', 0.70)
+        elif not exposure_ok:
+            # Exposure too high = mild SELL
+            return ('SELL', 0.60)
+        else:
+            # All clear = HOLD with decent confidence
+            return ('HOLD', 0.65)
 
     def get_capabilities(self) -> list[str]:
         return list(self._capabilities)

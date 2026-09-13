@@ -150,10 +150,33 @@ class OrderFlowAnalyst(BaseAnalyst):
         return (bid_vol - ask_vol) / total if total > 0 else 0.0
 
     def _evaluate_flow(self, microprice: float, imbalance: float) -> tuple:
-        if imbalance > 0.2:
-            return ('BUY', min(0.6 + imbalance, 0.85))
-        elif imbalance < -0.2:
-            return ('SELL', min(0.6 + abs(imbalance), 0.85))
+        """Evaluate order flow using imbalance, microprice deviation, and volume strength."""
+        # Microprice deviation from mid-price
+        if microprice > 0:
+            bid = microprice * 0.999
+            ask = microprice * 1.001
+            mid = (bid + ask) / 2 if (bid + ask) > 0 else microprice
+            deviation = (microprice - mid) / mid if mid > 0 else 0
+        else:
+            deviation = 0
+
+        # Combined signal from imbalance and deviation
+        flow_score = imbalance * 0.7 + deviation * 100 * 0.3
+
+        # Strong flow: imbalance > 0.15 (lowered from 0.2)
+        if flow_score > 0.15:
+            confidence = min(0.6 + abs(flow_score) * 0.8, 0.85)
+            return ('BUY', confidence)
+        elif flow_score < -0.15:
+            confidence = min(0.6 + abs(flow_score) * 0.8, 0.85)
+            return ('SELL', confidence)
+
+        # Weak flow: use microprice direction as tiebreaker
+        if imbalance > 0.05:
+            return ('BUY', 0.55)
+        elif imbalance < -0.05:
+            return ('SELL', 0.55)
+
         return ('HOLD', 0.5)
 
     def get_capabilities(self) -> list[str]:
