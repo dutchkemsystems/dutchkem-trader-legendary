@@ -1,8 +1,9 @@
 """
 MTF Cascading Scalper — Multi-Timeframe Cascading Signal Alignment
 ==================================================================
-Scans groups of 3 timeframes for directional alignment.
+Scans groups of 3 timeframes for directional alignment across multiple symbols.
 Executes scalp trades when all 3 timeframes agree on direction.
+Includes trailing stop management and breakeven logic.
 
 Signal computation: RSI + SMA20/50 + MACD crossover (sync, no LLM).
 """
@@ -32,6 +33,11 @@ BARS_PER_SIGNAL = 100
 MT5_MAGIC = 20260911
 MT5_SLIPPAGE = 10
 
+WATCHLIST = [
+    "EURUSD", "GBPUSD", "USDJPY", "USDCHF", "AUDUSD", "NZDUSD", "USDCAD",
+    "EURJPY", "GBPJPY", "AUDJPY", "EURAUD", "EURGBP",
+]
+
 
 def _compute_rsi(close: pd.Series, period: int = 14) -> float:
     delta = close.diff()
@@ -55,8 +61,9 @@ def _compute_macd(close: pd.Series, fast: int = 12, slow: int = 26, signal: int 
 class MTFCascadingScalper:
     """Multi-Timeframe Cascading Scalper.
 
-    Scans groups of 3 timeframes for directional alignment.
+    Scans groups of 3 timeframes for directional alignment across multiple symbols.
     Executes scalp trades when all 3 timeframes agree on direction.
+    Manages trailing stops and breakeven for open scalps.
     """
 
     def __init__(self, mt5_engine, risk_manager, config: dict):
@@ -68,24 +75,49 @@ class MTFCascadingScalper:
         self.last_scan: Optional[str] = None
         self.total_trades = 0
         self.last_error: Optional[str] = None
+        self._symbol_index: int = 0  # Round-robin index for multi-symbol scanning
 
     # ── Main Entry Point ────────────────────────────────────────
 
     def scan_and_execute(self) -> Optional[dict]:
-        """Scan all groups for alignment, execute if found."""
+        """Scan all symbols/groups for alignment, execute if found."""
         if not self.config.get("mtf_cascading_scalper_enabled", False):
             return None
 
         if not self._check_safety():
             return None
 
-        symbol = self.config.get("scalper_symbol", "EURUSD")
-        groups = self.config.get("scalper_groups", [])
+        # Manage trailing stops for existing open scalps
+        self._manage_trailing_stops()
+
+        # Get symbols to scan
+        symbols = self._get_symbols_to_scan()
+        if not symbols:
+            return None
+
+        # ── CROSS-DEDUP: Skip symbols blocked by main engine ──
+        blocked = getattr(self, 'blocked_symbols', set())
+        symbols = [s for s in symbols if s not in blocked]
+        if not symbols:
+            return None
+
         restart_from_g1 = self.config.get("scalper_restart_from_group1", True)
+        prefer_groups = self.config.get("scalper_prefer_groups", [])
+
+        # Rotate through symbols (one per scan cycle)
+        symbol = symbols[self._symbol_index % len(symbols)]
+        self._symbol_index += 1
 
         self.last_scan = datetime.now(timezone.utc).isoformat()
 
-        for group in groups:
+        # Try preferred groups first, then all groups
+        all_groups = self.config.get("scalper_groups", [])
+        ordered_groups = []
+        if prefer_groups:
+            ordered_groups = [g for g in all_groups if g["name"] in prefer_groups]
+        ordered_groups.extend([g for g in all_groups if g not in ordered_groups])
+
+        for group in ordered_groups:
             signals = self._get_signals_for_group(symbol, group)
             alignment = self._check_alignment(signals)
 
@@ -94,7 +126,7 @@ class MTFCascadingScalper:
                 if entry_price is None:
                     continue
 
-                result = self._execute_scalp(symbol, alignment, group["timeframes"][0], entry_price)
+                result = self._execute_scalp(symbol, alignment, group["name"], entry_price)
                 if result is not None:
                     return result
 
@@ -102,6 +134,110 @@ class MTFCascadingScalper:
                 break  # Only scan first group, restart on next cycle
 
         return None
+
+    def _get_symbols_to_scan(self) -> List[str]:
+        """Get list of symbols to scan. Multi-symbol uses WATCHLIST."""
+        if self.config.get("scalper_multi_symbol", False):
+            watchlist = self.config.get("watchlist", WATCHLIST)
+            return [s for s in watchlist if s and s.strip()]
+        return [self.config.get("scalper_symbol", "EURUSD")]
+
+    # ── Trailing Stop Management ────────────────────────────────
+
+    def _manage_trailing_stops(self):
+        """Manage trailing stops and breakeven for all open scalps."""
+        if not self.config.get("scalper_trailing_enabled", False):
+            return
+
+        breakeven_rr = self.config.get("scalper_trailing_breakeven_rr", 1.0)
+        trail_step_pips = self.config.get("scalper_trailing_step_pips", 5)
+
+        for ticket, scalp in list(self.open_scalps.items()):
+            if scalp.get("status") != "OPEN":
+                continue
+
+            symbol = scalp["symbol"]
+            direction = scalp["direction"]
+            entry_price = scalp["entry_price"]
+            current_sl = scalp.get("sl", 0)
+            current_tp = scalp.get("tp", 0)
+
+            tick = mt5.symbol_info_tick(symbol)
+            if tick is None:
+                continue
+
+            symbol_info = mt5.symbol_info(symbol)
+            if symbol_info is None:
+                continue
+
+            point = symbol_info.point if symbol_info.point else 0.0001
+            digits = symbol_info.digits
+
+            if direction == "BUY":
+                current_price = tick.bid
+                # Breakeven: move SL to entry when price reaches entry + (SL distance * breakeven_rr)
+                sl_distance = abs(entry_price - current_sl)
+                breakeven_level = entry_price + sl_distance * breakeven_rr
+                if current_price >= breakeven_level and current_sl < entry_price:
+                    new_sl = round(entry_price + (point * 2), digits)  # Entry + 2 points buffer
+                    self._modify_sl(ticket, new_sl)
+                    scalp["sl"] = new_sl
+                    scalp["breakeven_hit"] = True
+                    log.info(f"SCALP BE: BUY {symbol} ticket={ticket} SL moved to {new_sl:.5f}")
+
+                # Trailing: move SL up by trail_step_pips when price makes new high
+                elif scalp.get("breakeven_hit", False) and current_price > scalp.get("last_high", 0):
+                    trail_dist = trail_step_pips * point * 10
+                    new_sl = round(current_price - trail_dist, digits)
+                    if new_sl > current_sl:
+                        self._modify_sl(ticket, new_sl)
+                        scalp["sl"] = new_sl
+                        scalp["last_high"] = current_price
+
+            elif direction == "SELL":
+                current_price = tick.ask
+                sl_distance = abs(current_sl - entry_price)
+                breakeven_level = entry_price - sl_distance * breakeven_rr
+                if current_price <= breakeven_level and current_sl > entry_price:
+                    new_sl = round(entry_price - (point * 2), digits)
+                    self._modify_sl(ticket, new_sl)
+                    scalp["sl"] = new_sl
+                    scalp["breakeven_hit"] = True
+                    log.info(f"SCALP BE: SELL {symbol} ticket={ticket} SL moved to {new_sl:.5f}")
+
+                elif scalp.get("breakeven_hit", False):
+                    last_low = scalp.get("last_low", 0)
+                    if last_low == 0 or current_price < last_low:
+                        trail_dist = trail_step_pips * point * 10
+                        new_sl = round(current_price + trail_dist, digits)
+                        if new_sl < current_sl:
+                            self._modify_sl(ticket, new_sl)
+                            scalp["sl"] = new_sl
+                            scalp["last_low"] = current_price
+
+    def _modify_sl(self, ticket: int, new_sl: float) -> bool:
+        """Modify SL for an open position."""
+        try:
+            positions = mt5.positions_get(ticket=ticket)
+            if not positions:
+                return False
+            pos = positions[0]
+            request = {
+                "action": mt5.TRADE_ACTION_SLTP,
+                "position": pos.ticket,
+                "symbol": pos.symbol,
+                "sl": new_sl,
+                "tp": pos.tp,
+                "magic": MT5_MAGIC,
+            }
+            result = mt5.order_send(request)
+            if result and result.retcode == mt5.TRADE_RETCODE_DONE:
+                return True
+            log.debug(f"SL modify failed: ticket={ticket} code={result.retcode if result else 'None'}")
+            return False
+        except Exception as e:
+            log.debug(f"SL modify error: {e}")
+            return False
 
     # ── Signal Computation ──────────────────────────────────────
 
@@ -203,7 +339,7 @@ class MTFCascadingScalper:
         if not self.risk_manager.check_circuit_breaker():
             return False
 
-        max_concurrent = self.config.get("scalper_max_concurrent", 3)
+        max_concurrent = self.config.get("scalper_max_concurrent", 5)
         if len(self.open_scalps) >= max_concurrent:
             return False
 
@@ -212,16 +348,87 @@ class MTFCascadingScalper:
 
         return True
 
+    # ── Dynamic Lot Sizing (Strategy Selector for Scalper) ──
+
+    def _select_scalper_lot_size(self, symbol: str, group_name: str, direction: str,
+                                  entry_price: float, symbol_info) -> float:
+        """Select lot size based on group timeframe strength and session context.
+        
+        Logic:
+        - G5/G6/G7 (higher timeframes): Aggressive sizing (stronger trends)
+        - G1/G2 (lower timeframes): Conservative sizing (noisier)
+        - London/NY session: Aggressive bias
+        - Asian/Off-peak: Conservative bias
+        - Win streak: Slight aggression; Loss streak: Slight caution
+        
+        Returns: lot size
+        """
+        base_lots = self.config.get("scalper_lot_size", 0.01)
+
+        # ── Factor 1: Group timeframe tier ──
+        # G1-G2: scalp tier (M1-M30) → conservative
+        # G3-G4: transition tier (M15-H4) → neutral
+        # G5-G7: trend tier (H1-MN1) → aggressive
+        group_tier = {
+            "G1": "scalp", "G2": "scalp",
+            "G3": "transition", "G4": "transition",
+            "G5": "trend", "G6": "trend", "G7": "trend",
+        }
+        tier = group_tier.get(group_name, "transition")
+        if tier == "trend":
+            base_lots *= 1.5  # 50% larger for higher-TF alignment
+        elif tier == "scalp":
+            base_lots *= 0.7  # 30% smaller for noisy lower-TF
+
+        # ── Factor 2: Session bias ──
+        now_hour = datetime.now(timezone.utc).hour
+        if now_hour in [13, 14, 15, 16]:
+            base_lots *= 1.2  # London/NY overlap → 20% aggression
+        elif now_hour < 7 or now_hour > 21:
+            base_lots *= 0.6  # Asian/off-peak → 40% caution
+
+        # ── Factor 3: Win/loss streak (from trade history) ──
+        if len(self.trade_history) >= 3:
+            recent = self.trade_history[-5:]
+            wins = sum(1 for t in recent if t.get("profit", 0) > 0)
+            if wins >= 4:
+                base_lots *= 1.15  # Hot streak → 15% aggression
+            elif wins <= 1:
+                base_lots *= 0.8   # Cold streak → 20% caution
+
+        # ── Factor 4: Symbol volatility tier ──
+        # JPY pairs and Gold are more volatile → smaller size
+        volatile_symbols = {"USDJPY", "EURJPY", "GBPJPY", "AUDJPY", "XAUUSD"}
+        if symbol in volatile_symbols:
+            base_lots *= 0.7
+
+        # ── Floor and cap ──
+        lot_size = max(0.01, min(base_lots, self.config.get("scalper_max_lots", 0.50)))
+        lot_size = round(lot_size, 2)
+
+        # Ensure minimum lot size
+        if lot_size < symbol_info.volume_min:
+            lot_size = symbol_info.volume_min
+        lot_size = round(lot_size / symbol_info.volume_step) * symbol_info.volume_step
+        lot_size = round(lot_size, 2)
+
+        log.info(f"SCALP SIZING: {symbol} {group_name} tier={tier} session={now_hour}UTC "
+                 f"→ lots={lot_size:.2f} (base={self.config.get('scalper_lot_size', 0.01):.2f})")
+
+        return lot_size
+
     # ── Order Execution ─────────────────────────────────────────
 
-    def _execute_scalp(self, symbol: str, direction: str, entry_tf: str, entry_price: float) -> Optional[dict]:
-        """Place order with TP/SL."""
+    def _execute_scalp(self, symbol: str, direction: str, group_name: str, entry_price: float) -> Optional[dict]:
+        """Place order with dynamic lot sizing based on group alignment and session."""
         symbol_info = mt5.symbol_info(symbol)
         if symbol_info is None:
             return None
 
         sl, tp = self._calculate_sl_tp(entry_price, direction, symbol_info)
-        lot_size = self.config.get("scalper_lot_size", 0.01)
+
+        # ── Dynamic Lot Sizing (Strategy Selector for Scalper) ──
+        lot_size = self._select_scalper_lot_size(symbol, group_name, direction, entry_price, symbol_info)
 
         order_type = mt5.ORDER_TYPE_BUY if direction == "BUY" else mt5.ORDER_TYPE_SELL
 
@@ -235,7 +442,7 @@ class MTFCascadingScalper:
             "tp": tp,
             "deviation": MT5_SLIPPAGE,
             "magic": MT5_MAGIC,
-            "comment": "MTF_CASCADE",
+            "comment": f"MTF_{group_name}",
             "type_time": mt5.ORDER_TIME_GTC,
             "type_filling": mt5.ORDER_FILLING_IOC,
         }
@@ -255,25 +462,29 @@ class MTFCascadingScalper:
             "direction": direction,
             "entry_price": result.price,
             "entry_time": datetime.now(timezone.utc).isoformat(),
-            "entry_tf": entry_tf,
+            "group": group_name,
             "size": lot_size,
             "sl": sl,
             "tp": tp,
             "status": "OPEN",
+            "breakeven_hit": False,
+            "last_high": result.price if direction == "BUY" else 0,
+            "last_low": result.price if direction == "SELL" else 0,
+            "strategy_profile": "dynamic",
         }
         self.open_scalps[ticket] = scalp
         self.total_trades += 1
         self.last_error = None
 
         log.info(f"SCALP OPEN: {direction} {lot_size} {symbol} @ {result.price:.5f} "
-                 f"SL={sl:.5f} TP={tp:.5f} ticket={ticket}")
+                 f"SL={sl:.5f} TP={tp:.5f} ticket={ticket} group={group_name}")
         return scalp
 
     def _calculate_sl_tp(self, price: float, action: str, symbol_info) -> Tuple[float, float]:
         """Calculate SL/TP from pips config and symbol point size."""
         point = symbol_info.point if symbol_info.point else 0.0001
-        sl_pips = self.config.get("scalper_sl_pips", 10)
-        tp_pips = self.config.get("scalper_tp_pips", 15)
+        sl_pips = self.config.get("scalper_sl_pips", 5)
+        tp_pips = self.config.get("scalper_tp_pips", 10)
 
         sl_dist = sl_pips * point * 10  # pips to price distance
         tp_dist = tp_pips * point * 10
@@ -302,18 +513,38 @@ class MTFCascadingScalper:
         for ticket in closed:
             del self.open_scalps[ticket]
 
+        # Cap trade_history to prevent memory leak (keep last 200)
+        if len(self.trade_history) > 200:
+            self.trade_history = self.trade_history[-200:]
+
     def get_status(self) -> dict:
         """Return status dict for dashboard display."""
         return {
             "enabled": self.config.get("mtf_cascading_scalper_enabled", False),
+            "multi_symbol": self.config.get("scalper_multi_symbol", False),
             "open_scalps": len(self.open_scalps),
             "total_trades": self.total_trades,
             "last_scan": self.last_scan,
             "last_error": self.last_error,
             "symbol": self.config.get("scalper_symbol", "EURUSD"),
-            "tp_pips": self.config.get("scalper_tp_pips", 15),
-            "sl_pips": self.config.get("scalper_sl_pips", 10),
-            "max_concurrent": self.config.get("scalper_max_concurrent", 3),
+            "tp_pips": self.config.get("scalper_tp_pips", 10),
+            "sl_pips": self.config.get("scalper_sl_pips", 5),
+            "max_concurrent": self.config.get("scalper_max_concurrent", 5),
+            "trailing_enabled": self.config.get("scalper_trailing_enabled", False),
+            "prefer_groups": self.config.get("scalper_prefer_groups", []),
+            "open_positions": [
+                {
+                    "ticket": s["ticket"],
+                    "symbol": s["symbol"],
+                    "direction": s["direction"],
+                    "entry": s["entry_price"],
+                    "sl": s["sl"],
+                    "tp": s["tp"],
+                    "group": s["group"],
+                    "breakeven": s.get("breakeven_hit", False),
+                }
+                for s in self.open_scalps.values()
+            ],
             "groups": [
                 g["name"] for g in self.config.get("scalper_groups", [])
             ],
