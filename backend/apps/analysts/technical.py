@@ -1,5 +1,3 @@
-import random
-
 from .base import BaseAnalyst, AnalystResult
 
 
@@ -143,16 +141,26 @@ class TechnicalAnalyst(BaseAnalyst):
                 'resistance': chart_data.get('resistance', 1.105)}
 
     def _evaluate_patterns(self, patterns: list, sr_levels: dict) -> tuple:
-        bullish_patterns = ['double_bottom', 'bullish_engulfing', 'hammer', 'morning_star']
-        bearish_patterns = ['double_top', 'bearish_engulfing', 'shooting_star', 'evening_star']
+        bullish_patterns = ['bullish_trend', 'double_bottom', 'bullish_engulfing', 'hammer',
+                            'morning_star', 'oversold_bounce', 'bullish_crossover']
+        bearish_patterns = ['bearish_trend', 'double_top', 'bearish_engulfing', 'shooting_star',
+                            'evening_star', 'overbought_reversal', 'bearish_crossover']
 
         bull_count = sum(1 for p in patterns if p in bullish_patterns)
         bear_count = sum(1 for p in patterns if p in bearish_patterns)
 
-        if bull_count > bear_count:
-            return ('BUY', min(0.6 + bull_count * 0.1, 0.9))
-        elif bear_count > bull_count:
-            return ('SELL', min(0.6 + bear_count * 0.1, 0.9))
+        trend_patterns = ['bullish_trend', 'bearish_trend']
+        bull_weight = sum(2 if p in trend_patterns else 1 for p in patterns if p in bullish_patterns)
+        bear_weight = sum(2 if p in trend_patterns else 1 for p in patterns if p in bearish_patterns)
+
+        if bull_weight > bear_weight:
+            return ('BUY', min(0.55 + bull_weight * 0.1, 0.85))
+        elif bear_weight > bull_weight:
+            return ('SELL', min(0.55 + bear_weight * 0.1, 0.85))
+        elif bull_count > 0 and bear_count == 0:
+            return ('BUY', 0.55)
+        elif bear_count > 0 and bull_count == 0:
+            return ('SELL', 0.55)
         return ('HOLD', 0.5)
 
     def get_capabilities(self) -> list[str]:
