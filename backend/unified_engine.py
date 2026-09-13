@@ -2799,13 +2799,13 @@ class UnifiedEngine:
         # Layer 1-2: Fetch H1 data + compute indicators
         df = self.mt5.fetch_candles(symbol, TIMEFRAME, 200)
         if df is None or len(df) < 60:
-            log.debug(f"  {symbol}: SKIP data={len(df) if df is not None else 'None'}")
+            log.info(f"  {symbol}: SKIP data={len(df) if df is not None else 'None'}")
             return None
 
         df = compute_indicators(df)
         df = df.dropna()
         if len(df) == 0:
-            log.debug(f"  {symbol}: SKIP no rows after dropna")
+            log.info(f"  {symbol}: SKIP no rows after dropna")
             return None
 
         row = df.iloc[-1]
@@ -2813,7 +2813,7 @@ class UnifiedEngine:
         action, confidence, details = generate_signal(row)
 
         if action == "HOLD" or confidence < CONFIG["min_confidence"]:
-            log.debug(f"  {symbol}: SKIP action={action} conf={confidence:.3f} < {CONFIG['min_confidence']}")
+            log.info(f"  {symbol}: SKIP action={action} conf={confidence:.3f} < {CONFIG['min_confidence']}")
             return None
 
         # Layer 3: Multi-timeframe confirmation
@@ -2822,7 +2822,7 @@ class UnifiedEngine:
 
         # Require MTF agreement
         if mtf_dir != action:
-            log.debug(f"  {symbol}: MTF KILLED h1={action} mtf={mtf_dir}")
+            log.info(f"  {symbol}: MTF KILLED h1={action} mtf={mtf_dir}")
             return None
 
         # Layer 4: LLM confirmation
