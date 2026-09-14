@@ -1040,13 +1040,13 @@ class RiskManager:
         # Check daily limits
         self._check_daily_limits()
 
-        if pnl <= 0:
+        if pnl < 0:
             self.consecutive_losses += 1
             self.consecutive_wins = 0
             if self.consecutive_losses >= CONFIG["circuit_breaker_losses"]:
                 self.circuit_breaker_state = "OPEN"
                 self.cb_opened_at = datetime.now(timezone.utc)
-        else:
+        elif pnl > 0:
             self.consecutive_wins += 1
             self.consecutive_losses = 0
             if self.circuit_breaker_state == "HALF_OPEN":
@@ -1055,6 +1055,7 @@ class RiskManager:
                     self.circuit_breaker_state = "CLOSED"
                     self.daily_pnl = 0
                     self.cb_recoveries = 0
+        # else: pnl == 0 (breakeven) — no change to win/loss streaks
 
     def _check_daily_limits(self):
         """Check if daily profit target or loss limit is hit."""
