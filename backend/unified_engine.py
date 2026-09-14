@@ -1325,6 +1325,14 @@ class MT5Client:
             })
         return result
 
+    def get_symbol_info(self, symbol: str):
+        """Get symbol info (spread, point, volumes, etc.). Used by scalping engine."""
+        return mt5.symbol_info(symbol)
+
+    def get_tick(self, symbol: str):
+        """Get current tick (ask/bid). Used by scalping engine."""
+        return mt5.symbol_info_tick(symbol)
+
     def fetch_candles(self, symbol: str, timeframe: str, count: int = 200) -> Optional[pd.DataFrame]:
         info = mt5.symbol_info(symbol)
         if info is None:
@@ -1631,9 +1639,10 @@ class UnifiedEngine:
             if pnl > 0:
                 self.risk.consecutive_wins += 1
                 self.risk.consecutive_losses = 0
-            else:
+            elif pnl < 0:
                 self.risk.consecutive_losses += 1
                 self.risk.consecutive_wins = 0
+            # pnl == 0: break-even, no streak change
             # Update daily PnL
             self.risk.daily_pnl += pnl
 

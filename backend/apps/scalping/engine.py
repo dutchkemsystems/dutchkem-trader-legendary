@@ -1,11 +1,10 @@
 """Scalping Engine — runs scalping strategies parallel to the main engine.
 
 Called from UnifiedEngine.run() every cycle.
-Does NOT block the main engine — runs asynchronously.
+Does NOT block the main engine — runs synchronously.
 """
 
 import logging
-import MetaTrader5 as mt5
 from typing import Dict, List, Optional
 from datetime import datetime
 
@@ -20,7 +19,7 @@ class ScalpingEngine:
     """Runs scalping strategies in parallel with the main engine.
     
     Integration point: Called from UnifiedEngine.run() every cycle.
-    Does NOT block the main engine — runs asynchronously.
+    Does NOT block the main engine — runs synchronously.
     """
     
     def __init__(self, mt5_client, risk_manager):
@@ -108,7 +107,7 @@ class ScalpingEngine:
     def _check_risk(self, signal: ScalpSignal) -> bool:
         """Pass signal through RiskManager checks."""
         try:
-            # Spread check (via MT5 directly)
+            # Spread check (via mt5_client abstraction)
             if not self._check_spread(signal.symbol):
                 return False
             # Correlation check
@@ -128,13 +127,13 @@ class ScalpingEngine:
     def _check_spread(self, symbol: str) -> bool:
         """Check if spread is acceptable for scalping. Returns True if OK."""
         try:
-            info = mt5.symbol_info(symbol)
+            info = self.mt5_client.get_symbol_info(symbol)
             if info is None:
                 return False
             spread = info.spread
             point = info.point if info.point else 0.0001
             spread_pips = spread * point * 10
-            max_spread = 1.5  # Scalping needs tight spreads
+            max_spread = SCALPING_GLOBAL_CONFIG.get('max_spread_pips', 1.5)
             if spread_pips > max_spread:
                 logger.debug(f"SPREAD FILTER {symbol}: {spread_pips:.1f} pips > max {max_spread:.1f}")
                 return False
@@ -150,11 +149,11 @@ class ScalpingEngine:
             return
         
         # Get current price for SL/TP calculation
-        tick = mt5.symbol_info_tick(signal.symbol)
+        tick = self.mt5_client.get_tick(signal.symbol)
         if tick is None:
             return
         
-        info = mt5.symbol_info(signal.symbol)
+        info = self.mt5_client.get_symbol_info(signal.symbol)
         if info is None:
             return
         
@@ -193,18 +192,17 @@ class ScalpingEngine:
             risk_amount = balance * risk_pct
             
             # Get point value for pip calculation
-            info = mt5.symbol_info(signal.symbol)
+            info = self.mt5_client.get_symbol_info(signal.symbol)
             if info is None:
                 return 0.01
             
             point = info.point if info.point else 0.0001
-            tick_value = info.trade_tick_value if info.trade_tick_value else 1.0
             
             # Calculate SL in price terms
             sl_distance = signal.sl_pips * point * 10
             
-            # Lots = risk_amount / (sl_distance * tick_value_per_point)
-            if sl_distance > 0 and tick_value > 0:
+            # Lots = risk_amount / (sl_distance * contract_size)
+            if sl_distance > 0:
                 contract_size = info.trade_contract_size if info.trade_contract_size else 100000
                 sl_value_per_lot = sl_distance * contract_size
                 lots = risk_amount / sl_value_per_lot if sl_value_per_lot > 0 else 0.01
