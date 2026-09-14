@@ -2,7 +2,7 @@
 
 import { PageWrapper } from "@/components/layout/page-wrapper";
 import { ScannerHeatmap } from "@/components/dashboard/scanner-heatmap";
-import { LegendaryModules } from "@/components/dashboard/legendary-modules";
+import { IntelligenceModules } from "@/components/dashboard/intelligence-modules";
 import { ErrorBoundary } from "@/components/error-boundary";
 import { useScanner } from "@/hooks/use-scanner";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -202,7 +202,7 @@ export default function ScannerPage() {
           <TimeframeDetails />
         </ErrorBoundary>
         <ErrorBoundary>
-          <LegendaryModules />
+          <IntelligenceModules />
         </ErrorBoundary>
       </div>
     </PageWrapper>
