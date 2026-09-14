@@ -230,3 +230,185 @@ class TestScanAndExecute:
             mock_dt.now.return_value = MagicMock(hour=3)
             result = scalper.scan_and_execute()
             assert result is None
+
+
+# ---------------------------------------------------------------------------
+# 8. Multi-group scanning (scalper_max_groups_per_cycle)
+# ---------------------------------------------------------------------------
+
+class TestMultiGroupScanning:
+    """Tests for scanning multiple groups per cycle."""
+
+    def _make_multi_group_config(self, max_groups=0):
+        """Config with 7 groups (G1-G7) for multi-group testing."""
+        return {
+            "mtf_cascading_scalper_enabled": True,
+            "scalper_groups": [
+                {"name": "G1", "timeframes": ["M1", "M5", "M15"]},
+                {"name": "G2", "timeframes": ["M5", "M15", "M30"]},
+                {"name": "G3", "timeframes": ["M15", "M30", "H1"]},
+                {"name": "G4", "timeframes": ["M30", "H1", "H4"]},
+                {"name": "G5", "timeframes": ["H1", "H4", "D1"]},
+                {"name": "G6", "timeframes": ["H4", "D1", "W1"]},
+                {"name": "G7", "timeframes": ["D1", "W1", "MN1"]},
+            ],
+            "scalper_tp_pips": 12,
+            "scalper_sl_pips": 8,
+            "scalper_lot_size": 0.01,
+            "scalper_max_concurrent": 5,
+            "scalper_scan_interval": 60,
+            "scalper_max_groups_per_cycle": max_groups,
+            "scalper_symbol": "EURUSD",
+            "session_hours": set(range(7, 22)),
+            "drawdown_pause_pct": 0.15,
+            "max_concurrent_trades": 6,
+            "scalper_multi_symbol": False,
+        }
+
+    def test_default_scans_all_groups(self, mock_mt5_engine, mock_risk_manager):
+        """Default (max_groups=0) should scan ALL groups per cycle."""
+        from apps.legendary.mtf_cascading_scalper import MTFCascadingScalper
+        config = self._make_multi_group_config(max_groups=0)
+        scalper = MTFCascadingScalper(mock_mt5_engine, mock_risk_manager, config)
+
+        # Mock _get_signals_for_group to track which groups are scanned
+        scanned_groups = []
+        original_get_signals = scalper._get_signals_for_group
+
+        def mock_get_signals(symbol, group):
+            scanned_groups.append(group["name"])
+            return ["HOLD", "HOLD", "HOLD"]  # No alignment, so we scan all
+
+        scalper._get_signals_for_group = mock_get_signals
+
+        # Mock safety and price
+        with patch.object(scalper, '_check_safety', return_value=True), \
+             patch.object(scalper, '_get_current_price', return_value=1.0850):
+            scalper.scan_and_execute()
+
+        # All 7 groups should have been scanned
+        assert len(scanned_groups) == 7
+        assert scanned_groups == ["G1", "G2", "G3", "G4", "G5", "G6", "G7"]
+
+    def test_max_groups_1_scans_only_first(self, mock_mt5_engine, mock_risk_manager):
+        """max_groups=1 should scan only the first group (old restart_from_g1 behavior)."""
+        from apps.legendary.mtf_cascading_scalper import MTFCascadingScalper
+        config = self._make_multi_group_config(max_groups=1)
+        scalper = MTFCascadingScalper(mock_mt5_engine, mock_risk_manager, config)
+
+        scanned_groups = []
+
+        def mock_get_signals(symbol, group):
+            scanned_groups.append(group["name"])
+            return ["HOLD", "HOLD", "HOLD"]
+
+        scalper._get_signals_for_group = mock_get_signals
+
+        with patch.object(scalper, '_check_safety', return_value=True), \
+             patch.object(scalper, '_get_current_price', return_value=1.0850):
+            scalper.scan_and_execute()
+
+        # Only 1 group scanned
+        assert len(scanned_groups) == 1
+        assert scanned_groups[0] == "G1"
+
+    def test_max_groups_3_scans_up_to_three(self, mock_mt5_engine, mock_risk_manager):
+        """max_groups=3 should scan up to 3 groups per cycle."""
+        from apps.legendary.mtf_cascading_scalper import MTFCascadingScalper
+        config = self._make_multi_group_config(max_groups=3)
+        scalper = MTFCascadingScalper(mock_mt5_engine, mock_risk_manager, config)
+
+        scanned_groups = []
+
+        def mock_get_signals(symbol, group):
+            scanned_groups.append(group["name"])
+            return ["HOLD", "HOLD", "HOLD"]
+
+        scalper._get_signals_for_group = mock_get_signals
+
+        with patch.object(scalper, '_check_safety', return_value=True), \
+             patch.object(scalper, '_get_current_price', return_value=1.0850):
+            scalper.scan_and_execute()
+
+        assert len(scanned_groups) == 3
+        assert scanned_groups == ["G1", "G2", "G3"]
+
+    def test_stops_after_successful_trade(self, mock_mt5_engine, mock_risk_manager):
+        """Should stop scanning after executing a trade, even with max_groups=0."""
+        from apps.legendary.mtf_cascading_scalper import MTFCascadingScalper
+        config = self._make_multi_group_config(max_groups=0)
+        scalper = MTFCascadingScalper(mock_mt5_engine, mock_risk_manager, config)
+
+        scanned_groups = []
+        call_count = [0]
+
+        def mock_get_signals(symbol, group):
+            scanned_groups.append(group["name"])
+            call_count[0] += 1
+            # G2 produces BUY alignment
+            if group["name"] == "G2":
+                return ["BUY", "BUY", "BUY"]
+            return ["HOLD", "HOLD", "HOLD"]
+
+        scalper._get_signals_for_group = mock_get_signals
+
+        # Mock _execute_scalp to return a scalp dict on the first alignment
+        mock_scalp_result = {"ticket": 12345, "symbol": "EURUSD", "direction": "BUY"}
+        scalper._execute_scalp = MagicMock(return_value=mock_scalp_result)
+
+        with patch.object(scalper, '_check_safety', return_value=True), \
+             patch.object(scalper, '_get_current_price', return_value=1.0850):
+            result = scalper.scan_and_execute()
+
+        # G1 scanned (HOLD), G2 scanned (BUY → executed), G3+ NOT scanned
+        assert scanned_groups == ["G1", "G2"]
+        assert result == mock_scalp_result
+
+    def test_backward_compat_restart_from_group1_true(self, mock_mt5_engine, mock_risk_manager):
+        """Legacy config: scalper_restart_from_group1=True should behave as max_groups=1."""
+        from apps.legendary.mtf_cascading_scalper import MTFCascadingScalper
+        config = self._make_multi_group_config(max_groups=1)
+        # Also set the legacy key to True
+        config["scalper_restart_from_group1"] = True
+        scalper = MTFCascadingScalper(mock_mt5_engine, mock_risk_manager, config)
+
+        scanned_groups = []
+
+        def mock_get_signals(symbol, group):
+            scanned_groups.append(group["name"])
+            return ["HOLD", "HOLD", "HOLD"]
+
+        scalper._get_signals_for_group = mock_get_signals
+
+        with patch.object(scalper, '_check_safety', return_value=True), \
+             patch.object(scalper, '_get_current_price', return_value=1.0850):
+            scalper.scan_and_execute()
+
+        # Should scan only 1 group
+        assert len(scanned_groups) == 1
+        assert scanned_groups[0] == "G1"
+
+    def test_prefer_groups_respected_with_multi_group(self, mock_mt5_engine, mock_risk_manager):
+        """Preferred groups should be scanned first, then remaining groups."""
+        from apps.legendary.mtf_cascading_scalper import MTFCascadingScalper
+        config = self._make_multi_group_config(max_groups=3)
+        config["scalper_prefer_groups"] = ["G5", "G3"]
+        scalper = MTFCascadingScalper(mock_mt5_engine, mock_risk_manager, config)
+
+        scanned_groups = []
+
+        def mock_get_signals(symbol, group):
+            scanned_groups.append(group["name"])
+            return ["HOLD", "HOLD", "HOLD"]
+
+        scalper._get_signals_for_group = mock_get_signals
+
+        with patch.object(scalper, '_check_safety', return_value=True), \
+             patch.object(scalper, '_get_current_price', return_value=1.0850):
+            scalper.scan_and_execute()
+
+        # Preferred groups come first (in all_groups order: G3, G5), then G1 = 3 groups scanned
+        assert len(scanned_groups) == 3
+        assert scanned_groups[0] == "G3"
+        assert scanned_groups[1] == "G5"
+        assert scanned_groups[2] == "G1"

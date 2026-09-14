@@ -362,7 +362,8 @@ CONFIG = {
     "scalper_lot_size": 0.01,
     "scalper_max_concurrent": 5,
     "scalper_scan_interval": 60,
-    "scalper_restart_from_group1": True,
+    "scalper_restart_from_group1": False,  # Deprecated: use scalper_max_groups_per_cycle
+    "scalper_max_groups_per_cycle": 0,  # 0 = scan all groups; N = scan up to N groups per cycle
     "scalper_symbol": "EURUSD",  # Fallback if multi-symbol disabled
     "scalper_multi_symbol": True,  # Scan all WATCHLIST symbols
     "scalper_trailing_enabled": True,

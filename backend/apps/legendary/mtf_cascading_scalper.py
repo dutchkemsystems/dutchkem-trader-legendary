@@ -101,8 +101,13 @@ class MTFCascadingScalper:
         if not symbols:
             return None
 
-        restart_from_g1 = self.config.get("scalper_restart_from_group1", True)
         prefer_groups = self.config.get("scalper_prefer_groups", [])
+
+        # How many groups to scan per cycle (0 = all groups)
+        # Backward compat: legacy scalper_restart_from_group1=True → max_groups=1
+        max_groups = self.config.get("scalper_max_groups_per_cycle", 0)
+        if max_groups == 0 and self.config.get("scalper_restart_from_group1", False):
+            max_groups = 1
 
         # Rotate through symbols (one per scan cycle)
         symbol = symbols[self._symbol_index % len(symbols)]
@@ -117,6 +122,10 @@ class MTFCascadingScalper:
             ordered_groups = [g for g in all_groups if g["name"] in prefer_groups]
         ordered_groups.extend([g for g in all_groups if g not in ordered_groups])
 
+        # Apply max_groups limit (0 = no limit, scan all)
+        if max_groups > 0:
+            ordered_groups = ordered_groups[:max_groups]
+
         for group in ordered_groups:
             signals = self._get_signals_for_group(symbol, group)
             alignment = self._check_alignment(signals)
@@ -129,9 +138,6 @@ class MTFCascadingScalper:
                 result = self._execute_scalp(symbol, alignment, group["name"], entry_price)
                 if result is not None:
                     return result
-
-            if restart_from_g1:
-                break  # Only scan first group, restart on next cycle
 
         return None
 
@@ -674,6 +680,7 @@ class MTFCascadingScalper:
             "max_concurrent": self.config.get("scalper_max_concurrent", 5),
             "trailing_enabled": self.config.get("scalper_trailing_enabled", False),
             "prefer_groups": self.config.get("scalper_prefer_groups", []),
+            "max_groups_per_cycle": self.config.get("scalper_max_groups_per_cycle", 0),
             "open_positions": [
                 {
                     "ticket": s["ticket"],
