@@ -208,12 +208,10 @@ class OnChainAnalyst(BaseAnalyst):
                 log.debug("Using default BTC dominance=55%")
 
             if btc_price:
-                log.info(
-                    f"ON-CHAIN: BTC=${btc_price:,.0f} Dom={btc_dominance:.1f}% "
-                    f"24h={btc_change_24h:+.1f}% Mcap=${total_market_cap/1e12:.2f}T"
-                    if total_market_cap else
-                    f"ON-CHAIN: BTC=${btc_price:,.0f} 24h={btc_change_24h:+.1f}%"
-                )
+                dom_str = f"Dom={btc_dominance:.1f}%" if btc_dominance is not None else "Dom=N/A"
+                chg_str = f"24h={btc_change_24h:+.1f}%" if btc_change_24h is not None else "24h=N/A"
+                mcap_str = f"Mcap=${total_market_cap/1e12:.2f}T" if total_market_cap else ""
+                log.info(f"ON-CHAIN: BTC=${btc_price:,.0f} {dom_str} {chg_str} {mcap_str}")
 
             return {
                 "btc_dominance": btc_dominance,

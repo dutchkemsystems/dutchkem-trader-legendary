@@ -244,10 +244,17 @@ CONFIG = {
     "session_hours": set(range(7, 22)),
     "optimal_sessions": [13, 14, 15, 16],
     "session_risk_mult": {
+        0: 0.5, 1: 0.5, 2: 0.6, 3: 0.6, 4: 0.7, 5: 0.7, 6: 0.6,  # Asian/AU hours
         7: 0.5, 8: 0.7, 9: 0.8, 10: 0.9, 11: 1.0, 12: 1.0,
         13: 1.0, 14: 1.0, 15: 1.0, 16: 1.0, 17: 0.9, 18: 0.8,
         19: 0.7, 20: 0.6, 21: 0.5,
     },
+
+    # ── Asian/Australian Session (select pairs only) ──
+    "asian_session_enabled": True,
+    "asian_session_hours": set(range(0, 7)),  # 00:00-06:59 UTC
+    "asian_session_symbols": {"USDJPY", "AUDUSD", "NZDUSD", "XAUUSD"},
+    "asian_session_risk_mult": 0.7,  # Slightly lower risk during thin liquidity
 
     # ── Indicators ──
     "adx_threshold": 20,
@@ -346,8 +353,8 @@ CONFIG = {
         {"name": "G6", "timeframes": ["H4", "D1", "W1"]},
         {"name": "G7", "timeframes": ["D1", "W1", "MN1"]},
     ],
-    "scalper_tp_pips": 10,
-    "scalper_sl_pips": 5,
+    "scalper_tp_pips": 12,
+    "scalper_sl_pips": 8,
     "scalper_lot_size": 0.01,
     "scalper_max_concurrent": 5,
     "scalper_scan_interval": 60,
@@ -2539,6 +2546,16 @@ class UnifiedEngine:
             "confidence_modifier": round(confidence_modifier, 3),
         }
 
+        # Cache results for dashboard API (instant lookup instead of re-running)
+        self.last_analysis[symbol] = {
+            "analysts": analyst_results,
+            "consensus": consensus_action,
+            "votes": votes,
+            "avg_confidence": round(avg_confidence, 3),
+            "total": active_analysts,
+            "timestamp": datetime.now(timezone.utc).isoformat(),
+        }
+
         log.info(f"  ANALYSTS [{active_analysts}] consensus={consensus_action} "
                  f"agreement={agreement_pct:.0%} avg_conf={avg_confidence:.2f} "
                  f"modifier={confidence_modifier:+.2f}")
@@ -2635,6 +2652,16 @@ class UnifiedEngine:
             "agreement_pct": round(agreement_pct, 3),
             "avg_confidence": round(avg_confidence, 3),
             "confidence_modifier": round(confidence_modifier, 3),
+        }
+
+        # Cache legendary results for dashboard API
+        self.last_analysis[f"{symbol}_legendary"] = {
+            "agents": agent_results,
+            "consensus": consensus_action,
+            "votes": votes,
+            "avg_confidence": round(avg_confidence, 3),
+            "total": active_agents,
+            "timestamp": datetime.now(timezone.utc).isoformat(),
         }
 
         log.info(f"  LEGENDARY [{active_agents}] consensus={consensus_action} "
@@ -3026,7 +3053,13 @@ class UnifiedEngine:
 
         # SAFETY CHECK 1: Session filter
         if CONFIG.get("session_filter_enabled", True):
-            if now.hour not in CONFIG["session_hours"]:
+            in_main_session = now.hour in CONFIG["session_hours"]
+            in_asian_session = (
+                CONFIG.get("asian_session_enabled", False)
+                and now.hour in CONFIG.get("asian_session_hours", set())
+                and signal.symbol in CONFIG.get("asian_session_symbols", set())
+            )
+            if not in_main_session and not in_asian_session:
                 log.info(f"  SKIP {signal.symbol} — outside session hours")
                 return
 
@@ -3238,9 +3271,72 @@ class UnifiedEngine:
             self.monitor_log(signal.symbol, "order_failed", "MT5 rejected or market closed")
 
     def _manage_existing_positions(self):
-        """Check trailing stops, partial TP, and time exits."""
+        """Check trailing stops, partial TP, and time exits.
+        Also reconcile: detect positions that MT5 closed (SL/TP hit) but engine didn't track."""
         now = datetime.now(timezone.utc)
         positions = self.mt5.get_positions()
+
+        # ── RECONCILIATION: Detect positions closed by MT5 (SL/TP hit server-side) ──
+        mt5_symbols = {p["symbol"] for p in positions}
+        stale_symbols = [s for s in list(self.risk.open_positions.keys()) if s not in mt5_symbols]
+        for sym in stale_symbols:
+            rm_pos = self.risk.open_positions[sym]
+            ticket = rm_pos.get("ticket", 0)
+            source = rm_pos.get("source", "engine")
+
+            # Try to get actual P&L from MT5 deal history
+            pnl = 0
+            try:
+                deals = mt5.history_deals_get(ticket=ticket)
+                if deals:
+                    pnl = sum(d.profit + d.swap + d.commission for d in deals)
+            except Exception:
+                # Fallback: estimate from entry vs last known price
+                entry = rm_pos.get("entry_price", 0)
+                current = rm_pos.get("current_price", 0)
+                size = rm_pos.get("size", 0.01)
+                action = rm_pos.get("action", rm_pos.get("direction", "BUY"))
+                if entry > 0 and current > 0:
+                    if action == "BUY":
+                        pnl = (current - entry) * size * 100000
+                    else:
+                        pnl = (entry - current) * size * 100000
+
+            # Record the result in risk manager
+            if pnl != 0 or source == "scalper":
+                if source == "scalper":
+                    self._trade_results.append(pnl)
+                    if len(self._trade_results) > 50:
+                        self._trade_results = self._trade_results[-50:]
+                self.risk.record_trade_result(pnl, pnl / self.risk.balance if self.risk.balance > 0 else 0)
+                self._update_streaks(pnl)
+                log.info(f"  RECONCILED {sym} | ticket={ticket} source={source} | P&L=${pnl:+.2f} | "
+                         f"W={self.consecutive_wins} L={self.consecutive_losses}")
+            else:
+                log.info(f"  RECONCILED {sym} | ticket={ticket} source={source} | P&L=$0.00 (no deal data)")
+
+            del self.risk.open_positions[sym]
+
+        # ── REVERSE RECONCILIATION: Register MT5 positions missing from risk manager ──
+        for pos in positions:
+            symbol = pos["symbol"]
+            if symbol not in self.risk.open_positions:
+                action = pos.get("action", "BUY")
+                self.risk.open_positions[symbol] = {
+                    "action": action,
+                    "entry_price": pos.get("entry_price", 0),
+                    "size": pos.get("lots", 0.01),
+                    "sl": pos.get("sl", 0),
+                    "tp": pos.get("tp", 0),
+                    "ticket": pos["ticket"],
+                    "entry_time": pos.get("time", datetime.now(timezone.utc).isoformat()),
+                    "partial_tp_done": False,
+                    "atr": 0.001,
+                    "source": "mt5_sync",
+                    "current_price": pos.get("current_price", 0),
+                    "profit": pos.get("profit", 0),
+                }
+                log.info(f"  SYNCED {symbol} from MT5 — ticket={pos['ticket']} {action} profit=${pos.get('profit', 0):+.2f}")
 
         for pos in positions:
             symbol = pos["symbol"]
@@ -4281,6 +4377,8 @@ def engine_status():
             "equity_curve_ma_period": CONFIG.get("equity_curve_ma_period", 20),
             "scalper_multi_symbol": CONFIG.get("scalper_multi_symbol", False),
             "scalper_trailing": CONFIG.get("scalper_trailing_enabled", False),
+            "asian_session_enabled": CONFIG.get("asian_session_enabled", False),
+            "asian_session_symbols": list(CONFIG.get("asian_session_symbols", set())),
         },
         "scalper": engine.scalper.get_status() if getattr(engine, 'scalper', None) else None,
         "phase4": {
@@ -4442,7 +4540,22 @@ except ImportError as e:
 
 @app.get("/api/v1/analysts/all")
 async def all_analysts(symbol: str = "EURUSD", timeframe: str = "H1"):
-    """Run all 12 analysts on a symbol."""
+    """Get cached analyst results from the engine cycle, or run on-demand."""
+    # FAST PATH: serve from engine cache (instant)
+    if hasattr(engine, 'last_analysis') and symbol in engine.last_analysis:
+        cached = engine.last_analysis[symbol]
+        return {
+            "symbol": symbol,
+            "analysts": cached.get("analysts", []),
+            "consensus": cached.get("consensus", "HOLD"),
+            "votes": cached.get("votes", {"BUY": 0, "SELL": 0, "HOLD": 0}),
+            "avg_confidence": cached.get("avg_confidence", 0),
+            "total": cached.get("total", 0),
+            "cached": True,
+            "timestamp": cached.get("timestamp", ""),
+        }
+
+    # SLOW PATH: run analysts on-demand (only if no cache yet)
     if not ADVANCED_FEATURES_AVAILABLE:
         return {"error": "Advanced features not available", "symbol": symbol, "analysts": [], "consensus": "HOLD"}
     analysts = [
@@ -4480,6 +4593,17 @@ async def all_analysts(symbol: str = "EURUSD", timeframe: str = "H1"):
 
     consensus = "BUY" if buys > sells and buys > holds else "SELL" if sells > buys and sells > holds else "HOLD"
 
+    # Cache slow-path results so subsequent calls are instant
+    if hasattr(engine, 'last_analysis'):
+        engine.last_analysis[symbol] = {
+            "analysts": results,
+            "consensus": consensus,
+            "votes": {"BUY": buys, "SELL": sells, "HOLD": holds},
+            "avg_confidence": round(avg_conf, 3),
+            "total": len(results),
+            "timestamp": datetime.now(timezone.utc).isoformat(),
+        }
+
     return {
         "symbol": symbol,
         "analysts": results,
@@ -4487,12 +4611,29 @@ async def all_analysts(symbol: str = "EURUSD", timeframe: str = "H1"):
         "votes": {"buy": buys, "sell": sells, "hold": holds},
         "avg_confidence": round(avg_conf, 3),
         "total": len(results),
+        "cached": False,
     }
 
 
 @app.get("/api/v1/legendary/all")
 def all_legendary(symbol: str = "EURUSD"):
-    """Run all 5 legendary agents."""
+    """Get cached legendary agent results, or run on-demand."""
+    # FAST PATH: serve from cache
+    cache_key = f"{symbol}_legendary"
+    if hasattr(engine, 'last_analysis') and cache_key in engine.last_analysis:
+        cached = engine.last_analysis[cache_key]
+        return {
+            "symbol": symbol,
+            "agents": cached.get("agents", []),
+            "consensus": cached.get("consensus", "HOLD"),
+            "votes": cached.get("votes", {}),
+            "avg_confidence": cached.get("avg_confidence", 0),
+            "total": cached.get("total", 0),
+            "cached": True,
+            "timestamp": cached.get("timestamp", ""),
+        }
+
+    # SLOW PATH: run on-demand (only if no cache yet)
     if not ADVANCED_FEATURES_AVAILABLE:
         return {"error": "Advanced features not available", "symbol": symbol, "agents": [], "consensus": "HOLD"}
     rates = mt5.copy_rates_from_pos(symbol, mt5.TIMEFRAME_H1, 0, 100)
@@ -4534,11 +4675,23 @@ def all_legendary(symbol: str = "EURUSD"):
     sells = sum(1 for r in results if r["signal"] == "SELL")
     consensus = "BUY" if buys > sells else "SELL" if sells > buys else "HOLD"
 
+    # Cache slow-path results so subsequent calls are instant
+    if hasattr(engine, 'last_analysis'):
+        engine.last_analysis[cache_key] = {
+            "agents": results,
+            "consensus": consensus,
+            "votes": {"BUY": buys, "SELL": sells, "HOLD": len(results) - buys - sells},
+            "avg_confidence": round(sum(r["confidence"] for r in results) / len(results) if results else 0, 3),
+            "total": len(results),
+            "timestamp": datetime.now(timezone.utc).isoformat(),
+        }
+
     return {
         "symbol": symbol,
         "agents": results,
         "consensus": consensus,
         "total": len(results),
+        "cached": False,
     }
 
 
@@ -5184,6 +5337,9 @@ if __name__ == "__main__":
         print(f"    {sym}: SL={sc['sl']}x TP={sc['tp']}x Trail={sc['trail']}x Risk={sc['risk']*100:.0f}%")
     print(f"  LLM: {'Enabled' if CONFIG['llm_enabled'] else 'Disabled'}")
     print(f"  ML: {'Enabled' if CONFIG['ml_enabled'] else 'Disabled'}")
+    print(f"  Sessions: London/NY (07:00-21:00 UTC) + Asian (00:00-07:00 UTC)")
+    asian_syms = CONFIG.get("asian_session_symbols", set())
+    print(f"  Asian pairs: {', '.join(sorted(asian_syms))}")
     print(f"  API Server: http://localhost:8888")
     print("=" * 70)
     print("\n  Starting FastAPI server with embedded trading engine...\n")

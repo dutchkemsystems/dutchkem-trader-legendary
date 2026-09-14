@@ -31,7 +31,7 @@ TIMEFRAME_MAP = {
 
 BARS_PER_SIGNAL = 100
 MT5_MAGIC = 20260911
-MT5_SLIPPAGE = 10
+MT5_SLIPPAGE = 20  # 2 pips slippage tolerance — matches main engine, reduces requotes
 
 WATCHLIST = [
     "EURUSD", "GBPUSD", "USDJPY", "USDCHF", "AUDUSD", "NZDUSD", "USDCAD",
@@ -366,8 +366,8 @@ class MTFCascadingScalper:
                     if entry_price is None:
                         continue
 
-                    sl_pips = self.config.get("scalper_sl_pips", 5)
-                    tp_pips = self.config.get("scalper_tp_pips", 10)
+                    sl_pips = self.config.get("scalper_sl_pips", 8)
+                    tp_pips = self.config.get("scalper_tp_pips", 12)
                     point = symbol_info.point if symbol_info.point else 0.0001
                     digits = symbol_info.digits
 
@@ -625,8 +625,8 @@ class MTFCascadingScalper:
     def _calculate_sl_tp(self, price: float, action: str, symbol_info) -> Tuple[float, float]:
         """Calculate SL/TP from pips config and symbol point size."""
         point = symbol_info.point if symbol_info.point else 0.0001
-        sl_pips = self.config.get("scalper_sl_pips", 5)
-        tp_pips = self.config.get("scalper_tp_pips", 10)
+        sl_pips = self.config.get("scalper_sl_pips", 8)
+        tp_pips = self.config.get("scalper_tp_pips", 12)
 
         sl_dist = sl_pips * point * 10  # pips to price distance
         tp_dist = tp_pips * point * 10
@@ -691,13 +691,6 @@ class MTFCascadingScalper:
                 g["name"] for g in self.config.get("scalper_groups", [])
             ],
         }
-        # Include quality trades scan result for dashboard (non-blocking)
-        if self.config.get("mtf_cascading_scalper_enabled", False):
-            try:
-                status["quality_trades"] = self.scan_all_symbols()
-            except Exception as e:
-                log.debug(f"get_status quality_trades scan failed: {e}")
-                status["quality_trades"] = []
-        else:
-            status["quality_trades"] = []
+        # NOTE: quality_trades are fetched via /api/v1/scalper/quality-trades endpoint
+        # NOT included in get_status() to avoid blocking the engine cycle
         return status

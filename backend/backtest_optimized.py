@@ -591,7 +591,8 @@ def main():
     print("  Trend-aware + Trailing Stop + Parameter Sweep")
     print("="*65)
 
-    symbols = ["EURUSD", "GBPUSD", "USDJPY", "XAUUSD"]
+    symbols = ["EURUSD", "GBPUSD", "USDJPY", "XAUUSD",
+               "USDCHF", "AUDUSD", "USDCAD", "NZDUSD", "EURGBP", "EURJPY"]
     all_results = []
     all_configs = {}
 

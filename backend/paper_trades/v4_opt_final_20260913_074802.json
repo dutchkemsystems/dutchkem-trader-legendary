@@ -1,0 +1,105 @@
+{
+  "verdict": "V3",
+  "configs": {
+    "GBPUSD": {
+      "sl_mult": 3.0,
+      "tp_mult": 6.0,
+      "trail_mult": 1.5,
+      "max_hold": 25,
+      "risk_pct": 0.025,
+      "cooldown": 5,
+      "min_agreement": 0.38
+    },
+    "USDCAD": {
+      "sl_mult": 3.0,
+      "tp_mult": 3.0,
+      "trail_mult": 1.5,
+      "max_hold": 25,
+      "risk_pct": 0.025,
+      "cooldown": 5,
+      "min_agreement": 0.38
+    },
+    "NZDUSD": {
+      "sl_mult": 1.5,
+      "tp_mult": 6.0,
+      "trail_mult": 1.5,
+      "max_hold": 25,
+      "risk_pct": 0.025,
+      "cooldown": 5,
+      "min_agreement": 0.38
+    },
+    "EURGBP": {
+      "sl_mult": 3.0,
+      "tp_mult": 3.0,
+      "trail_mult": 1.5,
+      "max_hold": 25,
+      "risk_pct": 0.025,
+      "cooldown": 5,
+      "min_agreement": 0.52
+    }
+  },
+  "total_oos_pnl": 108.87,
+  "total_is_pnl": 214.42,
+  "avg_wr": 51.575,
+  "avg_pf": 1.48,
+  "avg_dd": 0.16750000000000004,
+  "avg_sharpe": 2.0975,
+  "per_symbol": [
+    {
+      "sym": "GBPUSD",
+      "oos_pnl": 2.72,
+      "wr": 57.1,
+      "pf": 1.17,
+      "dd": 0.07,
+      "sh": 0.95,
+      "mc": {
+        "median": 2.93,
+        "p5": -15.05,
+        "p95": 21.41,
+        "prob_pos": 59.3
+      }
+    },
+    {
+      "sym": "USDCAD",
+      "oos_pnl": 35.15,
+      "wr": 50.8,
+      "pf": 1.57,
+      "dd": 0.08,
+      "sh": 2.98,
+      "mc": {
+        "median": 34.55,
+        "p5": -7.13,
+        "p95": 77.63,
+        "prob_pos": 91.2
+      }
+    },
+    {
+      "sym": "NZDUSD",
+      "oos_pnl": 56.79,
+      "wr": 48.4,
+      "pf": 1.46,
+      "dd": 0.46,
+      "sh": 2.22,
+      "mc": {
+        "median": 53.01,
+        "p5": -30.35,
+        "p95": 139.9,
+        "prob_pos": 85.4
+      }
+    },
+    {
+      "sym": "EURGBP",
+      "oos_pnl": 14.21,
+      "wr": 50.0,
+      "pf": 1.72,
+      "dd": 0.06,
+      "sh": 2.24,
+      "mc": {
+        "median": 14.93,
+        "p5": -7.94,
+        "p95": 35.8,
+        "prob_pos": 85.4
+      }
+    }
+  ]
+}

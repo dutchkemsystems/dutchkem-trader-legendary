@@ -474,7 +474,7 @@ tr:hover{background:rgba(0,102,255,0.02)}
   </div>
 
   <div class="card" style="margin-bottom:16px" id="scalperCard">
-    <div class="card-title">&#9889; MTF Scalper</div>
+    <div class="card-title">&#9889; MTF Cascading Scalper <span style="font-size:11px;font-weight:400;color:var(--ts)">(Multi-Timeframe Alignment)</span></div>
     <div id="scalperContent"><div class="empty-state"><div class="icon">Loading scalper...</div></div></div>
   </div>
 
@@ -1004,65 +1004,150 @@ function loadLegendary(symbol){
   }).catch(function(){document.getElementById('legendaryContent').innerHTML='<div class="empty-state">Failed to load legendary agents</div>';});
 }
 
+function toggleScalper(feature,enabled){
+  api('/scalper/toggle',{method:'POST',body:JSON.stringify({feature:feature,enabled:enabled})}).then(function(d){
+    if(d.error){toast(d.error,'error');return;}
+    toast(feature+' '+(enabled?'enabled':'disabled'),'success');
+    loadScalper();
+  }).catch(function(e){toast('Toggle failed: '+e.message,'error');});
+}
+
+function scanQualityTrades(){
+  var el=document.getElementById('qualityTradesContent');
+  el.innerHTML='<div style="text-align:center;padding:20px"><div class="spinner" style="border-color:rgba(0,102,255,0.2);border-top-color:var(--blue);width:24px;height:24px;margin:0 auto 8px"></div><div style="font-size:12px;color:var(--ts)">Scanning all symbols...</div></div>';
+  api('/scalper/quality-trades').then(function(d){
+    var trades=d.trades||[];
+    if(!trades.length){
+      el.innerHTML='<div class="empty-state" style="padding:20px"><div class="icon">&#128269;</div><div style="font-size:13px;color:var(--ts)">No quality trades detected this scan</div><div style="font-size:11px;color:var(--ts);margin-top:4px">Scan time: '+(d.scan_time?new Date(d.scan_time).toLocaleTimeString():'--')+'</div></div>';
+      return;
+    }
+    var html='<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">'+
+      '<div style="font-size:13px;font-weight:700;color:var(--green)">Found '+trades.length+' quality trade'+(trades.length>1?'s':'')+'</div>'+
+      '<div style="font-size:11px;color:var(--ts)">Scanned: '+new Date(d.scan_time).toLocaleTimeString()+'</div></div>';
+    html+='<div style="display:grid;gap:10px">';
+    trades.forEach(function(t){
+      var dirColor=t.direction==='BUY'?'var(--green)':'var(--coral)';
+      var dirIcon=t.direction==='BUY'?'&#128200;':'&#128196;';
+      var rr=t.risk_reward||0;
+      var rrColor=rr>=2?'var(--green)':rr>=1.5?'var(--gold)':'var(--coral)';
+      html+='<div style="padding:14px;border:1px solid var(--border);border-left:4px solid '+dirColor+';border-radius:8px;background:rgba(255,255,255,0.5)">';
+      // Header row
+      html+='<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">'+
+        '<div style="display:flex;align-items:center;gap:8px">'+
+          '<span style="font-size:16px">'+dirIcon+'</span>'+
+          '<span style="font-size:15px;font-weight:800;color:'+dirColor+'">'+t.symbol+'</span>'+
+          '<span class="badge '+(t.direction==='BUY'?'badge-buy':'badge-sell')+'">'+t.direction+'</span>'+
+          '<span style="font-size:11px;color:var(--blue);font-weight:600;background:rgba(0,102,255,0.08);padding:2px 8px;border-radius:4px">'+t.group+'</span>'+
+        '</div>'+
+        '<div style="text-align:right">'+
+          '<div style="font-size:13px;font-weight:700;color:var(--green)">~$'+(t.expected_profit_usd||0).toFixed(2)+'</div>'+
+          '<div style="font-size:10px;color:var(--ts)">expected profit</div>'+
+        '</div></div>';
+      // Trade details grid
+      html+='<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-bottom:10px">';
+      html+='<div style="padding:6px 8px;background:var(--bg);border-radius:4px"><div style="font-size:10px;color:var(--ts)">Entry</div><div style="font-size:12px;font-weight:700">'+fmt(t.entry_price,5)+'</div></div>';
+      html+='<div style="padding:6px 8px;background:rgba(255,80,80,0.06);border-radius:4px"><div style="font-size:10px;color:var(--ts)">SL ('+t.sl_pips+'p)</div><div style="font-size:12px;font-weight:700;color:var(--coral)">'+fmt(t.sl,5)+'</div></div>';
+      html+='<div style="padding:6px 8px;background:rgba(0,204,136,0.06);border-radius:4px"><div style="font-size:10px;color:var(--ts)">TP ('+t.tp_pips+'p)</div><div style="font-size:12px;font-weight:700;color:var(--green)">'+fmt(t.tp,5)+'</div></div>';
+      html+='<div style="padding:6px 8px;background:rgba(255,184,0,0.06);border-radius:4px"><div style="font-size:10px;color:var(--ts)">Lot Size</div><div style="font-size:12px;font-weight:700;color:var(--gold)">'+(t.lot_size||0.01).toFixed(2)+'</div></div>';
+      html+='</div>';
+      // Indicator details
+      html+='<div style="display:grid;grid-template-columns:repeat(5,1fr);gap:6px;margin-bottom:10px">';
+      html+='<div style="text-align:center"><div style="font-size:10px;color:var(--ts)">R:R</div><div style="font-size:12px;font-weight:700;color:'+rrColor+'">'+rr.toFixed(1)+'x</div></div>';
+      html+='<div style="text-align:center"><div style="font-size:10px;color:var(--ts)">RSI</div><div style="font-size:12px;font-weight:700">'+(t.rsi?t.rsi.toFixed(1):'--')+'</div></div>';
+      html+='<div style="text-align:center"><div style="font-size:10px;color:var(--ts)">MACD</div><div style="font-size:12px;font-weight:700">'+(t.macd?t.macd.toFixed(5):'--')+'</div></div>';
+      html+='<div style="text-align:center"><div style="font-size:10px;color:var(--ts)">SMA20</div><div style="font-size:12px;font-weight:700">'+(t.sma20?fmt(t.sma20,5):'--')+'</div></div>';
+      html+='<div style="text-align:center"><div style="font-size:10px;color:var(--ts)">SMA50</div><div style="font-size:12px;font-weight:700">'+(t.sma50?fmt(t.sma50,5):'--')+'</div></div>';
+      html+='</div>';
+      // Timeframe alignment
+      var tfs=t.signals_per_tf||{};
+      var tfKeys=Object.keys(tfs);
+      if(tfKeys.length){
+        html+='<div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap">';
+        html+='<span style="font-size:10px;color:var(--ts);font-weight:600">TF Align:</span>';
+        tfKeys.forEach(function(tf){
+          var s=tfs[tf];var sc=s==='BUY'?'var(--green)':s==='SELL'?'var(--coral)':'var(--ts)';
+          html+='<span style="font-size:10px;padding:2px 6px;border-radius:3px;background:rgba(0,0,0,0.04);font-weight:600;color:'+sc+'">'+tf+':'+s+'</span>';
+        });
+        html+='</div>';
+      }
+      html+='</div>';
+    });
+    html+='</div>';
+    el.innerHTML=html;
+  }).catch(function(e){
+    el.innerHTML='<div style="padding:12px;color:var(--coral);font-size:12px">Scan failed: '+e.message+'</div>';
+  });
+}
+
 function loadScalper(){
   return api('/scalper/status').then(function(d){
     var positions=d.open_positions||[];
     var groups=d.groups||[];
     var lastScan=d.last_scan?new Date(d.last_scan).toLocaleTimeString():'Never';
-    var statusBadge=d.enabled?
-      '<span style="color:var(--green);font-weight:700">ENABLED</span>':
-      '<span style="color:var(--red);font-weight:700">DISABLED</span>';
-    var multiBadge=d.multi_symbol?
-      '<span style="color:var(--blue);font-weight:600">MULTI-SYMBOL</span>':
-      '<span style="color:var(--ts);font-weight:600">SINGLE</span>';
-    var trailingBadge=d.trailing_enabled?
-      '<span style="color:var(--green);font-size:11px">Trailing ON</span>':
-      '<span style="color:var(--ts);font-size:11px">Trailing OFF</span>';
 
-    var html='<div style="display:flex;align-items:center;gap:16px;margin-bottom:16px;flex-wrap:wrap">'+
-      '<div style="font-size:14px;font-weight:700">'+statusBadge+'</div>'+
-      '<div style="font-size:12px">'+multiBadge+'</div>'+
-      '<div style="font-size:12px">'+trailingBadge+'</div>'+
-      '<div style="font-size:12px;color:var(--ts)">Scan: '+lastScan+'</div>'+
-      '<div style="font-size:12px;color:var(--ts)">Symbol: <strong>'+(d.symbol||'--')+'</strong></div>'+
-      '</div>';
+    // ── Status Bar with Toggles ──
+    var html='<div style="display:flex;align-items:center;gap:12px;margin-bottom:16px;flex-wrap:wrap">';
+    // Master enable toggle
+    html+='<div style="display:flex;align-items:center;gap:6px;padding:6px 12px;border-radius:8px;border:1px solid '+(d.enabled?'var(--green)':'var(--border)')+';background:'+(d.enabled?'rgba(0,204,136,0.06)':'rgba(0,0,0,0.02)')+';cursor:pointer" onclick="toggleScalper(\'enabled\','+(!d.enabled)+')">';
+    html+='<div style="width:10px;height:10px;border-radius:50%;background:'+(d.enabled?'var(--green)':'var(--coral)')+'"></div>';
+    html+='<span style="font-size:12px;font-weight:700;color:'+(d.enabled?'var(--green)':'var(--coral)')+'">'+(d.enabled?'SCALPER ON':'SCALPER OFF')+'</span></div>';
+    // Multi-symbol toggle
+    html+='<div style="display:flex;align-items:center;gap:6px;padding:6px 12px;border-radius:8px;border:1px solid '+(d.multi_symbol?'var(--blue)':'var(--border)')+';background:'+(d.multi_symbol?'rgba(0,102,255,0.06)':'rgba(0,0,0,0.02)')+';cursor:pointer" onclick="toggleScalper(\'multi_symbol\','+(!d.multi_symbol)+')">';
+    html+='<span style="font-size:12px;font-weight:700;color:'+(d.multi_symbol?'var(--blue)':'var(--ts)')+'">'+(d.multi_symbol?'&#127760; MULTI-SYMBOL':'&#128204; SINGLE')+'</span></div>';
+    // Trailing toggle
+    html+='<div style="display:flex;align-items:center;gap:6px;padding:6px 12px;border-radius:8px;border:1px solid '+(d.trailing_enabled?'var(--green)':'var(--border)')+';background:'+(d.trailing_enabled?'rgba(0,204,136,0.06)':'rgba(0,0,0,0.02)')+';cursor:pointer" onclick="toggleScalper(\'trailing\','+(!d.trailing_enabled)+')">';
+    html+='<span style="font-size:12px;font-weight:600;color:'+(d.trailing_enabled?'var(--green)':'var(--ts)')+'">'+(d.trailing_enabled?'&#128200; Trail ON':'&#9201; Trail OFF')+'</span></div>';
+    // Scan button
+    html+='<div style="flex:1"></div>';
+    html+='<button class="btn btn-blue btn-sm" onclick="scanQualityTrades()">&#128269; Scan Quality Trades</button>';
+    html+='</div>';
 
-    html+='<div style="display:flex;gap:16px;margin-bottom:16px;flex-wrap:wrap">'+
-      '<div style="font-size:12px;color:var(--ts)">TP: <strong>'+d.tp_pips+'p</strong></div>'+
-      '<div style="font-size:12px;color:var(--ts)">SL: <strong>'+d.sl_pips+'p</strong></div>'+
-      '<div style="font-size:12px;color:var(--ts)">Max Concurrent: <strong>'+d.max_concurrent+'</strong></div>'+
-      '<div style="font-size:12px;color:var(--ts)">Groups: <strong>'+(d.prefer_groups||[]).join(', ')+'</strong></div>'+
-      '<div style="font-size:12px;color:var(--ts)">Open: <strong style="color:var(--green)">'+positions.length+'</strong> / Total: <strong>'+d.total_trades+'</strong></div>'+
-      '</div>';
+    // ── Config Row ──
+    html+='<div style="display:flex;gap:16px;margin-bottom:12px;flex-wrap:wrap;font-size:12px;color:var(--ts)">';
+    html+='<div>TP: <strong>'+d.tp_pips+'p</strong></div>';
+    html+='<div>SL: <strong>'+d.sl_pips+'p</strong></div>';
+    html+='<div>Max Concurrent: <strong>'+d.max_concurrent+'</strong></div>';
+    html+='<div>Groups: <strong>'+(d.prefer_groups||[]).join(', ')+'</strong></div>';
+    html+='<div>Last Scan: <strong>'+lastScan+'</strong></div>';
+    html+='<div>Open: <strong style="color:var(--green)">'+positions.length+'</strong></div>';
+    html+='<div>Total: <strong>'+d.total_trades+'</strong></div>';
+    html+='</div>';
 
     if(d.last_error){
-      html+='<div style="padding:8px 12px;background:rgba(255,80,80,0.1);border:1px solid var(--red);border-radius:6px;margin-bottom:12px;font-size:12px;color:var(--red)">Error: '+d.last_error+'</div>';
+      html+='<div style="padding:8px 12px;background:rgba(255,80,80,0.1);border:1px solid var(--coral);border-radius:6px;margin-bottom:12px;font-size:12px;color:var(--coral)">&#9888; '+d.last_error+'</div>';
     }
 
+    // ── Active Scalp Positions ──
     if(positions.length){
-      html+='<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:8px">';
+      html+='<div style="font-size:13px;font-weight:700;margin-bottom:8px;color:var(--text)">&#128200; Active Scalps ('+positions.length+')</div>';
+      html+='<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:8px;margin-bottom:16px">';
       positions.forEach(function(p){
-        var dirColor=p.direction==='BUY'?'var(--green)':'var(--red)';
+        var dirColor=p.direction==='BUY'?'var(--green)':'var(--coral)';
         var dirIcon=p.direction==='BUY'?'&#128200;':'&#128196;';
-        html+='<div style="padding:12px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.08);border-radius:8px">'+
-          '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">'+
-            '<span style="font-weight:700;color:'+dirColor+'">'+dirIcon+' '+p.symbol+' '+p.direction+'</span>'+
-            '<span style="font-size:10px;color:var(--ts)">#'+p.ticket+'</span>'+
-          '</div>'+
-          '<div style="display:grid;grid-template-columns:1fr 1fr;gap:4px;font-size:11px;color:var(--ts)">'+
-            '<div>Entry: <strong>'+p.entry+'</strong></div>'+
-            '<div>Group: <strong style="color:var(--blue)">'+p.group+'</strong></div>'+
-            '<div>SL: <strong style="color:var(--red)">'+p.sl+'</strong></div>'+
-            '<div>TP: <strong style="color:var(--green)">'+p.tp+'</strong></div>'+
-          '</div>'+
-          '<div style="margin-top:6px;font-size:10px;color:'+(p.breakeven?'var(--green)':'var(--ts)')+'">'+
-            (p.breakeven?'&#9989; Breakeven hit':'&#9201; Breakeven pending')+'</div>'+
-        '</div>';
+        html+='<div style="padding:12px;border:1px solid var(--border);border-left:3px solid '+dirColor+';border-radius:8px;background:rgba(255,255,255,0.5)">';
+        html+='<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">';
+        html+='<span style="font-weight:700;color:'+dirColor+'">'+dirIcon+' '+p.symbol+' '+p.direction+'</span>';
+        html+='<span style="font-size:10px;color:var(--ts)">#'+p.ticket+'</span>';
+        html+='</div>';
+        html+='<div style="display:grid;grid-template-columns:1fr 1fr;gap:4px;font-size:11px;color:var(--ts)">';
+        html+='<div>Entry: <strong>'+p.entry+'</strong></div>';
+        html+='<div>Group: <strong style="color:var(--blue)">'+p.group+'</strong></div>';
+        html+='<div>SL: <strong style="color:var(--coral)">'+p.sl+'</strong></div>';
+        html+='<div>TP: <strong style="color:var(--green)">'+p.tp+'</strong></div>';
+        html+='</div>';
+        html+='<div style="margin-top:6px;font-size:10px;color:'+(p.breakeven?'var(--green)':'var(--ts)')+'">'+(p.breakeven?'&#9989; Breakeven hit':'&#9201; Breakeven pending')+'</div>';
+        html+='</div>';
       });
       html+='</div>';
     } else {
-      html+='<div class="empty-state" style="padding:16px"><div class="icon">&#9889; No active scalps</div></div>';
+      html+='<div style="padding:10px;text-align:center;font-size:12px;color:var(--ts);background:var(--bg);border-radius:8px;margin-bottom:12px">&#9889; No active scalp positions</div>';
     }
+
+    // ── Quality Trades Container ──
+    html+='<div style="font-size:13px;font-weight:700;margin-bottom:8px;color:var(--text)">&#127919; Quality Trades Detected</div>';
+    html+='<div id="qualityTradesContent" style="padding:10px;border:1px dashed var(--border);border-radius:8px">';
+    html+='<div class="empty-state" style="padding:16px"><div style="font-size:12px;color:var(--ts)">Click <strong>Scan Quality Trades</strong> to analyze all symbols</div></div>';
+    html+='</div>';
 
     document.getElementById('scalperContent').innerHTML=html;
   }).catch(function(){document.getElementById('scalperContent').innerHTML='<div class="empty-state">Failed to load scalper</div>';});
