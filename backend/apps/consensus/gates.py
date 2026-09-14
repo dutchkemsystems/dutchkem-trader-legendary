@@ -20,19 +20,25 @@ class ConsensusGates:
         self.black_scholes = black_scholes
         self.regime_detector = regime_detector
 
-    def check_ml_model(self, features, p_up_threshold=0.5) -> GateResult:
-        """Gate 1: ML model predicts P(UP)"""
+    def check_ml_model(self, features, p_up_threshold=0.5, direction="BUY") -> GateResult:
+        """Gate 1: ML model predicts P(UP) — direction-aware.
+        BUY: passes when p_up >= threshold (model predicts price goes UP)
+        SELL: passes when p_up <= (1 - threshold) (model predicts price goes DOWN)
+        """
         if not self.ml_predictor:
             return GateResult("ml_model", True, 0.5, "ML model not available, passing")
         try:
             pred = self.ml_predictor.predict_from_features(features)
-            passed = pred.p_up >= p_up_threshold
-            return GateResult(
-                "ml_model",
-                passed,
-                pred.p_up,
-                f"P(UP)={pred.p_up:.3f}, threshold={p_up_threshold}",
-            )
+            if direction == "SELL":
+                # For SELL: model should predict DOWN (low p_up)
+                p_down_threshold = 1.0 - p_up_threshold
+                passed = pred.p_up <= p_down_threshold
+                reason = f"P(UP)={pred.p_up:.3f}, SELL threshold={p_down_threshold:.3f} (model predicts DOWN)"
+            else:
+                # For BUY: model should predict UP (high p_up)
+                passed = pred.p_up >= p_up_threshold
+                reason = f"P(UP)={pred.p_up:.3f}, BUY threshold={p_up_threshold:.3f}"
+            return GateResult("ml_model", passed, pred.p_up, reason)
         except Exception as e:
             return GateResult("ml_model", False, 0.0, f"ML error: {e}")
 

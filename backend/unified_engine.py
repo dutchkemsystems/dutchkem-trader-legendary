@@ -3183,7 +3183,7 @@ class UnifiedEngine:
                     signal.indicators.get("support_distance", 0.0),
                     signal.indicators.get("resistance_distance", 0.0),
                 ]
-                ml_gate = self.consensus_gates.check_ml_model(ml_features)
+                ml_gate = self.consensus_gates.check_ml_model(ml_features, direction=signal.direction.value)
                 if not ml_gate.passed:
                     log.info(f"  ML GATE BLOCKED {signal.symbol} — {ml_gate.reason}")
                     self.monitor_log(signal.symbol, "gate_blocked", f"ML: {ml_gate.reason}")
@@ -3921,6 +3921,74 @@ def close_trade(ticket: int):
     raise HTTPException(status_code=500, detail="Close failed")
 
 
+@app.post("/api/v1/positions/close-all")
+def close_all_positions():
+    """Close all open positions."""
+    positions = mt5.positions_get()
+    if not positions:
+        return {"status": "closed", "closed_count": 0, "trades": []}
+    results = []
+    for p in positions:
+        try:
+            if engine.mt5.close_position(p.ticket):
+                results.append({"ticket": p.ticket, "symbol": p.symbol, "profit": p.profit})
+        except Exception:
+            pass
+    return {"status": "closed", "closed_count": len(results), "trades": results}
+
+
+@app.post("/api/v1/positions/close-winning")
+def close_winning_positions():
+    """Close all positions with profit > 0."""
+    positions = mt5.positions_get()
+    if not positions:
+        return {"status": "closed", "filter": "winning", "closed_count": 0, "trades": []}
+    results = []
+    for p in positions:
+        if p.profit > 0:
+            try:
+                if engine.mt5.close_position(p.ticket):
+                    results.append({"ticket": p.ticket, "symbol": p.symbol, "profit": p.profit})
+            except Exception:
+                pass
+    return {"status": "closed", "filter": "winning", "closed_count": len(results), "trades": results}
+
+
+@app.post("/api/v1/positions/close-losing")
+def close_losing_positions():
+    """Close all positions with profit <= 0."""
+    positions = mt5.positions_get()
+    if not positions:
+        return {"status": "closed", "filter": "losing", "closed_count": 0, "trades": []}
+    results = []
+    for p in positions:
+        if p.profit <= 0:
+            try:
+                if engine.mt5.close_position(p.ticket):
+                    results.append({"ticket": p.ticket, "symbol": p.symbol, "profit": p.profit})
+            except Exception:
+                pass
+    return {"status": "closed", "filter": "losing", "closed_count": len(results), "trades": results}
+
+
+@app.post("/api/v1/positions/close-scalps")
+def close_scalp_positions():
+    """Close all scalper positions (magic=20260911)."""
+    SCALP_MAGIC = 20260911
+    positions = mt5.positions_get()
+    if not positions:
+        return {"status": "closed", "filter": "scalps", "closed_count": 0, "trades": []}
+    results = []
+    for p in positions:
+        if p.magic == SCALP_MAGIC:
+            try:
+                if engine.mt5.close_position(p.ticket):
+                    results.append({"ticket": p.ticket, "symbol": p.symbol, "profit": p.profit})
+            except Exception:
+                pass
+    return {"status": "closed", "filter": "scalps", "closed_count": len(results), "trades": results}
+
+
 @app.post("/api/v1/engine/start")
 def start_engine():
     if engine.running:
@@ -4570,24 +4638,30 @@ async def all_analysts(symbol: str = "EURUSD", timeframe: str = "H1"):
     # SLOW PATH: run analysts on-demand (only if no cache yet)
     if not ADVANCED_FEATURES_AVAILABLE:
         return {"error": "Advanced features not available", "symbol": symbol, "analysts": [], "consensus": "HOLD"}
+    # Shared LLM client for on-demand analyst runs
+    try:
+        from apps.llm.client import LLMClient as _LLM
+        _llm = _LLM()
+    except Exception:
+        _llm = None
     analysts = [
-        ("Market", MarketAnalyst),
-        ("News", NewsAnalyst),
-        ("Sentiment", SentimentAnalyst),
-        ("Technical", TechnicalAnalyst),
-        ("Fundamentals", FundamentalsAnalyst),
-        ("Options", OptionsAnalyst),
-        ("OrderFlow", OrderFlowAnalyst),
-        ("Risk", RiskAnalyst),
-        ("Macro", MacroAnalyst),
-        ("OnChain", OnChainAnalyst),
-        ("Quant", QuantAnalyst),
-        ("Compliance", ComplianceAnalyst),
+        ("Market", MarketAnalyst, {}),
+        ("News", NewsAnalyst, {}),
+        ("Sentiment", SentimentAnalyst, {}),
+        ("Technical", TechnicalAnalyst, {}),
+        ("Fundamentals", FundamentalsAnalyst, {}),
+        ("Options", OptionsAnalyst, {}),
+        ("OrderFlow", OrderFlowAnalyst, {}),
+        ("Risk", RiskAnalyst, {}),
+        ("Macro", MacroAnalyst, {}),
+        ("OnChain", OnChainAnalyst, {}),
+        ("Quant", QuantAnalyst, {}),
+        ("Compliance", ComplianceAnalyst, {}),
     ]
     results = []
-    for name, cls in analysts:
+    for name, cls, extra_kw in analysts:
         try:
-            a = cls()
+            a = cls(llm_client=_llm, **extra_kw)
             r = await a.analyze(symbol, timeframe)
             results.append({
                 "name": name,
@@ -4704,6 +4778,79 @@ def all_legendary(symbol: str = "EURUSD"):
         "consensus": consensus,
         "total": len(results),
         "cached": False,
+    }
+
+
+@app.get("/api/v1/agents/status")
+def agents_status(symbol: str = "EURUSD"):
+    """Unified endpoint: all 17 agents (12 analysts + 5 legendary) in one call."""
+    if not ADVANCED_FEATURES_AVAILABLE:
+        return {"error": "Advanced features not available", "symbol": symbol, "analysts": [], "legendary": []}
+
+    # ── 12 Analysts ──
+    analyst_classes = [
+        ("Market", MarketAnalyst), ("News", NewsAnalyst), ("Sentiment", SentimentAnalyst),
+        ("Technical", TechnicalAnalyst), ("Fundamentals", FundamentalsAnalyst),
+        ("Options", OptionsAnalyst), ("OrderFlow", OrderFlowAnalyst), ("Risk", RiskAnalyst),
+        ("Macro", MacroAnalyst), ("OnChain", OnChainAnalyst), ("Quant", QuantAnalyst),
+        ("Compliance", ComplianceAnalyst),
+    ]
+    analyst_results = []
+    for name, cls in analyst_classes:
+        try:
+            a = cls()
+            r = a.analyze(symbol, "H1")
+            analyst_results.append({
+                "name": name, "type": "analyst",
+                "signal": getattr(r, "signal", "HOLD") if hasattr(r, "signal") else r.get("signal", "HOLD"),
+                "confidence": round(float(getattr(r, "confidence", 0) if hasattr(r, "confidence") else r.get("confidence", 0)), 3),
+                "reasoning": str(getattr(r, "reasoning", "") if hasattr(r, "reasoning") else r.get("reasoning", ""))[:200],
+            })
+        except Exception as e:
+            analyst_results.append({"name": name, "type": "analyst", "signal": "HOLD", "confidence": 0, "reasoning": str(e)[:100]})
+
+    # ── 5 Legendary Agents ──
+    legendary_classes = [
+        ("Soros", SorosAgent), ("Buffett", BuffettAgent),
+        ("Druckenmiller", DruckenmillerAgent), ("TudorJones", TudorJonesAgent),
+        ("Lynch", LynchAgent),
+    ]
+    rates = mt5.copy_rates_from_pos(symbol, mt5.TIMEFRAME_H1, 0, 100)
+    price_data = pd.DataFrame(rates) if rates is not None else None
+    legendary_results = []
+    for name, cls in legendary_classes:
+        try:
+            a = cls()
+            if price_data is not None and len(price_data) >= 20:
+                r = a.analyze(price_data, symbol)
+                if isinstance(r, dict):
+                    legendary_results.append({
+                        "name": name, "type": "legendary",
+                        "signal": r.get("signal", "HOLD"),
+                        "confidence": round(float(r.get("confidence", 0)), 3),
+                        "kelly_fraction": round(float(r.get("kelly_fraction", 0)), 3),
+                        "reasoning": str(r.get("reasoning", ""))[:200],
+                    })
+                else:
+                    legendary_results.append({"name": name, "type": "legendary", "signal": "HOLD", "confidence": 0, "reasoning": "invalid return"})
+            else:
+                legendary_results.append({"name": name, "type": "legendary", "signal": "HOLD", "confidence": 0, "reasoning": "insufficient data"})
+        except Exception as e:
+            legendary_results.append({"name": name, "type": "legendary", "signal": "HOLD", "confidence": 0, "reasoning": str(e)[:100]})
+
+    all_agents = analyst_results + legendary_results
+    buys = sum(1 for a in all_agents if a["signal"] == "BUY")
+    sells = sum(1 for a in all_agents if a["signal"] == "SELL")
+    consensus = "BUY" if buys > sells else "SELL" if sells > buys else "HOLD"
+
+    return {
+        "symbol": symbol,
+        "analysts": analyst_results,
+        "legendary": legendary_results,
+        "consensus": consensus,
+        "votes": {"BUY": buys, "SELL": sells, "HOLD": len(all_agents) - buys - sells},
+        "total": len(all_agents),
+        "timestamp": datetime.now(timezone.utc).isoformat(),
     }
 
 
