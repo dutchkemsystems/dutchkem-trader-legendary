@@ -5,7 +5,7 @@ export default function AnalystsPage() {
   return (
     <PageWrapper
       title="Analysts Deep-Dive"
-      description="13 legendary intelligence analysts with signal details and reasoning"
+      description="13 trading intelligence analysts with signal details and reasoning"
     >
       <AnalystsDeepDive />
     </PageWrapper>
