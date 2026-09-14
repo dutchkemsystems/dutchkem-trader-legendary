@@ -13387,3 +13387,207 @@ OSError: [WinError 64] The specified network name is no longer available
 2026-09-14 11:35:57,756 [INFO] OPTIONS QQQ: PCR=1.72 IV=12.5% call_vol=85860 put_vol=147889
 2026-09-14 11:35:58,470 [INFO] OPTIONS IWM: PCR=0.71 IV=3.1% call_vol=37514 put_vol=26734
 2026-09-14 11:36:05,240 [INFO] ON-CHAIN: BTC=$77,911 Dom=55.0% 24h=+1.4% Mcap=$1.56T
+2026-09-14 11:40:37,054 [INFO] 
+======================================================================
+2026-09-14 11:40:37,081 [INFO]   CYCLE 2 | 2026-09-14 10:40:37 UTC
+2026-09-14 11:40:37,089 [INFO]   Balance: $9269.18 | Equity: $9268.57 | DD: 7.3%
+2026-09-14 11:40:37,108 [INFO]   RECONCILED GBPUSD | ticket=3224108384 source=mt5_sync | P&L=$0.00 (no deal data)
+2026-09-14 11:40:37,687 [INFO]   EURUSD: SKIP action=HOLD conf=0.000 < 0.25
+2026-09-14 11:40:37,745 [INFO]   GBPUSD: SKIP action=HOLD conf=0.000 < 0.25
+2026-09-14 11:40:37,800 [INFO]   USDCHF: SKIP action=SELL conf=0.200 < 0.25
+2026-09-14 11:40:37,844 [INFO]   AUDUSD: SKIP action=HOLD conf=0.000 < 0.25
+2026-09-14 11:40:37,894 [INFO]   NZDUSD: SKIP action=HOLD conf=0.000 < 0.25
+2026-09-14 11:40:37,939 [INFO]   USDCAD: SKIP action=HOLD conf=0.000 < 0.25
+2026-09-14 11:40:37,988 [INFO]   EURGBP: SKIP action=HOLD conf=0.000 < 0.25
+2026-09-14 11:40:38,044 [INFO]   EURJPY: SKIP action=HOLD conf=0.000 < 0.25
+2026-09-14 11:40:38,085 [INFO]   GBPJPY: SKIP action=HOLD conf=0.000 < 0.25
+2026-09-14 11:40:38,129 [INFO]   USDJPY: SKIP action=HOLD conf=0.000 < 0.25
+2026-09-14 11:40:38,129 [INFO]   SIGNALS: 0/10 passed all gates
+2026-09-14 11:40:38,132 [INFO] 
+  SUMMARY: 4 open | 0 trades | WR=0/0 | P&L=$+0.00 | CB=CLOSED | Scalps=0/0(EURUSD)
+2026-09-14 11:40:38,132 [INFO]   DAILY: P&L=$+0.00 (0.00%) | Trades=0 | WR=0/0 | Target=2.0% Limit=-1.5%
+2026-09-14 11:45:38,134 [INFO] 
+======================================================================
+2026-09-14 11:45:38,141 [INFO]   CYCLE 3 | 2026-09-14 10:45:38 UTC
+2026-09-14 11:45:38,141 [INFO]   Balance: $9269.18 | Equity: $9268.67 | DD: 7.3%
+2026-09-14 11:45:38,420 [INFO]   EURUSD: SKIP action=HOLD conf=0.000 < 0.25
+2026-09-14 11:45:38,497 [INFO]   GBPUSD: SKIP action=HOLD conf=0.000 < 0.25
+2026-09-14 11:45:38,555 [INFO]   USDCHF: SKIP action=HOLD conf=0.000 < 0.25
+2026-09-14 11:45:38,625 [INFO]   AUDUSD: SKIP action=HOLD conf=0.000 < 0.25
+2026-09-14 11:45:38,698 [INFO]   NZDUSD: SKIP action=HOLD conf=0.000 < 0.25
+2026-09-14 11:45:38,801 [INFO]   USDCAD: SKIP action=HOLD conf=0.000 < 0.25
+2026-09-14 11:45:38,890 [INFO]   EURGBP: SKIP action=HOLD conf=0.000 < 0.25
+2026-09-14 11:45:38,979 [INFO]   EURJPY: SKIP action=HOLD conf=0.000 < 0.25
+2026-09-14 11:45:39,114 [INFO]   GBPJPY: SKIP action=HOLD conf=0.000 < 0.25
+2026-09-14 11:45:39,271 [INFO]   USDJPY: SKIP action=HOLD conf=0.000 < 0.25
+2026-09-14 11:45:39,272 [INFO]   SIGNALS: 0/10 passed all gates
+2026-09-14 11:45:39,286 [INFO] 
+  SUMMARY: 4 open | 0 trades | WR=0/0 | P&L=$+0.00 | CB=CLOSED | Scalps=0/0(EURUSD)
+2026-09-14 11:45:39,287 [INFO]   DAILY: P&L=$+0.00 (0.00%) | Trades=0 | WR=0/0 | Target=2.0% Limit=-1.5%
+2026-09-14 11:50:39,294 [INFO] 
+======================================================================
+2026-09-14 11:50:39,305 [INFO]   CYCLE 4 | 2026-09-14 10:50:39 UTC
+2026-09-14 11:50:39,309 [INFO]   Balance: $9269.18 | Equity: $9269.27 | DD: 7.3%
+2026-09-14 11:50:39,814 [INFO] SCALP SIZING: USDCAD G3 tier=transition session=10UTC → lots=0.01 (base=0.01)
+2026-09-14 11:50:40,017 [INFO] SCALP OPEN: BUY 0.01 USDCAD @ 1.38985 SL=1.38905 TP=1.39105 ticket=3224324195 group=G3
+2026-09-14 11:50:40,127 [INFO]   EURUSD: SKIP action=HOLD conf=0.000 < 0.25
+2026-09-14 11:50:40,173 [INFO]   GBPUSD: SKIP action=HOLD conf=0.000 < 0.25
+2026-09-14 11:50:40,217 [INFO]   USDCHF: SKIP action=HOLD conf=0.000 < 0.25
+2026-09-14 11:50:40,268 [INFO]   AUDUSD: SKIP action=HOLD conf=0.000 < 0.25
+2026-09-14 11:50:40,316 [INFO]   NZDUSD: SKIP action=HOLD conf=0.000 < 0.25
+2026-09-14 11:50:40,360 [INFO]   USDCAD: SKIP action=HOLD conf=0.000 < 0.25
+2026-09-14 11:50:40,403 [INFO]   EURGBP: SKIP action=HOLD conf=0.000 < 0.25
+2026-09-14 11:50:40,461 [INFO]   EURJPY: SKIP action=HOLD conf=0.000 < 0.25
+2026-09-14 11:50:40,526 [INFO]   GBPJPY: SKIP action=HOLD conf=0.000 < 0.25
+2026-09-14 11:50:40,567 [INFO]   USDJPY: SKIP action=HOLD conf=0.000 < 0.25
+2026-09-14 11:50:40,568 [INFO]   SIGNALS: 0/10 passed all gates
+2026-09-14 11:50:40,570 [INFO] 
+  SUMMARY: 5 open | 0 trades | WR=0/0 | P&L=$+0.00 | CB=CLOSED | Scalps=1/1(EURUSD)
+2026-09-14 11:50:40,571 [INFO]   DAILY: P&L=$+0.00 (0.00%) | Trades=0 | WR=0/0 | Target=2.0% Limit=-1.5%
+2026-09-14 11:55:40,578 [INFO] 
+======================================================================
+2026-09-14 11:55:40,587 [INFO]   CYCLE 5 | 2026-09-14 10:55:40 UTC
+2026-09-14 11:55:40,589 [INFO]   Balance: $9269.18 | Equity: $9268.79 | DD: 7.3%
+2026-09-14 11:55:41,131 [INFO]   EURUSD: SKIP action=HOLD conf=0.000 < 0.25
+2026-09-14 11:55:41,223 [INFO]   GBPUSD: SKIP action=HOLD conf=0.000 < 0.25
+2026-09-14 11:55:41,302 [INFO]   USDCHF: SKIP action=HOLD conf=0.000 < 0.25
+2026-09-14 11:55:41,377 [INFO]   AUDUSD: SKIP action=HOLD conf=0.000 < 0.25
+2026-09-14 11:55:41,475 [INFO]   NZDUSD: SKIP action=HOLD conf=0.000 < 0.25
+2026-09-14 11:55:41,603 [INFO]   USDCAD: SKIP action=HOLD conf=0.000 < 0.25
+2026-09-14 11:55:41,709 [INFO]   EURGBP: SKIP action=HOLD conf=0.000 < 0.25
+2026-09-14 11:55:41,764 [INFO]   EURJPY: SKIP action=HOLD conf=0.000 < 0.25
+2026-09-14 11:55:41,808 [INFO]   GBPJPY: SKIP action=HOLD conf=0.000 < 0.25
+2026-09-14 11:55:41,867 [INFO]   USDJPY: SKIP action=HOLD conf=0.000 < 0.25
+2026-09-14 11:55:41,868 [INFO]   SIGNALS: 0/10 passed all gates
+2026-09-14 11:55:41,870 [INFO] 
+  SUMMARY: 5 open | 0 trades | WR=0/0 | P&L=$+0.00 | CB=CLOSED | Scalps=1/1(EURUSD)
+2026-09-14 11:55:41,870 [INFO]   DAILY: P&L=$+0.00 (0.00%) | Trades=0 | WR=0/0 | Target=2.0% Limit=-1.5%
+2026-09-14 12:00:41,877 [INFO] 
+======================================================================
+2026-09-14 12:00:41,888 [INFO]   CYCLE 6 | 2026-09-14 11:00:41 UTC
+2026-09-14 12:00:41,895 [INFO]   Balance: $9269.18 | Equity: $9268.49 | DD: 7.3%
+2026-09-14 12:00:42,638 [INFO]   EURUSD: SKIP action=HOLD conf=0.000 < 0.25
+2026-09-14 12:00:42,708 [INFO]   GBPUSD: SKIP action=HOLD conf=0.000 < 0.25
+2026-09-14 12:00:42,762 [INFO]   USDCHF: SKIP action=HOLD conf=0.000 < 0.25
+2026-09-14 12:00:42,828 [INFO]   AUDUSD: SKIP action=HOLD conf=0.000 < 0.25
+2026-09-14 12:00:42,903 [INFO]   NZDUSD: SKIP action=HOLD conf=0.000 < 0.25
+2026-09-14 12:00:42,960 [INFO]   USDCAD: SKIP action=HOLD conf=0.000 < 0.25
+2026-09-14 12:00:43,029 [INFO]   EURGBP: SKIP action=HOLD conf=0.000 < 0.25
+2026-09-14 12:00:43,094 [INFO]   EURJPY: SKIP action=HOLD conf=0.000 < 0.25
+2026-09-14 12:00:43,164 [INFO]   GBPJPY: SKIP action=HOLD conf=0.000 < 0.25
+2026-09-14 12:00:43,224 [INFO]   USDJPY: SKIP action=HOLD conf=0.000 < 0.25
+2026-09-14 12:00:43,225 [INFO]   SIGNALS: 0/10 passed all gates
+2026-09-14 12:00:43,227 [INFO] 
+  SUMMARY: 5 open | 0 trades | WR=0/0 | P&L=$+0.00 | CB=CLOSED | Scalps=1/1(EURUSD)
+2026-09-14 12:00:43,227 [INFO]   DAILY: P&L=$+0.00 (0.00%) | Trades=0 | WR=0/0 | Target=2.0% Limit=-1.5%
+2026-09-14 12:05:43,234 [INFO] 
+======================================================================
+2026-09-14 12:05:43,242 [INFO]   CYCLE 7 | 2026-09-14 11:05:43 UTC
+2026-09-14 12:05:43,284 [INFO]   Balance: $9268.68 | Equity: $9267.56 | DD: 7.3%
+2026-09-14 12:05:43,317 [INFO]   RECONCILED EURUSD | ticket=3224100662 source=mt5_sync | P&L=$0.00 (no deal data)
+2026-09-14 12:05:46,273 [INFO]   EURUSD: SKIP action=HOLD conf=0.000 < 0.25
+2026-09-14 12:05:46,616 [INFO]   GBPUSD: SKIP action=SELL conf=0.200 < 0.25
+2026-09-14 12:05:46,889 [INFO]   USDCHF: SKIP action=HOLD conf=0.000 < 0.25
+2026-09-14 12:05:47,078 [INFO]   AUDUSD: SKIP action=HOLD conf=0.000 < 0.25
+2026-09-14 12:05:47,246 [INFO]   NZDUSD: SKIP action=HOLD conf=0.000 < 0.25
+2026-09-14 12:05:47,387 [INFO]   USDCAD: SKIP action=BUY conf=0.200 < 0.25
+2026-09-14 12:05:47,543 [INFO]   EURGBP: SKIP action=HOLD conf=0.000 < 0.25
+2026-09-14 12:05:47,686 [INFO]   EURJPY: SKIP action=HOLD conf=0.000 < 0.25
+2026-09-14 12:05:47,811 [INFO]   GBPJPY: SKIP action=HOLD conf=0.000 < 0.25
+2026-09-14 12:05:47,932 [INFO]   USDJPY: SKIP action=HOLD conf=0.000 < 0.25
+2026-09-14 12:05:47,933 [INFO]   SIGNALS: 0/10 passed all gates
+2026-09-14 12:05:47,936 [INFO] 
+  SUMMARY: 4 open | 0 trades | WR=0/0 | P&L=$+0.00 | CB=CLOSED | Scalps=1/1(EURUSD)
+2026-09-14 12:05:47,937 [INFO]   DAILY: P&L=$+0.00 (0.00%) | Trades=0 | WR=0/0 | Target=2.0% Limit=-1.5%
+2026-09-14 12:10:47,963 [INFO] 
+======================================================================
+2026-09-14 12:10:47,983 [INFO]   CYCLE 8 | 2026-09-14 11:10:47 UTC
+2026-09-14 12:10:47,985 [INFO]   Balance: $9268.10 | Equity: $9267.72 | DD: 7.3%
+2026-09-14 12:10:48,001 [INFO]   RECONCILED USDCAD | ticket=3224324195 source=scalper | P&L=$+0.00 | W=0 L=0
+2026-09-14 12:10:50,967 [INFO]   EURUSD: SKIP action=HOLD conf=0.000 < 0.25
+2026-09-14 12:10:51,173 [INFO]   GBPUSD: SKIP action=SELL conf=0.200 < 0.25
+2026-09-14 12:10:51,375 [INFO]   USDCHF: SKIP action=HOLD conf=0.000 < 0.25
+2026-09-14 12:10:51,910 [INFO]   AUDUSD: SKIP action=HOLD conf=0.000 < 0.25
+2026-09-14 12:10:52,190 [INFO]   NZDUSD: SKIP action=HOLD conf=0.000 < 0.25
+2026-09-14 12:10:52,300 [INFO]   USDCAD: SKIP action=BUY conf=0.200 < 0.25
+2026-09-14 12:10:52,416 [INFO]   EURGBP: SKIP action=HOLD conf=0.000 < 0.25
+2026-09-14 12:10:52,607 [INFO]   EURJPY: SKIP action=HOLD conf=0.000 < 0.25
+2026-09-14 12:10:52,737 [INFO]   GBPJPY: SKIP action=HOLD conf=0.000 < 0.25
+2026-09-14 12:10:52,947 [INFO]   USDJPY: SKIP action=HOLD conf=0.000 < 0.25
+2026-09-14 12:10:52,948 [INFO]   SIGNALS: 0/10 passed all gates
+2026-09-14 12:10:52,949 [INFO] 
+  SUMMARY: 3 open | 1 trades | WR=0/1 | P&L=$+0.00 | CB=CLOSED | Scalps=0/1(EURUSD)
+2026-09-14 12:10:52,951 [INFO]   DAILY: P&L=$+0.00 (0.00%) | Trades=1 | WR=0/1 | Target=2.0% Limit=-1.5%
+2026-09-14 12:15:58,639 [INFO] 
+======================================================================
+2026-09-14 12:15:58,667 [INFO]   CYCLE 9 | 2026-09-14 11:15:58 UTC
+2026-09-14 12:15:58,671 [INFO]   Balance: $9268.10 | Equity: $9267.41 | DD: 7.3%
+2026-09-14 12:16:01,606 [INFO]   EURUSD: SKIP action=HOLD conf=0.000 < 0.25
+2026-09-14 12:16:01,976 [INFO]   GBPUSD: SKIP action=SELL conf=0.200 < 0.25
+2026-09-14 12:16:02,389 [INFO]   USDCHF: SKIP action=HOLD conf=0.000 < 0.25
+2026-09-14 12:16:02,726 [INFO]   AUDUSD: SKIP action=HOLD conf=0.000 < 0.25
+2026-09-14 12:16:03,060 [INFO]   NZDUSD: SKIP action=HOLD conf=0.000 < 0.25
+2026-09-14 12:16:03,169 [INFO]   USDCAD: SKIP action=HOLD conf=0.000 < 0.25
+2026-09-14 12:16:03,297 [INFO]   EURGBP: SKIP action=HOLD conf=0.000 < 0.25
+2026-09-14 12:16:03,432 [INFO]   EURJPY: SKIP action=HOLD conf=0.000 < 0.25
+2026-09-14 12:16:03,623 [INFO]   GBPJPY: SKIP action=HOLD conf=0.000 < 0.25
+2026-09-14 12:16:03,743 [INFO]   USDJPY: SKIP action=HOLD conf=0.000 < 0.25
+2026-09-14 12:16:03,744 [INFO]   SIGNALS: 0/10 passed all gates
+2026-09-14 12:16:03,747 [INFO] 
+  SUMMARY: 3 open | 1 trades | WR=0/1 | P&L=$+0.00 | CB=CLOSED | Scalps=0/1(EURUSD)
+2026-09-14 12:16:03,748 [INFO]   DAILY: P&L=$+0.00 (0.00%) | Trades=1 | WR=0/1 | Target=2.0% Limit=-1.5%
+2026-09-14 12:21:04,750 [INFO] 
+======================================================================
+2026-09-14 12:21:04,764 [INFO]   CYCLE 10 | 2026-09-14 11:21:04 UTC
+2026-09-14 12:21:04,767 [INFO]   Balance: $9268.10 | Equity: $9266.73 | DD: 7.3%
+2026-09-14 12:21:08,181 [INFO]   EURUSD: SKIP action=HOLD conf=0.000 < 0.25
+2026-09-14 12:21:08,294 [INFO]   GBPUSD: SKIP action=SELL conf=0.200 < 0.25
+2026-09-14 12:21:08,405 [INFO]   USDCHF: SKIP action=HOLD conf=0.000 < 0.25
+2026-09-14 12:21:08,532 [INFO]   AUDUSD: SKIP action=HOLD conf=0.000 < 0.25
+2026-09-14 12:21:08,675 [INFO]   NZDUSD: SKIP action=HOLD conf=0.000 < 0.25
+2026-09-14 12:21:08,800 [INFO]   USDCAD: SKIP action=BUY conf=0.200 < 0.25
+2026-09-14 12:21:08,905 [INFO]   EURGBP: SKIP action=HOLD conf=0.000 < 0.25
+2026-09-14 12:21:09,003 [INFO]   EURJPY: SKIP action=HOLD conf=0.000 < 0.25
+2026-09-14 12:21:09,088 [INFO]   GBPJPY: SKIP action=HOLD conf=0.000 < 0.25
+2026-09-14 12:21:09,163 [INFO]   USDJPY: SKIP action=HOLD conf=0.000 < 0.25
+2026-09-14 12:21:09,164 [INFO]   SIGNALS: 0/10 passed all gates
+2026-09-14 12:21:09,167 [INFO] 
+  SUMMARY: 3 open | 1 trades | WR=0/1 | P&L=$+0.00 | CB=CLOSED | Scalps=0/1(EURUSD)
+2026-09-14 12:21:09,168 [INFO]   DAILY: P&L=$+0.00 (0.00%) | Trades=1 | WR=0/1 | Target=2.0% Limit=-1.5%
+2026-09-14 12:26:09,174 [INFO] 
+======================================================================
+2026-09-14 12:26:09,181 [INFO]   CYCLE 11 | 2026-09-14 11:26:09 UTC
+2026-09-14 12:26:09,197 [INFO]   Balance: $9267.60 | Equity: $9266.71 | DD: 7.3%
+2026-09-14 12:26:09,231 [INFO]   RECONCILED NZDUSD | ticket=3224161226 source=mt5_sync | P&L=$0.00 (no deal data)
+2026-09-14 12:26:09,630 [INFO]   EURUSD: SKIP action=HOLD conf=0.000 < 0.25
+2026-09-14 12:26:09,725 [INFO]   GBPUSD: SKIP action=SELL conf=0.200 < 0.25
+2026-09-14 12:26:09,817 [INFO]   USDCHF: SKIP action=HOLD conf=0.000 < 0.25
+2026-09-14 12:26:09,897 [INFO]   AUDUSD: SKIP action=HOLD conf=0.000 < 0.25
+2026-09-14 12:26:09,961 [INFO]   NZDUSD: SKIP action=HOLD conf=0.000 < 0.25
+2026-09-14 12:26:10,016 [INFO]   USDCAD: SKIP action=BUY conf=0.200 < 0.25
+2026-09-14 12:26:10,078 [INFO]   EURGBP: SKIP action=SELL conf=0.200 < 0.25
+2026-09-14 12:26:10,140 [INFO]   EURJPY: SKIP action=HOLD conf=0.000 < 0.25
+2026-09-14 12:26:10,201 [INFO]   GBPJPY: SKIP action=HOLD conf=0.000 < 0.25
+2026-09-14 12:26:10,270 [INFO]   USDJPY: SKIP action=HOLD conf=0.000 < 0.25
+2026-09-14 12:26:10,271 [INFO]   SIGNALS: 0/10 passed all gates
+2026-09-14 12:26:10,272 [INFO] 
+  SUMMARY: 2 open | 1 trades | WR=0/1 | P&L=$+0.00 | CB=CLOSED | Scalps=0/1(EURUSD)
+2026-09-14 12:26:10,272 [INFO]   DAILY: P&L=$+0.00 (0.00%) | Trades=1 | WR=0/1 | Target=2.0% Limit=-1.5%
+2026-09-14 12:31:10,278 [INFO] 
+======================================================================
+2026-09-14 12:31:10,290 [INFO]   CYCLE 12 | 2026-09-14 11:31:10 UTC
+2026-09-14 12:31:10,291 [INFO]   Balance: $9267.60 | Equity: $9266.62 | DD: 7.3%
+2026-09-14 12:31:10,629 [INFO]   EURUSD: SKIP action=HOLD conf=0.000 < 0.25
+2026-09-14 12:31:10,677 [INFO]   GBPUSD: SKIP action=SELL conf=0.200 < 0.25
+2026-09-14 12:31:10,726 [INFO]   USDCHF: SKIP action=HOLD conf=0.000 < 0.25
+2026-09-14 12:31:10,772 [INFO]   AUDUSD: SKIP action=HOLD conf=0.000 < 0.25
+2026-09-14 12:31:10,822 [INFO]   NZDUSD: SKIP action=SELL conf=0.200 < 0.25
+2026-09-14 12:31:10,870 [INFO]   USDCAD: SKIP action=BUY conf=0.200 < 0.25
+2026-09-14 12:31:10,937 [INFO]   EURGBP: SKIP action=SELL conf=0.200 < 0.25
+2026-09-14 12:31:10,984 [INFO]   EURJPY: SKIP action=HOLD conf=0.000 < 0.25
+2026-09-14 12:31:11,078 [INFO]   GBPJPY: SKIP action=HOLD conf=0.000 < 0.25
+2026-09-14 12:31:11,300 [INFO]   USDJPY: SKIP action=HOLD conf=0.000 < 0.25
+2026-09-14 12:31:11,301 [INFO]   SIGNALS: 0/10 passed all gates
+2026-09-14 12:31:11,304 [INFO] 
+  SUMMARY: 2 open | 1 trades | WR=0/1 | P&L=$+0.00 | CB=CLOSED | Scalps=0/1(EURUSD)
+2026-09-14 12:31:11,305 [INFO]   DAILY: P&L=$+0.00 (0.00%) | Trades=1 | WR=0/1 | Target=2.0% Limit=-1.5%

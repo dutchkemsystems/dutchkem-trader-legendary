@@ -3126,7 +3126,7 @@ class UnifiedEngine:
 
         lots = round(lots, 2)
         # Ensure minimum lot size
-        if lots > 0 and lots < 0.01:
+        if lots < 0.01:
             lots = 0.01
         log.info(f"  SIZING: profile={profile_name} kelly={kelly_scale:.2f} session={session_mult:.2f} streak={streak_mult:.2f} → lots={lots:.2f}")
 
