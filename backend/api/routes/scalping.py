@@ -6,7 +6,7 @@ from typing import Dict, Any
 router = APIRouter()
 
 
-@router.get("/scalping/status")
+@router.get("/status")
 async def get_scalping_status():
     """Get status of all scalping strategies."""
     from apps.scalping.config import SCALPING_STRATEGIES
@@ -27,7 +27,7 @@ async def get_scalping_status():
     }
 
 
-@router.post("/scalping/toggle/{strategy_name}")
+@router.post("/toggle/{strategy_name}")
 async def toggle_strategy(strategy_name: str, body: Dict[str, bool]):
     """Toggle a strategy on/off."""
     from apps.scalping.config import SCALPING_STRATEGIES

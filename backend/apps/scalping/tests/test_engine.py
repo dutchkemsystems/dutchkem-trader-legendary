@@ -13,12 +13,11 @@ def mock_mt5():
 @pytest.fixture
 def mock_risk():
     risk = Mock()
-    risk.daily_pnl_pct = 0.0
-    risk.check_spread.return_value = True
+    risk.balance = 10000.0
+    risk.daily_pnl = 0.0
     risk.check_correlation.return_value = True
     risk.check_portfolio_limits.return_value = True
     risk.check_circuit_breaker.return_value = True
-    risk.calculate_position_size.return_value = 0.01
     return risk
 
 

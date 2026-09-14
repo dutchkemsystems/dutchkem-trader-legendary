@@ -13,6 +13,7 @@ import { DebateResultCard } from "@/components/dashboard/debate-result-card";
 import { MemoryContextCard } from "@/components/dashboard/memory-context-card";
 import { PaperTradingCard } from "@/components/dashboard/paper-trading-card";
 import { ScalperDashboardPanel } from "@/components/dashboard/scalper-dashboard-panel";
+import { ScalpingStrategiesPanel } from "@/components/dashboard/scalping-strategies-panel";
 import { LiveTradingCard } from "@/components/dashboard/live-trading-card";
 import { PriceChart } from "@/components/charts/price-chart";
 import { Indicators } from "@/components/charts/indicators";
@@ -168,6 +169,11 @@ export default function DashboardPage() {
           {/* MTF Cascading Scalper */}
           <ErrorBoundary>
             <ScalperDashboardPanel status={scalperStatus} loading={scalperLoading} />
+          </ErrorBoundary>
+
+          {/* Scalping Strategies — 10 new parallel strategies */}
+          <ErrorBoundary>
+            <ScalpingStrategiesPanel />
           </ErrorBoundary>
         </div>
 

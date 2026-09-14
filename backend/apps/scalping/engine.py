@@ -5,6 +5,7 @@ Does NOT block the main engine — runs asynchronously.
 """
 
 import logging
+import MetaTrader5 as mt5
 from typing import Dict, List, Optional
 from datetime import datetime
 
@@ -42,8 +43,8 @@ class ScalpingEngine:
         self.strategies.clear()
         self._load_strategies()
     
-    async def run_cycle(self, symbols: List[str]):
-        """Main entry point — called every 5 minutes by UnifiedEngine.
+    def run_cycle(self, symbols: List[str]):
+        """Main entry point — called every cycle by UnifiedEngine.
         
         Flow:
         1. Check if any strategy is enabled
@@ -62,7 +63,11 @@ class ScalpingEngine:
         if not self._is_session_active():
             return
         
-        if self.risk_manager.daily_pnl_pct <= -SCALPING_GLOBAL_CONFIG['daily_loss_limit_pct']:
+        # Check daily loss limit using RiskManager's daily_pnl
+        balance = getattr(self.risk_manager, 'balance', 10000.0)
+        daily_pnl = getattr(self.risk_manager, 'daily_pnl', 0.0)
+        daily_pnl_pct = (daily_pnl / balance * 100) if balance > 0 else 0.0
+        if daily_pnl_pct <= -SCALPING_GLOBAL_CONFIG['daily_loss_limit_pct']:
             logger.warning("Scalping: Daily loss limit reached. Pausing.")
             return
         
@@ -71,11 +76,11 @@ class ScalpingEngine:
         
         for name, strategy in self.strategies.items():
             try:
-                await self._run_strategy(strategy, symbols)
+                self._run_strategy(strategy, symbols)
             except Exception as e:
                 logger.error(f"Scalping strategy {name} error: {e}")
     
-    async def _run_strategy(self, strategy: ScalpingStrategy, symbols: List[str]):
+    def _run_strategy(self, strategy: ScalpingStrategy, symbols: List[str]):
         """Run a single strategy across all symbols."""
         for symbol in symbols:
             # Fetch data for required timeframes
@@ -98,38 +103,127 @@ class ScalpingEngine:
                 continue
             
             # Execute
-            await self._execute_signal(signal)
+            self._execute_signal(signal)
     
     def _check_risk(self, signal: ScalpSignal) -> bool:
         """Pass signal through RiskManager checks."""
-        checks = [
-            self.risk_manager.check_spread(signal.symbol, signal.strategy_name),
-            self.risk_manager.check_correlation(signal.symbol),
-            self.risk_manager.check_portfolio_limits(),
-            self.risk_manager.check_circuit_breaker(),
-        ]
-        return all(checks)
+        try:
+            # Spread check (via MT5 directly)
+            if not self._check_spread(signal.symbol):
+                return False
+            # Correlation check
+            if not self.risk_manager.check_correlation(signal.symbol):
+                return False
+            # Portfolio limits
+            if not self.risk_manager.check_portfolio_limits():
+                return False
+            # Circuit breaker
+            if not self.risk_manager.check_circuit_breaker():
+                return False
+            return True
+        except Exception as e:
+            logger.error(f"Risk check failed for {signal.symbol}: {e}")
+            return False
     
-    async def _execute_signal(self, signal: ScalpSignal):
+    def _check_spread(self, symbol: str) -> bool:
+        """Check if spread is acceptable for scalping. Returns True if OK."""
+        try:
+            info = mt5.symbol_info(symbol)
+            if info is None:
+                return False
+            spread = info.spread
+            point = info.point if info.point else 0.0001
+            spread_pips = spread * point * 10
+            max_spread = 1.5  # Scalping needs tight spreads
+            if spread_pips > max_spread:
+                logger.debug(f"SPREAD FILTER {symbol}: {spread_pips:.1f} pips > max {max_spread:.1f}")
+                return False
+            return True
+        except Exception:
+            return False
+    
+    def _execute_signal(self, signal: ScalpSignal):
         """Execute approved signal via MT5."""
-        # Calculate position size via RiskManager
-        lots = self.risk_manager.calculate_position_size(
-            signal.symbol, signal.sl_pips, signal.confidence
-        )
+        # Calculate position size: risk-based sizing
+        lots = self._calculate_scalping_lots(signal)
+        if lots <= 0:
+            return
+        
+        # Get current price for SL/TP calculation
+        tick = mt5.symbol_info_tick(signal.symbol)
+        if tick is None:
+            return
+        
+        info = mt5.symbol_info(signal.symbol)
+        if info is None:
+            return
+        
+        point = info.point if info.point else 0.0001
+        price = tick.ask if signal.direction.value == "BUY" else tick.bid
+        
+        # Convert pips to price levels
+        sl_distance = signal.sl_pips * point * 10
+        tp_distance = signal.tp_pips * point * 10
+        
+        if signal.direction.value == "BUY":
+            sl = price - sl_distance
+            tp = price + tp_distance
+        else:
+            sl = price + sl_distance
+            tp = price - tp_distance
         
         # Place order with unique magic
         result = self.mt5_client.place_order(
             symbol=signal.symbol,
             action=signal.direction.value,
             lots=lots,
-            sl_pips=signal.sl_pips,
-            tp_pips=signal.tp_pips,
+            sl=sl,
+            tp=tp,
             magic=SCALPING_GLOBAL_CONFIG['magic_base'] + self._strategy_index(signal.strategy_name),
-            comment=f"SCALP_{signal.strategy_name[:8]}"
         )
         
         # Log trade
         self._log_trade(signal, result, lots)
+    
+    def _calculate_scalping_lots(self, signal: ScalpSignal) -> float:
+        """Calculate position size for scalping (risk-based, simplified)."""
+        try:
+            balance = getattr(self.risk_manager, 'balance', 10000.0)
+            risk_pct = SCALPING_GLOBAL_CONFIG.get('risk_per_trade_pct', 0.5) / 100
+            risk_amount = balance * risk_pct
+            
+            # Get point value for pip calculation
+            info = mt5.symbol_info(signal.symbol)
+            if info is None:
+                return 0.01
+            
+            point = info.point if info.point else 0.0001
+            tick_value = info.trade_tick_value if info.trade_tick_value else 1.0
+            
+            # Calculate SL in price terms
+            sl_distance = signal.sl_pips * point * 10
+            
+            # Lots = risk_amount / (sl_distance * tick_value_per_point)
+            if sl_distance > 0 and tick_value > 0:
+                contract_size = info.trade_contract_size if info.trade_contract_size else 100000
+                sl_value_per_lot = sl_distance * contract_size
+                lots = risk_amount / sl_value_per_lot if sl_value_per_lot > 0 else 0.01
+            else:
+                lots = 0.01
+            
+            # Clamp to min/max
+            min_lot = info.volume_min if info.volume_min else 0.01
+            max_lot = info.volume_max if info.volume_max else 100.0
+            lots = max(min_lot, min(lots, max_lot))
+            
+            # Round to lot step
+            lot_step = info.volume_step if info.volume_step else 0.01
+            lots = round(lots / lot_step) * lot_step
+            
+            return round(lots, 2)
+        except Exception as e:
+            logger.error(f"Position sizing error: {e}")
+            return 0.01
     
     def _is_session_active(self) -> bool:
         """Check if current time is within allowed trading sessions."""
@@ -154,7 +248,7 @@ class ScalpingEngine:
             'lots': lots,
             'sl_pips': signal.sl_pips,
             'tp_pips': signal.tp_pips,
-            'ticket': result.get('ticket') if result else None,
+            'ticket': result if result else None,
             'status': 'open',
             'pnl': 0.0,
         })

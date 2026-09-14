@@ -10,35 +10,32 @@ from apps.scalping.config import SCALPING_STRATEGIES
 def mock_mt5():
     mt5 = Mock()
     mt5.fetch_candles.return_value = Mock()
-    mt5.place_order.return_value = {'ticket': 12345, 'status': 'ok'}
+    mt5.place_order.return_value = 12345  # ticket number
     return mt5
 
 
 @pytest.fixture
 def mock_risk():
     risk = Mock()
-    risk.daily_pnl_pct = 0.0
-    risk.check_spread.return_value = True
+    risk.balance = 10000.0
+    risk.daily_pnl = 0.0
     risk.check_correlation.return_value = True
     risk.check_portfolio_limits.return_value = True
     risk.check_circuit_breaker.return_value = True
-    risk.calculate_position_size.return_value = 0.01
-    risk.trade_results = []
-    risk.win_streak = 0
-    risk.loss_streak = 0
-    risk.daily_pnl = 0.0
+    risk.consecutive_losses = 0
+    risk.consecutive_wins = 0
     return risk
 
 
-@pytest.mark.asyncio
-async def test_full_scalping_flow(mock_mt5, mock_risk):
+def test_full_scalping_flow(mock_mt5, mock_risk):
     """Integration test: strategy -> signal -> risk check -> execution -> sync."""
     original_enabled = SCALPING_STRATEGIES['chiaroscuro']['enabled']
     SCALPING_STRATEGIES['chiaroscuro']['enabled'] = True
     try:
         engine = ScalpingEngine(mock_mt5, mock_risk)
         assert 'chiaroscuro' in engine.strategies
-        await engine.run_cycle(['EURUSD'])
+        # run_cycle is synchronous now (not async)
+        engine.run_cycle(['EURUSD'])
     finally:
         SCALPING_STRATEGIES['chiaroscuro']['enabled'] = original_enabled
 

@@ -1606,32 +1606,17 @@ class UnifiedEngine:
     # SCALPING STRATEGIES ENGINE (10 new strategies)
     # ═══════════════════════════════════════════════════════════════
 
-    async def _run_scalping_strategies(self):
-        """Run scalping strategies if any are enabled."""
+    def _run_scalping_strategies_sync(self):
+        """Run scalping strategies if any are enabled (synchronous wrapper)."""
         try:
             from apps.scalping.engine import ScalpingEngine
             from apps.scalping.config import is_any_strategy_enabled
             if not is_any_strategy_enabled():
                 return
             if not hasattr(self, '_scalping_engine'):
-                self._scalping_engine = ScalpingEngine(self.mt5_client, self.risk_manager)
-            await self._scalping_engine.run_cycle(self.WATCHLIST)
-        except ImportError:
-            pass
-
-    def _run_scalping_strategies_sync(self):
-        """Synchronous wrapper for scalping strategies."""
-        try:
-            import asyncio
-            loop = asyncio.get_event_loop()
-            if loop.is_running():
-                # If event loop is already running, schedule as task
-                asyncio.ensure_future(self._run_scalping_strategies())
-            else:
-                loop.run_until_complete(self._run_scalping_strategies())
-        except RuntimeError:
-            # No event loop, create one
-            asyncio.run(self._run_scalping_strategies())
+                # Pass the actual MT5Client and RiskManager instances
+                self._scalping_engine = ScalpingEngine(self.mt5, self.risk)
+            self._scalping_engine.run_cycle(WATCHLIST)
         except ImportError:
             pass
 
@@ -1641,17 +1626,16 @@ class UnifiedEngine:
             return
         results = self._scalping_engine.get_trade_results()
         for trade in results:
-            # Update Kelly calculation
-            self.risk.trade_results.append(trade)
-            # Update win/loss streaks
-            if trade.get('pnl', 0) > 0:
-                self.risk.win_streak += 1
-                self.risk.loss_streak = 0
+            pnl = trade.get('pnl', 0.0)
+            # Update RiskManager using correct attribute names
+            if pnl > 0:
+                self.risk.consecutive_wins += 1
+                self.risk.consecutive_losses = 0
             else:
-                self.risk.loss_streak += 1
-                self.risk.win_streak = 0
+                self.risk.consecutive_losses += 1
+                self.risk.consecutive_wins = 0
             # Update daily PnL
-            self.risk.daily_pnl += trade.get('pnl', 0)
+            self.risk.daily_pnl += pnl
 
     # ═══════════════════════════════════════════════════════════════
     # PHASE 2: ML LIVE LEARNING LOOP
