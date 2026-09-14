@@ -120,11 +120,11 @@ class FundamentalsAnalyst(BaseAnalyst):
             dxy_change = data["dxy"].get("change_pct", 0)
             reasoning_parts.append(f"DXY={dxy_val:.1f} ({dxy_change:+.2f}%)")
             is_usd_first = symbol.startswith("USD")
-            if dxy_change > 0.3:
+            if dxy_change > 0.15:
                 signal = "SELL" if is_usd_first else "BUY"
                 confidence = min(confidence + 0.20, 0.7)
                 reasoning_parts.append("DXY rising → USD strengthening")
-            elif dxy_change < -0.3:
+            elif dxy_change < -0.15:
                 signal = "BUY" if is_usd_first else "SELL"
                 confidence = min(confidence + 0.20, 0.7)
                 reasoning_parts.append("DXY falling → USD weakening")
@@ -133,12 +133,12 @@ class FundamentalsAnalyst(BaseAnalyst):
         if "us10y" in data:
             us10y = data["us10y"]["value"]
             reasoning_parts.append(f"US10Y={us10y:.2f}%")
-            if us10y > 4.5:
+            if us10y > 4.0:
                 if signal == "HOLD":
                     signal = "BUY" if symbol.startswith("USD") else "SELL"
                 confidence = min(confidence + 0.12, 0.7)
                 reasoning_parts.append("High US yields → capital flows to USD")
-            elif us10y < 3.5:
+            elif us10y < 4.0:
                 if signal == "HOLD":
                     signal = "SELL" if symbol.startswith("USD") else "BUY"
                 confidence = min(confidence + 0.12, 0.7)
@@ -148,7 +148,7 @@ class FundamentalsAnalyst(BaseAnalyst):
         if "gold" in data:
             gold_change = data["gold"].get("change_pct", 0)
             reasoning_parts.append(f"Gold={gold_change:+.2f}%")
-            if gold_change > 1:
+            if gold_change > 0.5:
                 if symbol == "USDCHF":
                     signal = "SELL"
                     confidence = min(confidence + 0.15, 0.7)
@@ -156,7 +156,7 @@ class FundamentalsAnalyst(BaseAnalyst):
                     signal = "BUY"
                     confidence = min(confidence + 0.15, 0.7)
                 reasoning_parts.append("Gold rising → risk-off sentiment")
-            elif gold_change < -1:
+            elif gold_change < -0.5:
                 if symbol == "USDCHF":
                     signal = "BUY"
                     confidence = min(confidence + 0.15, 0.7)
@@ -167,7 +167,7 @@ class FundamentalsAnalyst(BaseAnalyst):
             oil_change = data["oil"].get("change_pct", 0)
             reasoning_parts.append(f"Oil={oil_change:+.2f}%")
             if symbol == "USDCAD":
-                signal = "SELL" if oil_change > 1 else "BUY" if oil_change < -1 else signal
+                signal = "SELL" if oil_change > 0.5 else "BUY" if oil_change < -0.5 else signal
                 confidence = min(confidence + 0.12, 0.7)
 
         # ── Copper (AUD correlation) ──
@@ -175,7 +175,7 @@ class FundamentalsAnalyst(BaseAnalyst):
             copper_change = data["copper"].get("change_pct", 0)
             reasoning_parts.append(f"Copper={copper_change:+.2f}%")
             if symbol == "AUDUSD":
-                signal = "BUY" if copper_change > 1 else "SELL" if copper_change < -1 else signal
+                signal = "BUY" if copper_change > 0.5 else "SELL" if copper_change < -0.5 else signal
                 confidence = min(confidence + 0.12, 0.7)
 
         # ── Nikkei (JPY risk sentiment) ──
@@ -183,7 +183,7 @@ class FundamentalsAnalyst(BaseAnalyst):
             nikkei_change = data["nikkei"].get("change_pct", 0)
             reasoning_parts.append(f"Nikkei={nikkei_change:+.2f}%")
             if "JPY" in symbol:
-                signal = "SELL" if nikkei_change > 1 else "BUY" if nikkei_change < -1 else signal
+                signal = "SELL" if nikkei_change > 0.5 else "BUY" if nikkei_change < -0.5 else signal
                 confidence = min(confidence + 0.12, 0.7)
 
         if confidence == 0:

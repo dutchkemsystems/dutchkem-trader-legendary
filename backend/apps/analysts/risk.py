@@ -145,14 +145,14 @@ class RiskAnalyst(BaseAnalyst):
         elif correlation < 0.3:
             risk_score += 0.1
 
-        # Convert to signal
-        if risk_score > 0.3:
+        # Convert to signal (lowered thresholds for more directional signals)
+        if risk_score > 0.2:
             return ('BUY', min(0.55 + risk_score * 0.3, 0.8))
-        elif risk_score < -0.3:
+        elif risk_score < -0.2:
             return ('SELL', min(0.55 + abs(risk_score) * 0.3, 0.8))
-        elif risk_score > 0.1:
+        elif risk_score > 0.05:
             return ('BUY', 0.55)
-        elif risk_score < -0.1:
+        elif risk_score < -0.05:
             return ('SELL', 0.55)
         return ('HOLD', 0.5)
 

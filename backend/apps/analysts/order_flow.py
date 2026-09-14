@@ -163,18 +163,18 @@ class OrderFlowAnalyst(BaseAnalyst):
         # Combined signal from imbalance and deviation
         flow_score = imbalance * 0.7 + deviation * 100 * 0.3
 
-        # Strong flow: imbalance > 0.15 (lowered from 0.2)
-        if flow_score > 0.15:
+        # Strong flow: imbalance > 0.08 (lowered from 0.15)
+        if flow_score > 0.08:
             confidence = min(0.6 + abs(flow_score) * 0.8, 0.85)
             return ('BUY', confidence)
-        elif flow_score < -0.15:
+        elif flow_score < -0.08:
             confidence = min(0.6 + abs(flow_score) * 0.8, 0.85)
             return ('SELL', confidence)
 
-        # Weak flow: use microprice direction as tiebreaker
-        if imbalance > 0.05:
+        # Weak flow: use imbalance as directional lean (lowered from 0.05)
+        if imbalance > 0.02:
             return ('BUY', 0.55)
-        elif imbalance < -0.05:
+        elif imbalance < -0.02:
             return ('SELL', 0.55)
 
         return ('HOLD', 0.5)

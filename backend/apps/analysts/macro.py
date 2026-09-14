@@ -145,10 +145,10 @@ class MacroAnalyst(BaseAnalyst):
         # DXY analysis (most important for forex)
         dxy = macro_data.get("BASE_DXY") or macro_data.get("QUOTE_DXY")
         if dxy is not None:
-            if dxy > 105:
+            if dxy > 103:
                 bull_score += 1  # Strong USD
                 reasoning_parts.append(f"DXY={dxy:.1f} (strong USD)")
-            elif dxy < 100:
+            elif dxy < 102:
                 bear_score += 1  # Weak USD
                 reasoning_parts.append(f"DXY={dxy:.1f} (weak USD)")
             else:
@@ -176,10 +176,10 @@ class MacroAnalyst(BaseAnalyst):
         if gold is not None:
             reasoning_parts.append(f"Gold=${gold:.0f}")
         if oil is not None:
-            if oil > 80:
-                bull_score += 1  # High oil → inflation → hawkish → USD+
+            if oil > 70:
+                bull_score += 1  # Elevated oil → inflation → hawkish → USD+
                 reasoning_parts.append(f"Oil=${oil:.1f} (elevated)")
-            elif oil < 60:
+            elif oil < 65:
                 bear_score += 1
                 reasoning_parts.append(f"Oil=${oil:.1f} (low)")
             else:

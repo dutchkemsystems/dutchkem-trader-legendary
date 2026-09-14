@@ -153,11 +153,11 @@ class NewsAnalyst(BaseAnalyst):
         scores = [_score_headline(a.get("title", ""), a.get("summary", "")) for a in pool]
         avg_score = sum(scores) / len(scores) if scores else 0.0
 
-        # Determine signal
-        if avg_score > 0.15:
+        # Determine signal (lowered thresholds for more directional signals)
+        if avg_score > 0.05:
             signal = "BUY"
             confidence = min(0.4 + abs(avg_score) * 0.4, 0.85)
-        elif avg_score < -0.15:
+        elif avg_score < -0.05:
             signal = "SELL"
             confidence = min(0.4 + abs(avg_score) * 0.4, 0.85)
         else:

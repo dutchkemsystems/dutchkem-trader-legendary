@@ -82,14 +82,14 @@ class OptionsAnalyst(BaseAnalyst):
         bear_score = 0
         reasoning_parts = []
 
-        # Put/Call ratio
-        if avg_pcr > 1.2:
+        # Put/Call ratio (lowered thresholds for more directional signals)
+        if avg_pcr > 1.0:
             bear_score += 2
             reasoning_parts.append(f"PCR={avg_pcr:.2f} (very bearish)")
-        elif avg_pcr > 1.0:
+        elif avg_pcr > 0.9:
             bear_score += 1
             reasoning_parts.append(f"PCR={avg_pcr:.2f} (bearish)")
-        elif avg_pcr < 0.6:
+        elif avg_pcr < 0.7:
             bull_score += 2
             reasoning_parts.append(f"PCR={avg_pcr:.2f} (very bullish)")
         elif avg_pcr < 0.8:

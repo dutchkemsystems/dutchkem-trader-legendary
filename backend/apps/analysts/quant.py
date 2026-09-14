@@ -114,28 +114,28 @@ class QuantAnalyst(BaseAnalyst):
         composite = (stat_arb * 0.3 + mean_rev * 0.2 + coint * 0.25 + momentum * 0.25)
 
         # Individual strong signals can override composite
-        # Momentum > 0.3 = strong trend
-        if momentum > 0.3 and stat_arb > 0.1:
+        # Momentum > 0.15 = moderate trend (lowered from 0.3)
+        if momentum > 0.15 and stat_arb > 0.05:
             return ('BUY', min(0.6 + momentum * 0.3, 0.85))
-        elif momentum < -0.3 and stat_arb < -0.1:
+        elif momentum < -0.15 and stat_arb < -0.05:
             return ('SELL', min(0.6 + abs(momentum) * 0.3, 0.85))
 
-        # Mean reversion: strong z-score reversion signal
-        if mean_rev > 0.3:
+        # Mean reversion: z-score reversion signal (lowered from 0.3)
+        if mean_rev > 0.15:
             return ('BUY', min(0.55 + mean_rev * 0.3, 0.8))
-        elif mean_rev < -0.3:
+        elif mean_rev < -0.15:
             return ('SELL', min(0.55 + abs(mean_rev) * 0.3, 0.8))
 
-        # Composite with lower threshold
-        if composite > 0.3:
+        # Composite with lower threshold (lowered from 0.3)
+        if composite > 0.15:
             return ('BUY', min(0.5 + composite * 0.5, 0.85))
-        elif composite < -0.3:
+        elif composite < -0.15:
             return ('SELL', min(0.5 + abs(composite) * 0.5, 0.85))
 
-        # Default: weak HOLD with directional lean based on z-score
-        if stat_arb > 0.5:
+        # Default: weak directional lean based on z-score (lowered from 0.5)
+        if stat_arb > 0.2:
             return ('BUY', 0.55)
-        elif stat_arb < -0.5:
+        elif stat_arb < -0.2:
             return ('SELL', 0.55)
         return ('HOLD', 0.5)
 

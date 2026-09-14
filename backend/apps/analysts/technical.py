@@ -36,8 +36,9 @@ class TechnicalAnalyst(BaseAnalyst):
             )
         patterns = self._detect_patterns(chart_data)
         sr_levels = self._find_support_resistance(chart_data)
+        trend = chart_data.get('trend', 'neutral')
 
-        signal, confidence = self._evaluate_patterns(patterns, sr_levels)
+        signal, confidence = self._evaluate_patterns(patterns, sr_levels, trend)
 
         return AnalystResult(
             analyst_name='technical',
@@ -140,7 +141,7 @@ class TechnicalAnalyst(BaseAnalyst):
         return {'support': chart_data.get('support', 1.085),
                 'resistance': chart_data.get('resistance', 1.105)}
 
-    def _evaluate_patterns(self, patterns: list, sr_levels: dict) -> tuple:
+    def _evaluate_patterns(self, patterns: list, sr_levels: dict, trend: str = 'neutral') -> tuple:
         bullish_patterns = ['bullish_trend', 'double_bottom', 'bullish_engulfing', 'hammer',
                             'morning_star', 'oversold_bounce', 'bullish_crossover']
         bearish_patterns = ['bearish_trend', 'double_top', 'bearish_engulfing', 'shooting_star',
@@ -161,6 +162,12 @@ class TechnicalAnalyst(BaseAnalyst):
             return ('BUY', 0.55)
         elif bear_count > 0 and bull_count == 0:
             return ('SELL', 0.55)
+
+        # Tiebreaker: use trend direction as directional lean
+        if trend == 'up':
+            return ('BUY', 0.52)
+        elif trend == 'down':
+            return ('SELL', 0.52)
         return ('HOLD', 0.5)
 
     def get_capabilities(self) -> list[str]:

@@ -65,35 +65,35 @@ class OnChainAnalyst(BaseAnalyst):
         bear_score = 0
         reasoning_parts = []
 
-        # BTC dominance analysis
+        # BTC dominance analysis (lowered thresholds for more directional signals)
         if btc_dominance is not None:
-            if btc_dominance > 55:
+            if btc_dominance > 52:
                 bear_score += 2  # Risk-off in crypto → risk-off globally
                 reasoning_parts.append(f"BTC Dom={btc_dominance:.1f}% (risk-off)")
-            elif btc_dominance > 50:
+            elif btc_dominance > 48:
                 bear_score += 1
                 reasoning_parts.append(f"BTC Dom={btc_dominance:.1f}% (moderate risk-off)")
-            elif btc_dominance < 40:
+            elif btc_dominance < 43:
                 bull_score += 2  # Risk-on → speculative capital flowing
                 reasoning_parts.append(f"BTC Dom={btc_dominance:.1f}% (risk-on)")
-            elif btc_dominance < 45:
+            elif btc_dominance < 46:
                 bull_score += 1
                 reasoning_parts.append(f"BTC Dom={btc_dominance:.1f}% (moderate risk-on)")
             else:
                 reasoning_parts.append(f"BTC Dom={btc_dominance:.1f}% (neutral)")
 
-        # BTC 24h change
+        # BTC 24h change (lowered thresholds)
         if btc_change_24h is not None:
-            if btc_change_24h > 5:
+            if btc_change_24h > 3:
                 bull_score += 1  # BTC rally → risk-on
                 reasoning_parts.append(f"BTC +{btc_change_24h:.1f}% 24h (rally)")
-            elif btc_change_24h > 2:
+            elif btc_change_24h > 1:
                 bull_score += 1
                 reasoning_parts.append(f"BTC +{btc_change_24h:.1f}% 24h (up)")
-            elif btc_change_24h < -5:
+            elif btc_change_24h < -3:
                 bear_score += 1  # BTC crash → risk-off
                 reasoning_parts.append(f"BTC {btc_change_24h:.1f}% 24h (crash!)")
-            elif btc_change_24h < -2:
+            elif btc_change_24h < -1:
                 bear_score += 1
                 reasoning_parts.append(f"BTC {btc_change_24h:.1f}% 24h (down)")
             else:
