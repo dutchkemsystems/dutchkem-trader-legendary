@@ -158,7 +158,7 @@ CONFIG = {
     "kelly_win_rate": 0.55,
     "kelly_avg_win": 1.5,
     "kelly_avg_loss": 1.0,
-    "hold_bars": 72,
+    "hold_bars": 96,                    # Hold up to 96 hours (4 days for H1)
     "min_confidence": 0.25,
     "min_score": 2,
 
@@ -270,13 +270,13 @@ CONFIG = {
     "v3_symbol_configs": {
         "EURUSD": {"sl": 1.5, "tp": 4.0, "trail": 1.0, "risk": 0.03, "cooldown": 3},
         "GBPUSD": {"sl": 1.5, "tp": 4.0, "trail": 2.0, "risk": 0.03, "cooldown": 5},
-        "USDJPY": {"sl": 2.0, "tp": 3.0, "trail": 1.0, "risk": 0.03, "cooldown": 3},
+        "USDJPY": {"sl": 1.5, "tp": 4.0, "trail": 1.0, "risk": 0.03, "cooldown": 3},  # was sl=2.0/tp=3.0 (R:R 1.5→2.67)
         "XAUUSD": {"sl": 1.5, "tp": 3.0, "trail": 2.0, "risk": 0.02, "cooldown": 5},
-        "USDCHF": {"sl": 2.0, "tp": 3.0, "trail": 2.0, "risk": 0.02, "cooldown": 3},
+        "USDCHF": {"sl": 1.5, "tp": 4.0, "trail": 2.0, "risk": 0.02, "cooldown": 3},  # was sl=2.0/tp=3.0 (R:R 1.5→2.67)
         "AUDUSD": {"sl": 1.5, "tp": 4.0, "trail": 2.0, "risk": 0.03, "cooldown": 3},
         "USDCAD": {"sl": 2.0, "tp": 4.0, "trail": 1.0, "risk": 0.03, "cooldown": 5},
-        "NZDUSD": {"sl": 2.5, "tp": 4.0, "trail": 1.0, "risk": 0.03, "cooldown": 3},
-        "EURGBP": {"sl": 2.0, "tp": 3.0, "trail": 1.0, "risk": 0.03, "cooldown": 3},
+        "NZDUSD": {"sl": 2.0, "tp": 5.0, "trail": 1.0, "risk": 0.03, "cooldown": 3},  # was sl=2.5/tp=4.0 (R:R 1.6→2.5)
+        "EURGBP": {"sl": 1.5, "tp": 4.0, "trail": 1.0, "risk": 0.03, "cooldown": 3},  # was sl=2.0/tp=3.0 (R:R 1.5→2.67)
         "EURJPY": {"sl": 1.5, "tp": 4.0, "trail": 2.0, "risk": 0.03, "cooldown": 3},
     },
 
@@ -293,8 +293,8 @@ CONFIG = {
 
     # ── Partial Take-Profit ──
     "partial_tp_enabled": True,
-    "partial_tp_pct": 0.50,
-    "partial_tp_rr": 1.0,
+    "partial_tp_pct": 0.30,             # Take 30% at TP (was 50% — let winners run longer)
+    "partial_tp_rr": 1.5,               # Trigger at 1.5R (was 1.0 — allow more room before partial exit)
 
     # ── Trailing Stop ──
     "trailing_enabled": True,
@@ -1603,6 +1603,57 @@ class UnifiedEngine:
             self.scalper.trade_history = self.scalper.trade_history[-200:]
 
     # ═══════════════════════════════════════════════════════════════
+    # SCALPING STRATEGIES ENGINE (10 new strategies)
+    # ═══════════════════════════════════════════════════════════════
+
+    async def _run_scalping_strategies(self):
+        """Run scalping strategies if any are enabled."""
+        try:
+            from apps.scalping.engine import ScalpingEngine
+            from apps.scalping.config import is_any_strategy_enabled
+            if not is_any_strategy_enabled():
+                return
+            if not hasattr(self, '_scalping_engine'):
+                self._scalping_engine = ScalpingEngine(self.mt5_client, self.risk_manager)
+            await self._scalping_engine.run_cycle(self.WATCHLIST)
+        except ImportError:
+            pass
+
+    def _run_scalping_strategies_sync(self):
+        """Synchronous wrapper for scalping strategies."""
+        try:
+            import asyncio
+            loop = asyncio.get_event_loop()
+            if loop.is_running():
+                # If event loop is already running, schedule as task
+                asyncio.ensure_future(self._run_scalping_strategies())
+            else:
+                loop.run_until_complete(self._run_scalping_strategies())
+        except RuntimeError:
+            # No event loop, create one
+            asyncio.run(self._run_scalping_strategies())
+        except ImportError:
+            pass
+
+    def _sync_scalping_results(self):
+        """Feed scalping trades into main engine's RiskManager."""
+        if not hasattr(self, '_scalping_engine'):
+            return
+        results = self._scalping_engine.get_trade_results()
+        for trade in results:
+            # Update Kelly calculation
+            self.risk.trade_results.append(trade)
+            # Update win/loss streaks
+            if trade.get('pnl', 0) > 0:
+                self.risk.win_streak += 1
+                self.risk.loss_streak = 0
+            else:
+                self.risk.loss_streak += 1
+                self.risk.win_streak = 0
+            # Update daily PnL
+            self.risk.daily_pnl += trade.get('pnl', 0)
+
+    # ═══════════════════════════════════════════════════════════════
     # PHASE 2: ML LIVE LEARNING LOOP
     # ═══════════════════════════════════════════════════════════════
 
@@ -2058,9 +2109,9 @@ class UnifiedEngine:
         If avg_win/avg_loss provided (from strategy profile), use those."""
         win_rate = CONFIG.get("kelly_win_rate", 0.55)
         if avg_win is None:
-            avg_win = CONFIG.get("kelly_avg_win", 1.5)
+            avg_win = CONFIG.get("kelly_avg_win", 1.75)   # Aligned with V3 neutral profile
         if avg_loss is None:
-            avg_loss = CONFIG.get("kelly_avg_loss", 1.0)
+            avg_loss = CONFIG.get("kelly_avg_loss", 0.75)  # Aligned with V3 neutral profile
 
         # If we have enough trade results, compute dynamic Kelly
         if len(self._trade_results) >= 10:
@@ -2747,6 +2798,9 @@ class UnifiedEngine:
             self.scalper.refresh_trade_statuses()
             # ── SCALPER INTEGRATION: Feed scalp results into main engine ──
             self._sync_scalp_results()
+            # ── SCALPING STRATEGIES: Run 10 new scalping strategies ──
+            self._run_scalping_strategies_sync()
+            self._sync_scalping_results()
             # ── Register scalp positions with risk manager for portfolio limits ──
             for ticket, scalp in self.scalper.open_scalps.items():
                 sym = scalp["symbol"]
@@ -3211,12 +3265,17 @@ class UnifiedEngine:
                     self.monitor_log(signal.symbol, "gate_blocked", f"TECH: {tech_gate.reason}")
                     return
 
-                # Gate 5: Edge after costs
-                # Edge = ML confidence - 0.5 (null hypothesis). Must exceed MIN_EDGE_AFTER_COSTS.
-                # For forex, the "edge" is how much better than random (50/50) the ML predicts.
-                ml_confidence = ml_gate.value if ml_gate.value else 0.5
-                edge_value = ml_confidence - 0.5
-                edge_gate = self.consensus_gates.check_edge(ml_confidence, 0.5)
+                # Gate 5: Edge after costs — DIRECTION-AWARE
+                # Edge = how much ML confirms the trade direction vs random (50/50).
+                # BUY:  edge = ML_p_up - 0.5  (positive = confirms UP)
+                # SELL: edge = 0.5 - ML_p_up  (positive = confirms DOWN)
+                ml_p_up = ml_gate.value if ml_gate.value else 0.5
+                if signal.direction.value == "BUY":
+                    edge_value = ml_p_up - 0.5
+                else:  # SELL
+                    edge_value = 0.5 - ml_p_up
+                # Pass direction-correct edge to the gate (use 0.5 + edge as p_up equivalent)
+                edge_gate = self.consensus_gates.check_edge(0.5 + edge_value, 0.5)
                 if not edge_gate.passed:
                     log.info(f"  EDGE GATE BLOCKED {signal.symbol} — {edge_gate.reason}")
                     self.monitor_log(signal.symbol, "gate_blocked", f"EDGE: {edge_gate.reason}")
@@ -3402,13 +3461,26 @@ class UnifiedEngine:
                                 self._close_trade(symbol, ticket, "EXIT_OPTIMIZER")
                                 continue
 
-            # Time exit (72 bars = 3 days for H1)
+            # Time exit (96 bars = 4 days for H1) — skip if in profit > 1R
             entry_time = datetime.fromisoformat(rm_pos["entry_time"])
             bars_held = (now - entry_time).total_seconds() / 3600  # Approximate
             if bars_held >= CONFIG["hold_bars"]:
-                log.info(f"  TIME EXIT {symbol} — held {bars_held:.0f}h")
-                self._close_trade(symbol, ticket, "TIME_EXIT")
-                continue
+                # Don't force-close profitable trades — let trailing stop handle them
+                entry = rm_pos["entry_price"]
+                sl = rm_pos.get("sl", 0)
+                if rm_pos["action"] == "BUY":
+                    unrealized = current - entry
+                    sl_distance = entry - sl if sl > 0 else entry * 0.01
+                else:
+                    unrealized = entry - current
+                    sl_distance = sl - entry if sl > 0 else entry * 0.01
+                rr_ratio = unrealized / sl_distance if sl_distance > 0 else 0
+                if rr_ratio >= 1.0:
+                    log.info(f"  TIME EXIT SKIPPED {symbol} — held {bars_held:.0f}h but in profit ({rr_ratio:.1f}R)")
+                else:
+                    log.info(f"  TIME EXIT {symbol} — held {bars_held:.0f}h, RR={rr_ratio:.1f}")
+                    self._close_trade(symbol, ticket, "TIME_EXIT")
+                    continue
 
             # Trailing stop + partial TP logic
             if CONFIG["trailing_enabled"]:
