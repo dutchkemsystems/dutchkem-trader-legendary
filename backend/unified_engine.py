@@ -2932,12 +2932,11 @@ class UnifiedEngine:
             log.info(f"  REJECTED: confidence {adjusted_confidence:.3f} < min {CONFIG['min_confidence']}")
             return None
 
-        # Layer 6: ML ranking — GATE trades by ML confidence
+        # Layer 6: ML ranking — BOOST-ONLY mode (never penalize)
         ml_p_up = ml_rank(indicator_dict)
-        ml_min = CONFIG.get("ml_min_confidence", 0.50)
 
-        # ML gating: ONLY boost when ML strongly agrees (never penalize with unreliable model)
-        # BUG FIX: Model trained on synthetic data (57.6% accuracy) — too unreliable to block trades
+        # ML boost-only: Only boost when ML strongly agrees. Model is unreliable
+        # (57.6% accuracy on synthetic data) so we never use it to block/reduce trades.
         if action == "BUY" and ml_p_up > 0.65:
             ml_boost = (ml_p_up - 0.5) * 0.2
             adjusted_confidence = min(1.0, adjusted_confidence + ml_boost)
@@ -2946,8 +2945,6 @@ class UnifiedEngine:
             ml_boost = (0.5 - ml_p_up) * 0.2
             adjusted_confidence = min(1.0, adjusted_confidence + ml_boost)
             log.info(f"  ML BOOST {symbol}: SELL confirmed p_up={ml_p_up:.3f} → boost={ml_boost:.3f}")
-        else:
-            log.info(f"  ML NEUTRAL {symbol}: p_up={ml_p_up:.3f} (no boost/penalty)")
 
         # Layer 7: Regime detection — adjust confidence by market state
         regime_adj = self._get_regime_adjustment(symbol)
