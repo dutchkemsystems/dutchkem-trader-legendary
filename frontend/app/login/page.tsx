@@ -65,14 +65,14 @@ export default function LoginPage() {
           <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-cyan-400 to-blue-600 flex items-center justify-center font-black text-black text-sm shadow-lg shadow-cyan-500/20">DK</div>
           <div>
             <span className="text-xl font-bold">DutchKEM</span>
-            <span className="text-[10px] text-cyan-400 ml-2 font-medium tracking-widest uppercase">Legend</span>
+            <span className="text-[10px] text-cyan-400 ml-2 font-medium tracking-widest uppercase">Trader</span>
           </div>
         </div>
 
         {/* Card */}
         <div className="p-10 rounded-3xl glass border border-white/[0.08]">
           <h1 className="text-3xl font-black tracking-tight mb-2">Welcome back</h1>
-          <p className="text-gray-500 mb-8 text-sm">Sign in to access the Legendary Intelligence dashboard</p>
+          <p className="text-gray-500 mb-8 text-sm">Sign in to access the trading dashboard</p>
 
           <form onSubmit={handleSubmit} className="space-y-5">
             {error && (

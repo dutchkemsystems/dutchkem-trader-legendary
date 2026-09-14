@@ -3,8 +3,8 @@ import "./globals.css";
 import { Providers } from "@/components/providers";
 
 export const metadata: Metadata = {
-  title: "DutchKEM Trader - Legendary Intelligence",
-  description: "Professional trading platform with legendary intelligence edition",
+  title: "DutchKEM Trader",
+  description: "Professional trading platform",
 };
 
 export default function RootLayout({

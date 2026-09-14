@@ -224,7 +224,7 @@ export default function HomePage() {
               </div>
               <div>
                 <span className="text-lg font-bold tracking-tight">DutchKEM</span>
-                <span className="text-[10px] text-cyan-400 ml-2 font-medium tracking-widest uppercase">Legend</span>
+                <span className="text-[10px] text-cyan-400 ml-2 font-medium tracking-widest uppercase">Trader</span>
               </div>
             </div>
             <div className="hidden md:flex items-center gap-8 text-sm text-gray-400">
@@ -268,8 +268,8 @@ export default function HomePage() {
                 loaded ? "opacity-100 translate-y-0" : "opacity-0 translate-y-10"
               }`}
             >
-              <span className="block text-gradient-animated">Legendary</span>
-              <span className="block text-white/90">Intelligence</span>
+              <span className="block text-gradient-animated">DutchKEM</span>
+              <span className="block text-white/90">Trader</span>
             </h1>
 
             {/* Subtitle */}
@@ -547,7 +547,7 @@ export default function HomePage() {
               <span className="font-bold text-sm">DutchKEM Trader</span>
             </div>
             <div className="text-sm text-gray-600">
-              Legendary Intelligence Edition &mdash; Powered by AI &mdash; 2026
+              DutchKEM Trader &mdash; Powered by AI &mdash; 2026
             </div>
           </div>
         </footer>
