@@ -5,7 +5,7 @@ import { ConsensusGauge } from "@/components/dashboard/consensus-gauge";
 import { AnalystGrid } from "@/components/dashboard/analyst-grid";
 import { VoteBreakdown } from "@/components/dashboard/vote-breakdown";
 import { ScannerHeatmap } from "@/components/dashboard/scanner-heatmap";
-import { LegendaryModules } from "@/components/dashboard/legendary-modules";
+import { IntelligenceModules } from "@/components/dashboard/intelligence-modules";
 import { QuickTrade } from "@/components/dashboard/quick-trade";
 import { MLPredictionCard } from "@/components/dashboard/ml-prediction-card";
 import { GateStatusCard } from "@/components/dashboard/gate-status-card";
@@ -127,13 +127,13 @@ export default function DashboardPage() {
             </div>
           </div>
 
-          {/* Scanner heatmap + legendary */}
+          {/* Scanner heatmap + intelligence */}
           <div className="grid gap-4 sm:grid-cols-2">
             <ErrorBoundary>
               <ScannerHeatmap />
             </ErrorBoundary>
             <ErrorBoundary>
-              <LegendaryModules />
+              <IntelligenceModules />
             </ErrorBoundary>
           </div>
 

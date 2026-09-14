@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
-import { useLegendary } from "@/hooks/use-legendary";
+import { useIntelligence } from "@/hooks/use-intelligence";
 import { useSymbolStore } from "@/stores/symbol-store";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -163,8 +163,8 @@ function LoadingSkeleton() {
   );
 }
 
-export function LegendaryModules() {
-  const { seykota, turtleSoup, pyramiding, loading, error, fetch } = useLegendary();
+export function IntelligenceModules() {
+  const { seykota, turtleSoup, pyramiding, loading, error, fetch } = useIntelligence();
   const { selectedSymbol } = useSymbolStore();
 
   useEffect(() => {
@@ -175,7 +175,7 @@ export function LegendaryModules() {
     return (
       <div className="space-y-4">
         <h3 className="text-sm font-medium text-muted-foreground">
-          Legendary Modules
+          Intelligence Modules
         </h3>
         <LoadingSkeleton />
       </div>
@@ -186,7 +186,7 @@ export function LegendaryModules() {
     return (
       <div className="space-y-4">
         <h3 className="text-sm font-medium text-muted-foreground">
-          Legendary Modules
+          Intelligence Modules
         </h3>
         <div className="rounded-lg border border-border bg-card p-6">
           <p className="text-sm text-destructive">{error}</p>
@@ -199,7 +199,7 @@ export function LegendaryModules() {
     <div className="space-y-4">
       <div className="flex items-center justify-between">
         <h3 className="text-sm font-medium text-muted-foreground">
-          Legendary Modules
+          Intelligence Modules
         </h3>
         <button
           onClick={() => fetch()}

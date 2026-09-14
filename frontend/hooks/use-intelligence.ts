@@ -5,7 +5,7 @@ import { getSeykota, getTurtleSoup, getPyramiding } from "@/lib/api";
 import { useSymbolStore } from "@/stores/symbol-store";
 import type { SeykotaResult, TurtleSoupResult, PyramidingResult } from "@/lib/types";
 
-interface LegendaryState {
+interface IntelligenceState {
   seykota: SeykotaResult | null;
   turtleSoup: TurtleSoupResult | null;
   pyramiding: PyramidingResult | null;
@@ -13,8 +13,8 @@ interface LegendaryState {
   error: string | null;
 }
 
-export function useLegendary() {
-  const [state, setState] = useState<LegendaryState>({
+export function useIntelligence() {
+  const [state, setState] = useState<IntelligenceState>({
     seykota: null,
     turtleSoup: null,
     pyramiding: null,
@@ -42,7 +42,7 @@ export function useLegendary() {
       setState((s) => ({
         ...s,
         loading: false,
-        error: err instanceof Error ? err.message : "Failed to fetch legendary data",
+        error: err instanceof Error ? err.message : "Failed to fetch intelligence data",
       }));
     }
   }, [selectedSymbol]);
