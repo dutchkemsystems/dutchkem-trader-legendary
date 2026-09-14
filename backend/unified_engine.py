@@ -144,6 +144,10 @@ SESSION_LONDON = (7, 16)   # London session
 SESSION_NY = (12, 21)      # New York session
 SESSION_OVERLAP = (12, 16) # London-NY overlap (best spreads)
 
+# Exit optimizer cooldown — don't run exit optimizer within first N cycles
+# after a position is registered (prevents premature closure on engine restart)
+EXIT_OPTIMIZER_COOLDOWN_CYCLES = 2
+
 # ═══════════════════════════════════════════════════════════════
 # UNIFIED CONFIG — ALL LAYERS COMBINED
 # ═══════════════════════════════════════════════════════════════
@@ -2420,6 +2424,7 @@ class UnifiedEngine:
                 "ticket": p["ticket"],
                 "entry_time": p["time"],
                 "partial_tp_done": False,
+                "registered_at_cycle": self.cycle_count,
             }
         log.info(f"  Synced {len(positions)} open positions")
 
@@ -2751,6 +2756,7 @@ class UnifiedEngine:
                         "entry_price": scalp["entry_price"],
                         "source": "scalper",
                         "ticket": ticket,
+                        "registered_at_cycle": self.cycle_count,
                     }
 
         # Scan all symbols
@@ -3253,6 +3259,7 @@ class UnifiedEngine:
                 # Store indicators for ML live learning
                 "indicators": signal.indicators.copy() if signal.indicators else {},
                 "confidence": signal.confidence,
+                "registered_at_cycle": self.cycle_count,
             }
             log.info(f"  EXECUTED {signal.symbol:8} {signal.direction.value:4} @ {signal.entry_price:.5f} "
                      f"lots={lots} SL={signal.sl_price:.5f} TP={signal.tp_price:.5f} "
@@ -3333,6 +3340,7 @@ class UnifiedEngine:
                     "source": "mt5_sync",
                     "current_price": pos.get("current_price", 0),
                     "profit": pos.get("profit", 0),
+                    "registered_at_cycle": self.cycle_count,
                 }
                 log.info(f"  SYNCED {symbol} from MT5 — ticket={pos['ticket']} {action} profit=${pos.get('profit', 0):+.2f}")
 
@@ -3374,19 +3382,24 @@ class UnifiedEngine:
 
             # Phase 4: Exit Optimizer — ML-enhanced exit decision
             if CONFIG.get("exit_model_enabled") and self.exit_optimizer:
-                exit_rec = self._get_optimized_exit(symbol, rm_pos)
-                if exit_rec.get("method") != "none" and exit_rec.get("method") != "fallback":
-                    rec_price = exit_rec.get("exit_price", 0)
-                    if rec_price > 0:
-                        current = pos["current_price"]
-                        if rm_pos["action"] == "BUY" and current >= rec_price:
-                            log.info(f"  EXIT OPTIMIZER {symbol}: BUY exit at {rec_price:.5f} (current={current:.5f})")
-                            self._close_trade(symbol, ticket, "EXIT_OPTIMIZER")
-                            continue
-                        elif rm_pos["action"] == "SELL" and current <= rec_price:
-                            log.info(f"  EXIT OPTIMIZER {symbol}: SELL exit at {rec_price:.5f} (current={current:.5f})")
-                            self._close_trade(symbol, ticket, "EXIT_OPTIMIZER")
-                            continue
+                registered_at = rm_pos.get("registered_at_cycle", 0)
+                cycles_tracked = self.cycle_count - registered_at
+                if cycles_tracked < EXIT_OPTIMIZER_COOLDOWN_CYCLES:
+                    log.debug(f"  EXIT OPTIMIZER {symbol}: skipped (cooldown {cycles_tracked}/{EXIT_OPTIMIZER_COOLDOWN_CYCLES})")
+                else:
+                    exit_rec = self._get_optimized_exit(symbol, rm_pos)
+                    if exit_rec.get("method") != "none" and exit_rec.get("method") != "fallback":
+                        rec_price = exit_rec.get("exit_price", 0)
+                        if rec_price > 0:
+                            current = pos["current_price"]
+                            if rm_pos["action"] == "BUY" and current >= rec_price:
+                                log.info(f"  EXIT OPTIMIZER {symbol}: BUY exit at {rec_price:.5f} (current={current:.5f})")
+                                self._close_trade(symbol, ticket, "EXIT_OPTIMIZER")
+                                continue
+                            elif rm_pos["action"] == "SELL" and current <= rec_price:
+                                log.info(f"  EXIT OPTIMIZER {symbol}: SELL exit at {rec_price:.5f} (current={current:.5f})")
+                                self._close_trade(symbol, ticket, "EXIT_OPTIMIZER")
+                                continue
 
             # Time exit (72 bars = 3 days for H1)
             entry_time = datetime.fromisoformat(rm_pos["entry_time"])
