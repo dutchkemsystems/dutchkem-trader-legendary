@@ -1,6 +1,9 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { API_BASE_URL } from '@/lib/constants';
+
+const API = `${API_BASE_URL}/scalping`;
 
 interface ScalpingStrategy {
   name: string;
@@ -30,7 +33,7 @@ export function ScalpingStrategiesPanel() {
   useEffect(() => {
     const fetchStatus = async () => {
       try {
-        const res = await fetch('/api/v1/scalping/status');
+        const res = await fetch(`${API}/status`);
         const data = await res.json();
         setStrategies(data.strategies);
         setActiveTrades(data.active_trades);
@@ -47,7 +50,7 @@ export function ScalpingStrategiesPanel() {
 
   const toggleStrategy = async (name: string, enabled: boolean) => {
     try {
-      await fetch(`/api/v1/scalping/toggle/${name}`, {
+      await fetch(`${API}/toggle/${name}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ enabled }),
