@@ -3773,6 +3773,13 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+# Register scalping API routes
+try:
+    from api.routes.scalping import router as scalping_router
+    app.include_router(scalping_router, prefix="/api/v1/scalping", tags=["scalping"])
+except ImportError:
+    pass
+
 engine = UnifiedEngine()
 
 

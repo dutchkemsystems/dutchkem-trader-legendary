@@ -18,7 +18,7 @@ async def get_scalping_status():
                 "trades": 0,
                 "winRate": 0,
                 "pnl": 0,
-                "status": "disabled"
+                "status": "active" if config.get("enabled", False) else "disabled"
             }
             for name, config in SCALPING_STRATEGIES.items()
         ],
