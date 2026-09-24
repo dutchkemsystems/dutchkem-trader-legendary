@@ -139,3 +139,98 @@ def test_connector_default_config():
         conn = MT5Connector()
     from config.broker_config import BrokerConfig
     assert isinstance(conn._config, BrokerConfig)
+
+
+# =============================================================================
+# Pending order management (for Gold Hedge EA)
+# =============================================================================
+
+def test_cancel_pending_order_sim(connector):
+    """Should cancel pending order in simulation mode."""
+    connector.connect("SIM-001", "pass", "Sim")
+    
+    # Manually add a pending order to sim state
+    connector._sim_pending[12345] = {
+        'symbol': 'XAUUSD',
+        'type': 'BUY_STOP',
+        'volume': 0.01,
+        'price': 2010.0,
+    }
+    
+    result = connector.cancel_pending_order(12345)
+    assert result is True
+    assert 12345 not in connector._sim_pending
+
+
+def test_cancel_pending_order_not_found(connector):
+    """Should return False for non-existent pending order."""
+    connector.connect("SIM-001", "pass", "Sim")
+    result = connector.cancel_pending_order(99999)
+    assert result is False
+
+
+def test_modify_pending_order_sim(connector):
+    """Should modify pending order in simulation mode."""
+    connector.connect("SIM-001", "pass", "Sim")
+    
+    connector._sim_pending[12345] = {
+        'symbol': 'XAUUSD',
+        'type': 'BUY_STOP',
+        'volume': 0.01,
+        'price': 2010.0,
+        'sl': 2000.0,
+        'tp': 2020.0,
+    }
+    
+    result = connector.modify_pending_order(12345, price=Decimal("2015.0"), stop_loss=Decimal("2005.0"))
+    assert result is True
+    assert connector._sim_pending[12345]['price'] == Decimal("2015.0")
+    assert connector._sim_pending[12345]['sl'] == Decimal("2005.0")
+
+
+def test_modify_pending_order_not_found(connector):
+    """Should return False for non-existent pending order."""
+    connector.connect("SIM-001", "pass", "Sim")
+    result = connector.modify_pending_order(99999, price=Decimal("2015.0"))
+    assert result is False
+
+
+def test_get_pending_orders_sim(connector):
+    """Should return pending orders in simulation mode."""
+    connector.connect("SIM-001", "pass", "Sim")
+    
+    connector._sim_pending[12345] = {
+        'symbol': 'XAUUSD',
+        'type': 'BUY_STOP',
+        'volume': 0.01,
+        'price': 2010.0,
+        'magic': 234020,
+    }
+    connector._sim_pending[12346] = {
+        'symbol': 'EURUSD',
+        'type': 'SELL_LIMIT',
+        'volume': 0.02,
+        'price': 1.1000,
+        'magic': 234010,
+    }
+    
+    # Get all
+    orders = connector.get_pending_orders()
+    assert len(orders) == 2
+    
+    # Filter by symbol
+    orders = connector.get_pending_orders(symbol='XAUUSD')
+    assert len(orders) == 1
+    assert orders[0]['symbol'] == 'XAUUSD'
+    
+    # Filter by magic
+    orders = connector.get_pending_orders(magic=234020)
+    assert len(orders) == 1
+    assert orders[0]['magic'] == 234020
+
+
+def test_get_pending_orders_empty(connector):
+    """Should return empty list when no pending orders."""
+    connector.connect("SIM-001", "pass", "Sim")
+    orders = connector.get_pending_orders()
+    assert orders == []

@@ -1,185 +1,189 @@
+"""
+Lightweight in-memory store replacing Django ORM models.
+Provides AccountConfig and Position with the same interface used by route handlers.
+"""
+
 import uuid
-from django.db import models
-from django.contrib.auth.models import User
+from datetime import datetime, timezone
+from decimal import Decimal
 
 
-class UserProxy(User):
-    class Meta:
-        proxy = True
-        db_table = "users"
+class _MemoryStore:
+    """Simple dict-backed store with get_or_create / save semantics."""
+
+    def __init__(self):
+        self._items: dict[tuple, object] = {}
+
+    def get_or_create(self, defaults=None, **kwargs):
+        key = tuple(sorted(kwargs.items()))
+        if key in self._items:
+            return self._items[key], False
+        obj = _Model(defaults or {}, **kwargs)
+        self._items[key] = obj
+        return obj, True
+
+    def filter(self, **kwargs):
+        return [
+            obj
+            for obj in self._items.values()
+            if all(getattr(obj, k, None) == v for k, v in kwargs.items())
+        ]
 
 
-class AnalystResult(models.Model):
-    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="analyst_results")
-    ticker = models.CharField(max_length=20)
-    analyst_type = models.CharField(max_length=50)
-    signal = models.CharField(max_length=20)
-    confidence = models.FloatField()
-    reasoning = models.TextField(blank=True)
-    metadata_json = models.JSONField(default=dict, blank=True)
-    created_at = models.DateTimeField(auto_now_add=True)
+class _Model:
+    def __init__(self, defaults=None, **kwargs):
+        self.id = uuid.uuid4()
+        self.created_at = datetime.now(timezone.utc)
+        self.updated_at = datetime.now(timezone.utc)
+        for k, v in (defaults or {}).items():
+            setattr(self, k, v)
+        for k, v in kwargs.items():
+            setattr(self, k, v)
 
-    class Meta:
-        ordering = ["-created_at"]
-        db_table = "analyst_results"
-
-    def __str__(self):
-        return f"{self.analyst_type} - {self.ticker}: {self.signal} ({self.confidence:.0%})"
+    def save(self):
+        self.updated_at = datetime.now(timezone.utc)
 
 
-class ConsensusResult(models.Model):
-    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="consensus_results")
-    ticker = models.CharField(max_length=20)
-    consensus_signal = models.CharField(max_length=20)
-    weight = models.FloatField()
-    analyst_results = models.ManyToManyField(AnalystResult, related_name="consensus_groups")
-    reasoning = models.TextField(blank=True)
-    created_at = models.DateTimeField(auto_now_add=True)
-
-    class Meta:
-        ordering = ["-created_at"]
-        db_table = "consensus_results"
-
-    def __str__(self):
-        return f"Consensus {self.ticker}: {self.consensus_signal} (w={self.weight:.2f})"
+# ── AccountConfig ──
 
 
-class Trade(models.Model):
-    class Status(models.TextChoices):
-        PENDING = "PENDING", "Pending"
-        SUBMITTED = "SUBMITTED", "Submitted"
-        PARTIAL = "PARTIAL", "Partial"
-        EXECUTED = "EXECUTED", "Executed"
-        CANCELLED = "CANCELLED", "Cancelled"
-        FAILED = "FAILED", "Failed"
+class _AccountConfig:
+    class Broker:
+        MT4 = "MT4"
+        MT5 = "MT5"
 
-    class Side(models.TextChoices):
-        BUY = "BUY", "Buy"
-        SELL = "SELL", "Sell"
+    class AccountType:
+        CENT = "CENT"
+        STANDARD = "STANDARD"
 
-    class OrderType(models.TextChoices):
-        MARKET = "MARKET", "Market"
-        LIMIT = "LIMIT", "Limit"
-        STOP = "STOP", "Stop"
-        STOP_LIMIT = "STOP_LIMIT", "Stop Limit"
+    objects = _MemoryStore()
 
-    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="trades")
-    ticker = models.CharField(max_length=20)
-    side = models.CharField(max_length=4, choices=Side.choices)
-    order_type = models.CharField(max_length=10, choices=OrderType.choices, default=OrderType.MARKET)
-    quantity = models.DecimalField(max_digits=15, decimal_places=6)
-    price = models.DecimalField(max_digits=15, decimal_places=6)
-    stop_loss = models.DecimalField(max_digits=15, decimal_places=6, null=True, blank=True)
-    take_profit = models.DecimalField(max_digits=15, decimal_places=6, null=True, blank=True)
-    trailing_stop = models.DecimalField(max_digits=15, decimal_places=6, null=True, blank=True)
-    broker_order_id = models.CharField(max_length=50, null=True, blank=True)
-    filled_quantity = models.DecimalField(max_digits=15, decimal_places=6, default=0)
-    fill_price = models.DecimalField(max_digits=15, decimal_places=6, null=True, blank=True)
-    commission = models.DecimalField(max_digits=15, decimal_places=6, default=0)
-    slippage = models.DecimalField(max_digits=15, decimal_places=6, default=0)
-    pnl = models.DecimalField(max_digits=15, decimal_places=6, default=0)
-    notes = models.TextField(blank=True)
-    status = models.CharField(max_length=10, choices=Status.choices, default=Status.PENDING)
-    consensus = models.ForeignKey(ConsensusResult, on_delete=models.SET_NULL, null=True, blank=True)
-    executed_at = models.DateTimeField(null=True, blank=True)
-    created_at = models.DateTimeField(auto_now_add=True)
+    def __init__(self, **kwargs):
+        self.id = uuid.uuid4()
+        self.created_at = datetime.now(timezone.utc)
+        self.updated_at = datetime.now(timezone.utc)
+        self.broker = kwargs.get("broker", "MT5")
+        self.account_type = kwargs.get("account_type")
+        self.account_number = kwargs.get("account_number", "")
+        self.balance = kwargs.get("balance", Decimal("0"))
+        self.equity = kwargs.get("equity", Decimal("0"))
+        self.margin = kwargs.get("margin", Decimal("0"))
+        self.free_margin = kwargs.get("free_margin", Decimal("0"))
+        self.leverage = kwargs.get("leverage", 100)
+        self.currency = kwargs.get("currency", "USD")
+        self.is_connected = kwargs.get("is_connected", False)
+        self.simulation_mode = kwargs.get("simulation_mode", True)
+        self.last_synced = kwargs.get("last_synced")
+        self.user = kwargs.get("user")
 
-    class Meta:
-        ordering = ["-created_at"]
-        db_table = "trades"
-
-    def __str__(self):
-        return f"{self.side} {self.quantity} {self.ticker} @ {self.price}"
+    def save(self):
+        self.updated_at = datetime.now(timezone.utc)
 
 
-class Order(models.Model):
-    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    trade = models.ForeignKey(Trade, on_delete=models.CASCADE, related_name="orders")
-    order_type = models.CharField(max_length=10, choices=Trade.OrderType.choices)
-    status = models.CharField(max_length=10, choices=Trade.Status.choices, default="PENDING")
-    broker_order_id = models.CharField(max_length=50, null=True, blank=True)
-    quantity = models.DecimalField(max_digits=15, decimal_places=6)
-    price = models.DecimalField(max_digits=15, decimal_places=6)
-    filled_quantity = models.DecimalField(max_digits=15, decimal_places=6, default=0)
-    fill_price = models.DecimalField(max_digits=15, decimal_places=6, null=True, blank=True)
-    submitted_at = models.DateTimeField(null=True, blank=True)
-    filled_at = models.DateTimeField(null=True, blank=True)
-    created_at = models.DateTimeField(auto_now_add=True)
-
-    class Meta:
-        db_table = "orders"
-        ordering = ["-created_at"]
-
-    def __str__(self):
-        return f"Order {self.order_type} {self.quantity} @ {self.price} [{self.status}]"
+AccountConfig = _AccountConfig
 
 
-class AccountConfig(models.Model):
-    class Broker(models.TextChoices):
-        MT4 = "MT4", "MetaTrader 4"
-        MT5 = "MT5", "MetaTrader 5"
-
-    class AccountType(models.TextChoices):
-        CENT = "CENT", "Cent"
-        STANDARD = "STANDARD", "Standard"
-
-    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="account_configs")
-    broker = models.CharField(max_length=4, choices=Broker.choices, default=Broker.MT5)
-    account_type = models.CharField(max_length=8, choices=AccountType.choices, null=True, blank=True)
-    account_number = models.CharField(max_length=20, blank=True)
-    balance = models.DecimalField(max_digits=15, decimal_places=6, default=0)
-    equity = models.DecimalField(max_digits=15, decimal_places=6, default=0)
-    margin = models.DecimalField(max_digits=15, decimal_places=6, default=0)
-    free_margin = models.DecimalField(max_digits=15, decimal_places=6, default=0)
-    leverage = models.IntegerField(default=100)
-    currency = models.CharField(max_length=3, default="USD")
-    is_connected = models.BooleanField(default=False)
-    simulation_mode = models.BooleanField(default=True)
-    last_synced = models.DateTimeField(null=True, blank=True)
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
-
-    class Meta:
-        db_table = "account_configs"
-
-    def __str__(self):
-        return f"{self.broker} {self.account_number} ({self.currency})"
+# ── Position ──
 
 
-class Position(models.Model):
-    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="positions")
-    ticker = models.CharField(max_length=20, unique=True)
-    quantity = models.DecimalField(max_digits=15, decimal_places=6)
-    avg_entry_price = models.DecimalField(max_digits=15, decimal_places=6)
-    current_price = models.DecimalField(max_digits=15, decimal_places=6, default=0)
-    unrealized_pnl = models.DecimalField(max_digits=15, decimal_places=6, default=0)
-    updated_at = models.DateTimeField(auto_now=True)
+class _Position:
+    objects = _MemoryStore()
 
-    class Meta:
-        db_table = "positions"
+    def __init__(self, **kwargs):
+        self.id = uuid.uuid4()
+        self.created_at = datetime.now(timezone.utc)
+        self.updated_at = datetime.now(timezone.utc)
+        self.ticker = kwargs.get("ticker", "")
+        self.quantity = kwargs.get("quantity", Decimal("0"))
+        self.avg_entry_price = kwargs.get("avg_entry_price", Decimal("0"))
+        self.current_price = kwargs.get("current_price", Decimal("0"))
+        self.unrealized_pnl = kwargs.get("unrealized_pnl", Decimal("0"))
+        self.user = kwargs.get("user")
 
-    def __str__(self):
-        return f"{self.ticker}: {self.quantity} @ {self.avg_entry_price}"
+    def save(self):
+        self.updated_at = datetime.now(timezone.utc)
 
 
-class LegendaryModuleResult(models.Model):
-    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="legendary_results")
-    ticker = models.CharField(max_length=20)
-    module_name = models.CharField(max_length=100)
-    score = models.FloatField()
-    recommendation = models.CharField(max_length=20)
-    details = models.JSONField(default=dict, blank=True)
-    created_at = models.DateTimeField(auto_now_add=True)
+Position = _Position
 
-    class Meta:
-        ordering = ["-created_at"]
-        db_table = "legendary_module_results"
 
-    def __str__(self):
-        return f"{self.module_name} - {self.ticker}: {self.recommendation} ({self.score:.2f})"
+# ── Trade ──
+
+
+class _Trade:
+    class Status:
+        PENDING = "PENDING"
+        SUBMITTED = "SUBMITTED"
+        PARTIAL = "PARTIAL"
+        EXECUTED = "EXECUTED"
+        CANCELLED = "CANCELLED"
+        FAILED = "FAILED"
+
+    class Side:
+        BUY = "BUY"
+        SELL = "SELL"
+
+    class OrderType:
+        MARKET = "MARKET"
+        LIMIT = "LIMIT"
+        STOP = "STOP"
+        STOP_LIMIT = "STOP_LIMIT"
+
+    objects = _MemoryStore()
+
+    def __init__(self, **kwargs):
+        self.id = uuid.uuid4()
+        self.created_at = datetime.now(timezone.utc)
+        self.updated_at = datetime.now(timezone.utc)
+        self.user = kwargs.get("user")
+        self.ticker = kwargs.get("ticker", "")
+        self.side = kwargs.get("side", "BUY")
+        self.order_type = kwargs.get("order_type", "MARKET")
+        self.quantity = kwargs.get("quantity", Decimal("0"))
+        self.price = kwargs.get("price", Decimal("0"))
+        self.stop_loss = kwargs.get("stop_loss")
+        self.take_profit = kwargs.get("take_profit")
+        self.broker_order_id = kwargs.get("broker_order_id")
+        self.filled_quantity = kwargs.get("filled_quantity", Decimal("0"))
+        self.fill_price = kwargs.get("fill_price")
+        self.commission = kwargs.get("commission", Decimal("0"))
+        self.pnl = kwargs.get("pnl", Decimal("0"))
+        self.notes = kwargs.get("notes", "")
+        self.status = kwargs.get("status", "PENDING")
+        self.executed_at = kwargs.get("executed_at")
+
+    def save(self):
+        self.updated_at = datetime.now(timezone.utc)
+
+    @property
+    def aggregate(self):
+        """Stub for .aggregate(total=Sum(...)) pattern."""
+        return lambda *a, **kw: {}
+
+    def filter(self, **kwargs):
+        return []
+
+
+Trade = _Trade
+
+
+# ── ConsensusResult ──
+
+
+class _ConsensusResult:
+    objects = _MemoryStore()
+
+    def __init__(self, **kwargs):
+        self.id = uuid.uuid4()
+        self.created_at = datetime.now(timezone.utc)
+        self.user = kwargs.get("user")
+        self.ticker = kwargs.get("ticker", "")
+        self.consensus_signal = kwargs.get("consensus_signal", "HOLD")
+        self.weight = kwargs.get("weight", 0.0)
+        self.reasoning = kwargs.get("reasoning", "")
+
+    def save(self):
+        self.updated_at = datetime.now(timezone.utc)
+
+
+ConsensusResult = _ConsensusResult

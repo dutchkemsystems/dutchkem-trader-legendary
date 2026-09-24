@@ -1,3 +1,5 @@
+import asyncio
+
 from .base import BaseAnalyst, AnalystResult
 
 
@@ -10,7 +12,7 @@ class ComplianceAnalyst(BaseAnalyst):
         if self.llm_client:
             from .prompts import build_prompt, parse_llm_response
             prompt = build_prompt('compliance', symbol, timeframe)
-            response = self.llm_client.analyze(prompt)
+            response = await asyncio.to_thread(self.llm_client.analyze, prompt)
             parsed = parse_llm_response(response.text, response.confidence)
             return AnalystResult(
                 analyst_name='compliance',

@@ -41,3 +41,4 @@ desktop.ini
 *.csv
 *.sqlite
 *.db
+db.sqlite3

@@ -5,6 +5,7 @@ Uses feedparser (already installed) to pull headlines from:
 Then applies a keyword-scoring model to derive BUY/SELL/HOLD + confidence.
 No API keys required. ~100 headlines scanned per cycle.
 """
+import asyncio
 import logging
 import re
 from typing import Optional
@@ -97,7 +98,7 @@ class NewsAnalyst(BaseAnalyst):
         if self.llm_client:
             from .prompts import build_prompt, parse_llm_response
             prompt = build_prompt("news", symbol, timeframe)
-            response = self.llm_client.analyze(prompt)
+            response = await asyncio.to_thread(self.llm_client.analyze, prompt)
             parsed = parse_llm_response(response.text, response.confidence)
             return AnalystResult(
                 analyst_name="news",

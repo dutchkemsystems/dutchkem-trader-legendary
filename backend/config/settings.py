@@ -75,8 +75,8 @@ CACHES = {
 
 # Try to use Redis if available
 try:
-    import redis
-    r = redis.from_url(REDIS_URL, socket_connect_timeout=2)
+    import redis as _redis_mod
+    r = _redis_mod.from_url(REDIS_URL, socket_connect_timeout=2, socket_timeout=2)
     r.ping()
     CACHES = {
         "default": {
@@ -113,7 +113,7 @@ STATIC_ROOT = BASE_DIR / "staticfiles"
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 CORS_ALLOW_ALL_ORIGINS = DEBUG
-CORS_ALLOWED_ORIGINS = os.getenv("CORS_ALLOWED_ORIGINS", "http://localhost:3000").split(",")
+CORS_ALLOWED_ORIGINS = os.getenv("CORS_ALLOWED_ORIGINS", "http://localhost:8888,http://localhost:3000").split(",")
 
 REST_FRAMEWORK = {
     "DEFAULT_PAGINATION_CLASS": "rest_framework.pagination.PageNumberPagination",

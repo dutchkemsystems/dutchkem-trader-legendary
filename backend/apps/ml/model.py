@@ -39,6 +39,13 @@ class PredictionModel:
                 max_depth=6,
                 learning_rate=0.1,
             )
+        elif self.model_type == "perceptron":
+            # PyTorch perceptron (from GrokUltimateForexPro)
+            try:
+                from .perceptron import PerceptronModel
+                self.model = PerceptronModel(mode='simple')
+            except ImportError:
+                raise ImportError("PyTorch required for perceptron model")
         else:
             raise ValueError(f"Unknown model type: {self.model_type}")
         self.trained = False
@@ -51,18 +58,30 @@ class PredictionModel:
         self.trained = True
 
     def train(self, X: np.ndarray, y: np.ndarray):
-        self.model.fit(X, y)
+        if self.model_type == "perceptron":
+            self.model.train(X, y)
+        else:
+            self.model.fit(X, y)
         self.trained = True
 
     def predict(self, X: np.ndarray) -> Prediction:
         if not self.trained:
             return Prediction(probability=0.5, direction="NEUTRAL", model_name=f"{self.model_type}(untrained)")
+        if self.model_type == "perceptron":
+            result = self.model.predict(X[0] if X.ndim > 1 else X)
+            return Prediction(probability=result.probability, direction=result.direction, model_name=self.model_type)
         prob = self.model.predict_proba(X)[0]
         p_up = float(prob[1])
         direction = "UP" if p_up >= 0.5 else "DOWN"
         return Prediction(probability=p_up, direction=direction, model_name=self.model_type)
 
     def save(self, path):
+        if self.model_type == "perceptron":
+            file_path = path if path.endswith('.pkl') else os.path.join(path, f"{self.model_type}_model.pkl")
+            os.makedirs(os.path.dirname(file_path), exist_ok=True)
+            self.model.save(file_path)
+            self.trained = True
+            return file_path
         file_path = path if path.endswith('.pkl') else os.path.join(path, f"{self.model_type}_model.pkl")
         os.makedirs(os.path.dirname(file_path), exist_ok=True)
         with open(file_path, 'wb') as f:

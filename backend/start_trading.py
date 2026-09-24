@@ -6,6 +6,7 @@ If MT5 live trading fails, falls back to paper trading.
 
 Usage: python start_trading.py
 """
+
 import os
 import sys
 import time
@@ -28,7 +29,12 @@ CONTROL_FILE = BACKEND_DIR / "trades_complete" / "trading_control.json"
 
 def log(msg, level="INFO"):
     ts = datetime.now().strftime("%H:%M:%S")
-    colors = {"INFO": "\033[36m", "OK": "\033[32m", "WARN": "\033[33m", "ERR": "\033[31m"}
+    colors = {
+        "INFO": "\033[36m",
+        "OK": "\033[32m",
+        "WARN": "\033[33m",
+        "ERR": "\033[31m",
+    }
     reset = "\033[0m"
     c = colors.get(level, "")
     print(f"{c}[{ts}] [{level}] {msg}{reset}")
@@ -37,6 +43,7 @@ def log(msg, level="INFO"):
 def check_port(port):
     """Check if a port is in use."""
     import socket
+
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
         return s.connect_ex(("127.0.0.1", port)) == 0
 
@@ -49,10 +56,18 @@ def start_fastapi_server():
 
     log("Starting FastAPI server on :8000...")
     env = os.environ.copy()
-    env["DJANGO_SETTINGS_MODULE"] = "config.settings"
 
     proc = subprocess.Popen(
-        [sys.executable, "-m", "uvicorn", "api.main:app", "--host", "0.0.0.0", "--port", "8000"],
+        [
+            sys.executable,
+            "-m",
+            "uvicorn",
+            "api.main:app",
+            "--host",
+            "0.0.0.0",
+            "--port",
+            "8000",
+        ],
         cwd=str(BACKEND_DIR),
         env=env,
         stdout=subprocess.PIPE,
@@ -84,13 +99,16 @@ def check_mt5_connection():
     """Check if MT5 is connected and get account info."""
     try:
         import MetaTrader5 as mt5
+
         creds = load_credentials()
         if not creds:
             log("No MT5 credentials found", "WARN")
             return None
 
         if not mt5.initialize(
-            path=creds.get("mt5_path", r"C:\Program Files\MetaTrader 5 EXNESS\terminal64.exe"),
+            path=creds.get(
+                "mt5_path", r"C:\Program Files\MetaTrader 5 EXNESS\terminal64.exe"
+            ),
             login=creds["login"],
             password=creds["password"],
             server=creds["server"],
@@ -143,21 +161,9 @@ def start_live_trading():
 
 
 def start_paper_trading():
-    """Start paper trading as fallback."""
-    log("Starting paper trading engine...", "WARN")
-    env = os.environ.copy()
-    env["DJANGO_SETTINGS_MODULE"] = "config.settings"
-
-    proc = subprocess.Popen(
-        [sys.executable, "paper_trading_v2.py"],
-        cwd=str(BACKEND_DIR),
-        env=env,
-        stdout=subprocess.PIPE,
-        stderr=subprocess.STDOUT,
-        creationflags=subprocess.CREATE_NO_WINDOW if os.name == "nt" else 0,
-    )
-    log(f"Paper trading started (PID: {proc.pid})", "OK")
-    return proc
+    """Paper trading is not available — live trading only."""
+    log("Paper trading not available. Use live trading.", "WARN")
+    return None
 
 
 def main():
@@ -179,14 +185,17 @@ def main():
     # Step 3: Check MT5
     mt5_info = check_mt5_connection()
     if mt5_info:
-        log(f"MT5 connected: {mt5_info['account_type']} | Balance: ${mt5_info['balance']:.2f}", "OK")
+        log(
+            f"MT5 connected: {mt5_info['account_type']} | Balance: ${mt5_info['balance']:.2f}",
+            "OK",
+        )
 
         # Step 4a: Try live trading
         if start_live_trading():
             log("=" * 60, "OK")
             log("  LIVE TRADING ACTIVE!", "OK")
             log(f"  Server: {API_URL}", "OK")
-            log(f"  Dashboard: http://localhost:3000", "OK")
+            log(f"  Dashboard: http://localhost:8888", "OK")
             log("=" * 60, "OK")
         else:
             # Fallback to paper trading

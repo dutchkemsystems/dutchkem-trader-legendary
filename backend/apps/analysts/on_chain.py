@@ -10,6 +10,7 @@ leading indicator for global risk appetite:
 Data from CoinGecko public API via requests — free, no API key required.
 Rate limit: ~10-30 req/min (we make 1-2 calls per cycle, well within limits).
 """
+import asyncio
 import logging
 from typing import Optional
 
@@ -29,7 +30,7 @@ class OnChainAnalyst(BaseAnalyst):
         if self.llm_client:
             from .prompts import build_prompt, parse_llm_response
             prompt = build_prompt("on_chain", symbol, timeframe)
-            response = self.llm_client.analyze(prompt)
+            response = await asyncio.to_thread(self.llm_client.analyze, prompt)
             parsed = parse_llm_response(response.text, response.confidence)
             return AnalystResult(
                 analyst_name="on_chain",

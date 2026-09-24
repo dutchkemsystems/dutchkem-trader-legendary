@@ -1,10 +1,13 @@
 """Broker API routes — connection management, account info, and AccountConfig sync."""
+
 from __future__ import annotations
+
+import asyncio
 
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
 
-from django.utils import timezone
+from datetime import datetime, timezone as _tz
 
 from api.deps import get_broker, get_current_user
 from config.broker_config import BrokerConfig
@@ -16,6 +19,7 @@ router = APIRouter()
 # ---------------------------------------------------------------------------
 # Schemas
 # ---------------------------------------------------------------------------
+
 
 class BrokerConnectRequest(BaseModel):
     account_number: str
@@ -75,6 +79,7 @@ class BrokerSyncResponse(BaseModel):
 # Helpers
 # ---------------------------------------------------------------------------
 
+
 def _get_or_create_config(user):
     config, _ = AccountConfig.objects.get_or_create(
         user=user,
@@ -100,13 +105,14 @@ def _sync_config_from_broker(config, broker, broker_config):
 
         if config.account_type is None:
             from decimal import Decimal
+
             config.account_type = (
                 AccountConfig.AccountType.CENT
                 if info.balance < Decimal("1000")
                 else AccountConfig.AccountType.STANDARD
             )
 
-    config.last_synced = timezone.now()
+    config.last_synced = datetime.now(_tz.utc)
     config.save()
 
 
@@ -114,131 +120,162 @@ def _sync_config_from_broker(config, broker, broker_config):
 # Endpoints
 # ---------------------------------------------------------------------------
 
+
 @router.get("/status", response_model=BrokerStatusResponse)
-def broker_status():
+async def broker_status():
     """Return current broker connection status."""
-    broker = get_broker()
-    connected = broker.is_connected()
-    return BrokerStatusResponse(
-        connected=connected,
-        account_number=broker._account_number if connected else None,
-        server=broker._server if connected else None,
-    )
+
+    def _work():
+        broker = get_broker()
+        connected = broker.is_connected()
+        return BrokerStatusResponse(
+            connected=connected,
+            account_number=broker._account_number if connected else None,
+            server=broker._server if connected else None,
+        )
+
+    return await asyncio.to_thread(_work)
 
 
 @router.post("/connect", response_model=BrokerConnectResponse)
-def broker_connect(payload: BrokerConnectRequest):
+async def broker_connect(payload: BrokerConnectRequest):
     """Connect to the broker with provided credentials."""
-    broker = get_broker()
-    success = broker.connect(payload.account_number, payload.password, payload.server)
 
-    if not success:
-        return BrokerConnectResponse(
-            status="failed",
-            connected=False,
+    def _work():
+        broker = get_broker()
+        success = broker.connect(
+            payload.account_number, payload.password, payload.server
         )
 
-    account = broker.get_account_info()
+        if not success:
+            return BrokerConnectResponse(
+                status="failed",
+                connected=False,
+            )
 
-    # Sync AccountConfig
-    user = get_current_user()
-    config = _get_or_create_config(user)
-    broker_config = BrokerConfig.from_env()
-    _sync_config_from_broker(config, broker, broker_config)
+        account = broker.get_account_info()
 
-    return BrokerConnectResponse(
-        status="connected",
-        connected=True,
-        account_number=account.account_number,
-        server=payload.server,
-    )
+        # Sync AccountConfig
+        user = get_current_user()
+        config = _get_or_create_config(user)
+        broker_config = BrokerConfig.from_env()
+        _sync_config_from_broker(config, broker, broker_config)
+
+        return BrokerConnectResponse(
+            status="connected",
+            connected=True,
+            account_number=account.account_number,
+            server=payload.server,
+        )
+
+    return await asyncio.to_thread(_work)
 
 
 @router.post("/disconnect")
-def broker_disconnect():
+async def broker_disconnect():
     """Disconnect from the broker."""
-    broker = get_broker()
-    broker.disconnect()
 
-    # Sync AccountConfig
-    user = get_current_user()
-    config = _get_or_create_config(user)
-    broker_config = BrokerConfig.from_env()
-    _sync_config_from_broker(config, broker, broker_config)
+    def _work():
+        broker = get_broker()
+        broker.disconnect()
 
-    return {"status": "disconnected"}
+        # Sync AccountConfig
+        user = get_current_user()
+        config = _get_or_create_config(user)
+        broker_config = BrokerConfig.from_env()
+        _sync_config_from_broker(config, broker, broker_config)
+
+        return {"status": "disconnected"}
+
+    return await asyncio.to_thread(_work)
 
 
 @router.get("/account", response_model=BrokerAccountResponse)
-def broker_account():
+async def broker_account():
     """Get account info from the broker. Requires active connection."""
-    broker = get_broker()
-    if not broker.is_connected():
-        raise HTTPException(status_code=503, detail="Broker not connected")
 
-    info = broker.get_account_info()
+    def _work():
+        broker = get_broker()
+        if not broker.is_connected():
+            raise HTTPException(status_code=503, detail="Broker not connected")
 
-    # Sync AccountConfig
-    user = get_current_user()
-    config = _get_or_create_config(user)
-    broker_config = BrokerConfig.from_env()
-    _sync_config_from_broker(config, broker, broker_config)
+        info = broker.get_account_info()
 
-    return BrokerAccountResponse(
-        account_number=info.account_number,
-        balance=str(info.balance),
-        equity=str(info.equity),
-        free_margin=str(info.free_margin),
-        leverage=info.leverage,
-        currency=info.currency,
-        account_type=info.account_type,
-        profit=str(info.profit),
-    )
+        # Sync AccountConfig
+        user = get_current_user()
+        config = _get_or_create_config(user)
+        broker_config = BrokerConfig.from_env()
+        _sync_config_from_broker(config, broker, broker_config)
+
+        return BrokerAccountResponse(
+            account_number=info.account_number,
+            balance=str(info.balance),
+            equity=str(info.equity),
+            free_margin=str(info.free_margin),
+            leverage=info.leverage,
+            currency=info.currency,
+            account_type=info.account_type,
+            profit=str(info.profit),
+        )
+
+    return await asyncio.to_thread(_work)
 
 
 @router.get("/health")
-def broker_health():
+async def broker_health():
     """Health check with connection status and account risk metrics."""
-    from execution.health import BrokerHealthMonitor
 
-    broker = get_broker()
-    return BrokerHealthMonitor(broker).check()
+    def _work():
+        from execution.health import BrokerHealthMonitor
+
+        broker = get_broker()
+        return BrokerHealthMonitor(broker).check()
+
+    return await asyncio.to_thread(_work)
 
 
 @router.get("/config", response_model=BrokerConfigResponse)
-def broker_config():
+async def broker_config():
     """Get the stored AccountConfig for the current user."""
-    user = get_current_user()
-    config = _get_or_create_config(user)
-    return BrokerConfigResponse(
-        broker=config.broker,
-        account_number=config.account_number,
-        account_type=config.account_type,
-        balance=str(config.balance),
-        equity=str(config.equity),
-        margin=str(config.margin),
-        free_margin=str(config.free_margin),
-        leverage=config.leverage,
-        currency=config.currency,
-        is_connected=config.is_connected,
-        simulation_mode=config.simulation_mode,
-        last_synced=config.last_synced.isoformat() if config.last_synced else None,
-    )
+
+    def _work():
+        user = get_current_user()
+        config = _get_or_create_config(user)
+        return BrokerConfigResponse(
+            broker=config.broker,
+            account_number=config.account_number,
+            account_type=config.account_type,
+            balance=str(config.balance),
+            equity=str(config.equity),
+            margin=str(config.margin),
+            free_margin=str(config.free_margin),
+            leverage=config.leverage,
+            currency=config.currency,
+            is_connected=config.is_connected,
+            simulation_mode=config.simulation_mode,
+            last_synced=config.last_synced.isoformat() if config.last_synced else None,
+        )
+
+    return await asyncio.to_thread(_work)
 
 
 @router.post("/sync", response_model=BrokerSyncResponse)
-def broker_sync():
+async def broker_sync():
     """Force-sync broker state into the AccountConfig model."""
-    user = get_current_user()
-    config = _get_or_create_config(user)
-    broker = get_broker()
-    broker_config = BrokerConfig.from_env()
-    _sync_config_from_broker(config, broker, broker_config)
-    return BrokerSyncResponse(
-        synced=True,
-        account_number=config.account_number,
-        balance=str(config.balance),
-        is_connected=config.is_connected,
-        simulation_mode=config.simulation_mode,
-        last_synced=config.last_synced.isoformat() if config.last_synced else None,
-    )
+
+    def _work():
+        user = get_current_user()
+        config = _get_or_create_config(user)
+        broker = get_broker()
+        broker_config = BrokerConfig.from_env()
+        _sync_config_from_broker(config, broker, broker_config)
+        return BrokerSyncResponse(
+            synced=True,
+            account_number=config.account_number,
+            balance=str(config.balance),
+            is_connected=config.is_connected,
+            simulation_mode=config.simulation_mode,
+            last_synced=config.last_synced.isoformat() if config.last_synced else None,
+        )
+
+    return await asyncio.to_thread(_work)

@@ -1,9 +1,13 @@
 """
 Emotion Display API — Market emotion data derived from technical indicators.
 """
+
+import os
 import sys
+
 sys.stdout.reconfigure(encoding="utf-8", errors="replace")
 
+import asyncio
 from datetime import datetime, timezone
 from pathlib import Path
 
@@ -21,6 +25,7 @@ DEFAULT_MT5_PATH = r"C:\Program Files\MetaTrader 5 EXNESS\terminal64.exe"
 # Schemas
 # ---------------------------------------------------------------------------
 
+
 class EmotionResponse(BaseModel):
     symbol: str
     fear_greed_index: float
@@ -37,20 +42,28 @@ class EmotionResponse(BaseModel):
 # Helpers
 # ---------------------------------------------------------------------------
 
+
 def _load_credentials() -> dict:
     if CREDENTIALS_FILE.exists():
         try:
             import json
+
             with open(CREDENTIALS_FILE, "r") as f:
                 return json.load(f)
         except Exception:
             pass
-    return {"login": int(os.environ.get("MT5_LOGIN", "0")), "password": os.environ.get("MT5_PASSWORD", ""), "server": os.environ.get("MT5_SERVER", ""), "mt5_path": DEFAULT_MT5_PATH}
+    return {
+        "login": int(os.environ.get("MT5_LOGIN", "0")),
+        "password": os.environ.get("MT5_PASSWORD", ""),
+        "server": os.environ.get("MT5_SERVER", ""),
+        "mt5_path": DEFAULT_MT5_PATH,
+    }
 
 
 def _get_mt5_data(symbol: str, timeframe, count: int = 200):
     """Fetch OHLC data from MT5 for the given symbol and timeframe."""
     import MetaTrader5 as mt5
+
     creds = _load_credentials()
     mt5_path = creds.get("mt5_path", DEFAULT_MT5_PATH)
 
@@ -155,7 +168,7 @@ def _compute_bollinger_width(closes, period: int = 20) -> float:
     window = closes[-period:]
     sma = sum(window) / period
     variance = sum((x - sma) ** 2 for x in window) / period
-    std = variance ** 0.5
+    std = variance**0.5
     if sma == 0:
         return 0.02
     return (2 * std) / sma  # normalized width
@@ -209,40 +222,45 @@ def _compute_fear_greed(rsi: float, adx: float, bb_width: float) -> float:
 # Route
 # ---------------------------------------------------------------------------
 
+
 @router.get("/{symbol}")
-def get_emotion(symbol: str):
+async def get_emotion(symbol: str):
     """Return market emotion data for a symbol."""
-    import MetaTrader5 as mt5
 
-    symbol = symbol.upper()
+    def _work():
+        import MetaTrader5 as mt5
 
-    try:
-        rates = _get_mt5_data(symbol, mt5.TIMEFRAME_H1, 200)
-    except Exception as e:
-        raise HTTPException(status_code=502, detail=f"MT5 data fetch failed: {e}")
+        symbol_upper = symbol.upper()
 
-    closes = [r[4] for r in rates]
-    highs = [r[2] for r in rates]
-    lows = [r[3] for r in rates]
+        try:
+            rates = _get_mt5_data(symbol_upper, mt5.TIMEFRAME_H1, 200)
+        except Exception as e:
+            raise HTTPException(status_code=502, detail=f"MT5 data fetch failed: {e}")
 
-    rsi = _compute_rsi(closes)
-    adx = _compute_adx(highs, lows, closes)
-    bb_width = _compute_bollinger_width(closes)
-    fear_greed = _compute_fear_greed(rsi, adx, bb_width)
-    emotion_state = _map_emotion(fear_greed)
-    positioning = _map_positioning(fear_greed, adx)
+        closes = [r[4] for r in rates]
+        highs = [r[2] for r in rates]
+        lows = [r[3] for r in rates]
 
-    # Social score: derived from RSI momentum (proxy for social sentiment)
-    social_score = round(rsi * 0.7 + fear_greed * 0.3, 2)
+        rsi = _compute_rsi(closes)
+        adx = _compute_adx(highs, lows, closes)
+        bb_width = _compute_bollinger_width(closes)
+        fear_greed = _compute_fear_greed(rsi, adx, bb_width)
+        emotion_state = _map_emotion(fear_greed)
+        positioning = _map_positioning(fear_greed, adx)
 
-    return EmotionResponse(
-        symbol=symbol,
-        fear_greed_index=round(fear_greed, 2),
-        emotion_state=emotion_state,
-        positioning=positioning,
-        social_score=social_score,
-        rsi=round(rsi, 2),
-        adx=round(adx, 2),
-        bb_width=round(bb_width, 6),
-        timestamp=datetime.now(timezone.utc).isoformat(),
-    )
+        # Social score: derived from RSI momentum (proxy for social sentiment)
+        social_score = round(rsi * 0.7 + fear_greed * 0.3, 2)
+
+        return EmotionResponse(
+            symbol=symbol_upper,
+            fear_greed_index=round(fear_greed, 2),
+            emotion_state=emotion_state,
+            positioning=positioning,
+            social_score=social_score,
+            rsi=round(rsi, 2),
+            adx=round(adx, 2),
+            bb_width=round(bb_width, 6),
+            timestamp=datetime.now(timezone.utc).isoformat(),
+        )
+
+    return await asyncio.to_thread(_work)

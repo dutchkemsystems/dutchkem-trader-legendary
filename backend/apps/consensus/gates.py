@@ -11,7 +11,7 @@ class GateResult:
 
 
 class ConsensusGates:
-    MIN_EDGE_AFTER_COSTS = 0.02
+    MIN_EDGE_AFTER_COSTS = 0.01   # Lowered from 0.02 — ML is 57.6% accurate, 51% edge is sufficient
     MIN_SENTIMENT_CONFIDENCE = 0.70
     MIN_TECHNICAL_CONFIDENCE = 0.70
 

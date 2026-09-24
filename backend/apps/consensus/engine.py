@@ -29,14 +29,32 @@ class ConsensusEngine:
         use_debate: bool = False,
         use_memory: bool = False,
     ) -> Dict[str, Any]:
-        # 1. Run all analysts in parallel
-        tasks = [analyst.analyze(symbol, timeframe) for analyst in self.analysts]
-        results = await asyncio.gather(*tasks, return_exceptions=True)
+        # 1. Run all analysts in parallel with hard timeout
+        tasks = [asyncio.ensure_future(analyst.analyze(symbol, timeframe)) for analyst in self.analysts]
+        results = []
+        try:
+            results = await asyncio.wait_for(
+                asyncio.gather(*tasks, return_exceptions=True),
+                timeout=25.0
+            )
+        except (asyncio.TimeoutError, Exception):
+            # Collect whatever completed; ignore pending tasks
+            for t in tasks:
+                if t.done():
+                    try:
+                        results.append(t.result())
+                    except (asyncio.CancelledError, Exception) as e:
+                        results.append(e)
+            # Cancel still-pending tasks
+            for t in tasks:
+                if not t.done():
+                    t.cancel()
 
         # Log any exceptions
         for i, result in enumerate(results):
-            if isinstance(result, Exception):
-                logger.warning(f'Analyst {self.analysts[i].__class__.__name__} failed: {result}')
+            if isinstance(result, (Exception, asyncio.CancelledError)):
+                name = self.analysts[i].__class__.__name__ if i < len(self.analysts) else f'analyst_{i}'
+                logger.warning(f'{name} failed: {result}')
 
         # Filter out exceptions AND stub results (data_source == "none")
         valid_results = [

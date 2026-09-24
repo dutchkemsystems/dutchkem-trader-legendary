@@ -1,12 +1,43 @@
 import logging
-from datetime import timedelta
+from datetime import timedelta, timezone as _tz
 from decimal import Decimal
 from typing import Optional
 
-from django.contrib.auth.models import User
-from django.db import transaction
-from django.db.models import Sum
-from django.utils import timezone
+try:
+    from django.contrib.auth.models import User
+except Exception:
+    User = type("User", (), {"__init__": lambda *a, **kw: None})
+
+try:
+    from django.db import transaction
+except Exception:
+    from contextlib import contextmanager as _ctx
+
+    transaction = type("transaction", (), {"atomic": _ctx(lambda: (yield))})()
+
+try:
+    from django.db.models import Sum
+except Exception:
+
+    def Sum(field):
+        return field
+
+
+try:
+    from django.utils import timezone
+except Exception:
+
+    class timezone:
+        @staticmethod
+        def now():
+            from datetime import datetime
+
+            return datetime.now(_tz.utc)
+
+        @staticmethod
+        def utc():
+            return _tz.utc
+
 
 from django_app.models import ConsensusResult, Trade
 from execution.account import AccountManager
@@ -42,9 +73,7 @@ class OrderExecutionEngine:
     # Initialization
     # ------------------------------------------------------------------
 
-    def initialize(
-        self, user: User, force_account_type: Optional[str] = None
-    ) -> dict:
+    def initialize(self, user: User, force_account_type: Optional[str] = None) -> dict:
         """Initialize engine for a user. Returns connection status."""
         config = self.account.initialize(user, force_type=force_account_type)
         self.positions.sync_positions(user)
@@ -108,9 +137,7 @@ class OrderExecutionEngine:
                 entry_price, side, symbol=symbol
             )
         if take_profit is None:
-            take_profit = self.sizer.calculate_take_profit(
-                entry_price, stop_loss, side
-            )
+            take_profit = self.sizer.calculate_take_profit(entry_price, stop_loss, side)
 
         # 3. Auto-calculate lot size if not provided
         if lot_size is None:
@@ -201,8 +228,12 @@ class OrderExecutionEngine:
 
         logger.info(
             "Trade executed: %s %s %s @ %s (fill=%s, slippage=%s)",
-            trade.side, trade.quantity, trade.ticker, trade.price,
-            trade.fill_price, trade.slippage,
+            trade.side,
+            trade.quantity,
+            trade.ticker,
+            trade.price,
+            trade.fill_price,
+            trade.slippage,
         )
 
         return trade
@@ -220,8 +251,9 @@ class OrderExecutionEngine:
             return None
 
         positions = list(
-            PositionManager(broker=self.broker, risk_manager=self.risk)
-            .sync_positions(user)
+            PositionManager(broker=self.broker, risk_manager=self.risk).sync_positions(
+                user
+            )
         )
 
         from django_app.models import Position
@@ -268,13 +300,15 @@ class OrderExecutionEngine:
         start = timezone.make_aware(
             timezone.datetime.combine(today, timezone.datetime.min.time())
         )
-        trades = Trade.objects.filter(
-            user=user, created_at__gte=start
-        ).order_by("-created_at")
+        trades = Trade.objects.filter(user=user, created_at__gte=start).order_by(
+            "-created_at"
+        )
 
         executed = trades.filter(status=Trade.Status.EXECUTED)
         total_pnl = executed.aggregate(total=Sum("pnl"))["total"] or Decimal("0")
-        total_commission = executed.aggregate(total=Sum("commission"))["total"] or Decimal("0")
+        total_commission = executed.aggregate(total=Sum("commission"))[
+            "total"
+        ] or Decimal("0")
 
         return {
             "date": today.isoformat(),
@@ -293,17 +327,21 @@ class OrderExecutionEngine:
         start_dt = timezone.make_aware(
             timezone.datetime.combine(start, timezone.datetime.min.time())
         )
-        trades = Trade.objects.filter(
-            user=user, created_at__gte=start_dt
-        ).order_by("-created_at")
+        trades = Trade.objects.filter(user=user, created_at__gte=start_dt).order_by(
+            "-created_at"
+        )
 
         executed = trades.filter(status=Trade.Status.EXECUTED)
         total_pnl = executed.aggregate(total=Sum("pnl"))["total"] or Decimal("0")
-        total_commission = executed.aggregate(total=Sum("commission"))["total"] or Decimal("0")
+        total_commission = executed.aggregate(total=Sum("commission"))[
+            "total"
+        ] or Decimal("0")
 
         wins = executed.filter(pnl__gt=0).count()
         losses = executed.filter(pnl__lt=0).count()
-        win_rate = (wins / (wins + losses) * 100) if (wins + losses) > 0 else Decimal("0")
+        win_rate = (
+            (wins / (wins + losses) * 100) if (wins + losses) > 0 else Decimal("0")
+        )
 
         return {
             "month": start.isoformat()[:7],

@@ -13,7 +13,6 @@ import {
   WifiOff,
   Monitor,
   Shield,
-  Settings,
   Download,
   Key,
   CheckCircle2,
@@ -21,9 +20,13 @@ import {
   AlertTriangle,
 } from "lucide-react";
 
-import { API_BASE_URL } from "@/lib/constants";
-
-const API = `${API_BASE_URL}/live`;
+import {
+  getMT5Setup,
+  getLiveTradingStatus,
+  connectMT5,
+  startLiveTrading,
+  stopLiveTrading,
+} from "@/lib/api";
 
 interface MT5Setup {
   installed: boolean;
@@ -101,8 +104,8 @@ export function LiveTradingCard() {
 
   const fetchSetup = useCallback(async () => {
     try {
-      const res = await fetch(`${API}/setup`);
-      if (res.ok) setSetup(await res.json());
+      const data = await getMT5Setup();
+      setSetup(data);
     } catch (e) {
       console.error("Setup check failed:", e);
     }
@@ -110,8 +113,8 @@ export function LiveTradingCard() {
 
   const fetchStatus = useCallback(async () => {
     try {
-      const res = await fetch(`${API}/status`);
-      if (res.ok) setStatus(await res.json());
+      const data = await getLiveTradingStatus();
+      setStatus(data);
     } catch (e) {
       console.error("Status check failed:", e);
     } finally {
@@ -135,12 +138,7 @@ export function LiveTradingCard() {
     setConnectResult(null);
     setStartError(null);
     try {
-      const res = await fetch(`${API}/connect`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ login: parseInt(login), password, server }),
-      });
-      const data = await res.json();
+      const data = await connectMT5({ login: parseInt(login), password, server });
       setConnectResult({ ok: data.success, msg: data.message });
       if (data.success) {
         setShowConnect(false);
@@ -159,8 +157,7 @@ export function LiveTradingCard() {
     setActionLoading(true);
     setStartError(null);
     try {
-      const res = await fetch(`${API}/start`, { method: "POST" });
-      const data = await res.json();
+      const data = await startLiveTrading();
       if (data.status === "error") {
         setStartError(data.message);
       }
@@ -178,10 +175,10 @@ export function LiveTradingCard() {
     setActionLoading(true);
     setStartError(null);
     try {
-      await fetch(`${API}/stop`, { method: "POST" });
+      await stopLiveTrading();
       await fetchStatus();
     } catch (e) {
-      console.error("Stop failed:", e);
+      setStartError("Failed to stop. Is the backend running?");
     } finally {
       setActionLoading(false);
     }

@@ -1,9 +1,11 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { API_BASE_URL } from '@/lib/constants';
-
-const API = `${API_BASE_URL}/scalping`;
+import {
+  getScalpingStatus,
+  toggleScalpingStrategy,
+  toggleScalpingEngine,
+} from '@/lib/api';
 
 interface ScalpingStrategy {
   name: string;
@@ -24,20 +26,28 @@ interface ScalpTrade {
   status: string;
 }
 
+interface EngineToggles {
+  main_engine: boolean;
+  mtf_scalper: boolean;
+}
+
 export function ScalpingStrategiesPanel() {
   const [strategies, setStrategies] = useState<ScalpingStrategy[]>([]);
   const [activeTrades, setActiveTrades] = useState<ScalpTrade[]>([]);
   const [totalPnl, setTotalPnl] = useState(0);
   const [activeTab, setActiveTab] = useState('strategies');
+  const [engineToggles, setEngineToggles] = useState<EngineToggles>({ main_engine: true, mtf_scalper: true });
 
   useEffect(() => {
     const fetchStatus = async () => {
       try {
-        const res = await fetch(`${API}/status`);
-        const data = await res.json();
+        const data = await getScalpingStatus();
         setStrategies(data.strategies);
         setActiveTrades(data.active_trades);
         setTotalPnl(data.total_pnl);
+        if (data.engine_toggles) {
+          setEngineToggles(data.engine_toggles);
+        }
       } catch (err) {
         console.error('Failed to fetch scalping status:', err);
       }
@@ -50,16 +60,21 @@ export function ScalpingStrategiesPanel() {
 
   const toggleStrategy = async (name: string, enabled: boolean) => {
     try {
-      await fetch(`${API}/toggle/${name}`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ enabled }),
-      });
+      await toggleScalpingStrategy(name, enabled);
       setStrategies(prev => prev.map(s => 
         s.name === name ? { ...s, enabled, status: enabled ? 'active' : 'disabled' } : s
       ));
     } catch (err) {
       console.error('Failed to toggle strategy:', err);
+    }
+  };
+
+  const toggleEngine = async (toggleName: string, enabled: boolean) => {
+    try {
+      await toggleScalpingEngine(toggleName, enabled);
+      setEngineToggles(prev => ({ ...prev, [toggleName]: enabled }));
+    } catch (err) {
+      console.error('Failed to toggle engine:', err);
     }
   };
 
@@ -70,6 +85,37 @@ export function ScalpingStrategiesPanel() {
         <span className={`text-sm font-medium ${totalPnl >= 0 ? 'text-green-500' : 'text-red-500'}`}>
           Total P&L: ${totalPnl.toFixed(2)}
         </span>
+      </div>
+
+      {/* Engine Master Toggles */}
+      <div className="mb-4 p-3 border rounded bg-muted/30">
+        <div className="text-xs font-medium text-muted-foreground mb-2 uppercase tracking-wide">Engine Controls</div>
+        <div className="flex flex-wrap gap-4">
+          <div className="flex items-center gap-2">
+            <span className="text-sm">Main Engine</span>
+            <button
+              onClick={() => toggleEngine('main_engine', !engineToggles.main_engine)}
+              className={`w-10 h-5 rounded-full transition-colors ${engineToggles.main_engine ? 'bg-green-500' : 'bg-gray-300'}`}
+            >
+              <div className={`w-4 h-4 rounded-full bg-white transition-transform ${engineToggles.main_engine ? 'translate-x-5' : 'translate-x-0.5'}`} />
+            </button>
+            <span className={`text-xs ${engineToggles.main_engine ? 'text-green-600' : 'text-gray-500'}`}>
+              {engineToggles.main_engine ? 'ON' : 'OFF'}
+            </span>
+          </div>
+          <div className="flex items-center gap-2">
+            <span className="text-sm">MTF Scalper</span>
+            <button
+              onClick={() => toggleEngine('mtf_scalper', !engineToggles.mtf_scalper)}
+              className={`w-10 h-5 rounded-full transition-colors ${engineToggles.mtf_scalper ? 'bg-green-500' : 'bg-gray-300'}`}
+            >
+              <div className={`w-4 h-4 rounded-full bg-white transition-transform ${engineToggles.mtf_scalper ? 'translate-x-5' : 'translate-x-0.5'}`} />
+            </button>
+            <span className={`text-xs ${engineToggles.mtf_scalper ? 'text-green-600' : 'text-gray-500'}`}>
+              {engineToggles.mtf_scalper ? 'ON' : 'OFF'}
+            </span>
+          </div>
+        </div>
       </div>
 
       <div className="flex gap-2 mb-4">

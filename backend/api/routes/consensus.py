@@ -7,10 +7,29 @@ from apps.ml.features import FeatureExtractor
 from data.mt5_fetcher import async_fetch_mt5_candles, async_fetch_mt5_price
 import numpy as np
 import logging
+import time
 
 logger = logging.getLogger(__name__)
 
 router = APIRouter()
+
+# Simple TTL cache: key -> (timestamp, result)
+_consensus_cache: dict = {}
+_CONSENSUS_CACHE_TTL = 20.0  # seconds
+
+
+def _get_cached_consensus(key: str):
+    """Return cached result if still valid, else None."""
+    if key in _consensus_cache:
+        ts, result = _consensus_cache[key]
+        if time.time() - ts < _CONSENSUS_CACHE_TTL:
+            return result
+    return None
+
+
+def _set_cached_consensus(key: str, result: dict):
+    """Cache a result with current timestamp."""
+    _consensus_cache[key] = (time.time(), result)
 
 
 @router.get("/{symbol}")
@@ -20,8 +39,23 @@ async def get_consensus(
     use_debate: bool = False,
     use_memory: bool = False,
 ):
+    cache_key = f"{symbol}:{timeframe}:{use_debate}:{use_memory}"
+    cached = _get_cached_consensus(cache_key)
+    if cached is not None:
+        return cached
+
     engine = get_consensus_engine()
-    result = await engine.evaluate(symbol, timeframe, use_debate=use_debate, use_memory=use_memory)
+    try:
+        result = await engine.evaluate(symbol, timeframe, use_debate=use_debate, use_memory=use_memory)
+    except Exception as e:
+        logger.warning("Consensus evaluate failed for %s: %s — returning fallback", symbol, e)
+        result = {
+            "action": "HOLD",
+            "confidence": 0.0,
+            "agreement_pct": 0.0,
+            "reason": f"Consensus engine error: {e}",
+            "votes": {"BUY": 0, "SELL": 0, "HOLD": 0},
+        }
 
     # Build signal counts from analyst votes
     analyst_votes = result.get("votes", {})
@@ -31,6 +65,7 @@ async def get_consensus(
             vote_counts[signal] += 1
 
     result["votes"] = vote_counts
+    _set_cached_consensus(cache_key, result)
     return result
 
 

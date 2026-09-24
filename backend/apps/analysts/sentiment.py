@@ -6,6 +6,7 @@ Data sources (all free, no API keys):
   - News headline polarity via simple keyword scoring  (reused from NewsAnalyst)
 No API keys required.
 """
+import asyncio
 import logging
 from typing import Optional
 
@@ -47,7 +48,7 @@ class SentimentAnalyst(BaseAnalyst):
         if self.llm_client:
             from .prompts import build_prompt, parse_llm_response
             prompt = build_prompt("sentiment", symbol, timeframe)
-            response = self.llm_client.analyze(prompt)
+            response = await asyncio.to_thread(self.llm_client.analyze, prompt)
             parsed = parse_llm_response(response.text, response.confidence)
             return AnalystResult(
                 analyst_name="sentiment",

@@ -1,7 +1,5 @@
 from functools import lru_cache
 
-from django.contrib.auth.models import User
-
 from apps.analysts.compliance import ComplianceAnalyst
 from apps.analysts.fundamentals import FundamentalsAnalyst
 from apps.analysts.macro import MacroAnalyst
@@ -108,20 +106,24 @@ def get_consensus_engine():
     chart_analyzer = get_chart_analyzer()
     ml_predictor = get_ml_predictor()
     llm_client = get_llm_client()
-    # All analysts now provide real data (no stubs remain)
+    # All analysts now provide real data — inject LLM client for enhanced analysis
     analysts = [
-        MarketAnalyst(),           # MT5 technical data
-        FundamentalsAnalyst(),     # yfinance (DXY, yields, commodities)
-        TechnicalAnalyst(chart_analyzer=chart_analyzer),  # MT5 patterns
-        OrderFlowAnalyst(),        # MT5 tick data
-        RiskAnalyst(),             # MT5 account + price data
-        QuantAnalyst(),            # MT5 statistical analysis
-        ComplianceAnalyst(),       # MT5 position checks
-        NewsAnalyst(),             # RSS feeds (ForexLive, DailyFX, etc.)
-        SentimentAnalyst(),        # VIX + Fear&Greed + DXY momentum
-        MacroAnalyst(),            # yfinance (DXY, yields, commodities, VIX)
-        OptionsAnalyst(),          # SPY/QQQ options chain (put/call, IV)
-        OnChainAnalyst(),          # CoinGecko BTC dominance (risk-on/off)
+        MarketAnalyst(llm_client=llm_client),  # MT5 technical data
+        FundamentalsAnalyst(
+            llm_client=llm_client
+        ),  # yfinance (DXY, yields, commodities)
+        TechnicalAnalyst(
+            chart_analyzer=chart_analyzer, llm_client=llm_client
+        ),  # MT5 patterns
+        OrderFlowAnalyst(llm_client=llm_client),  # MT5 tick data
+        RiskAnalyst(llm_client=llm_client),  # MT5 account + price data
+        QuantAnalyst(llm_client=llm_client),  # MT5 statistical analysis
+        ComplianceAnalyst(llm_client=llm_client),  # MT5 position checks
+        NewsAnalyst(llm_client=llm_client),  # RSS feeds (ForexLive, DailyFX, etc.)
+        SentimentAnalyst(llm_client=llm_client),  # VIX + Fear&Greed + DXY momentum
+        MacroAnalyst(llm_client=llm_client),  # yfinance (DXY, yields, commodities, VIX)
+        OptionsAnalyst(llm_client=llm_client),  # SPY/QQQ options chain (put/call, IV)
+        OnChainAnalyst(llm_client=llm_client),  # CoinGecko BTC dominance (risk-on/off)
     ]
     debate_engine = DebateEngine(llm_client=llm_client, max_rounds=1)
     memory = FinancialSituationMemory()
@@ -134,4 +136,5 @@ def get_consensus_engine():
 
 
 def get_current_user():
-    return User.objects.first()
+    """Return a default user dict. Auth is handled by AuthMiddleware."""
+    return {"id": 1, "username": "admin", "is_active": True}

@@ -26,9 +26,9 @@ COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
 COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
 
 USER nextjs
-EXPOSE 3000
+EXPOSE 8888
 
 HEALTHCHECK --interval=30s --timeout=10s --start-period=30s --retries=3 \
-    CMD wget -q --spider http://localhost:3000 || exit 1
+    CMD wget -q --spider http://localhost:8888 || exit 1
 
 CMD ["node", "server.js"]

@@ -1,8 +1,25 @@
 from decimal import Decimal
 from typing import Optional
 
-from django.contrib.auth.models import User
-from django.utils import timezone
+try:
+    from django.contrib.auth.models import User
+except Exception:
+    User = type("User", (), {"__init__": lambda *a, **kw: None})
+
+try:
+    from django.utils import timezone
+except Exception:
+    from datetime import timezone as _tz, datetime
+
+    class timezone:
+        @staticmethod
+        def now():
+            return datetime.now(_tz.utc)
+
+        @staticmethod
+        def utc():
+            return _tz.utc
+
 
 from django_app.models import AccountConfig
 from execution.broker import AccountInfo, BaseBroker

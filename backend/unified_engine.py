@@ -24,6 +24,7 @@ import asyncio
 import json
 import os
 from dotenv import load_dotenv
+
 load_dotenv()
 import sys
 import time
@@ -41,10 +42,6 @@ MODELS_DIR.mkdir(parents=True, exist_ok=True)
 if sys.platform == "win32":
     sys.stdout.reconfigure(encoding="utf-8", errors="replace")
     sys.stderr.reconfigure(encoding="utf-8", errors="replace")
-
-os.environ["DJANGO_SETTINGS_MODULE"] = "config.settings"
-import django
-django.setup()
 
 import MetaTrader5 as mt5
 import numpy as np
@@ -81,6 +78,7 @@ try:
     from apps.optimization.genetic import GeneticOptimizer
     from apps.rl.execution import ExecutionOptimizer
     from apps.alternative.onchain import AlternativeData
+
     NEW_FEATURES_AVAILABLE = True
     log.info("All 10 new features loaded successfully")
 except ImportError as e:
@@ -90,7 +88,9 @@ except ImportError as e:
 # ═══════════════════════════════════════════════════════════════
 # MT5 CONFIGURATION
 # ═══════════════════════════════════════════════════════════════
-MT5_PATH = os.environ.get("MT5_PATH", r"C:\Program Files\MetaTrader 5 EXNESS\terminal64.exe")
+MT5_PATH = os.environ.get(
+    "MT5_PATH", r"C:\Program Files\MetaTrader 5 EXNESS\terminal64.exe"
+)
 MT5_LOGIN = int(os.environ.get("MT5_LOGIN", "0"))
 MT5_PASSWORD = os.environ.get("MT5_PASSWORD", "")
 MT5_SERVER = os.environ.get("MT5_SERVER", "")
@@ -109,23 +109,43 @@ WATCHLIST = WATCHLIST_TIER1 + WATCHLIST_TIER2 + WATCHLIST_TIER3
 
 # Tier-based risk multipliers
 TIER_RISK_MULT = {
-    "EURUSD": 1.0, "GBPUSD": 1.0, "USDCHF": 1.0, "AUDUSD": 1.0, "NZDUSD": 1.0,
-    "USDCAD": 0.7, "EURGBP": 0.7,
-    "EURJPY": 0.4, "GBPJPY": 0.4, "USDJPY": 0.4,
+    "EURUSD": 1.0,
+    "GBPUSD": 1.0,
+    "USDCHF": 1.0,
+    "AUDUSD": 1.0,
+    "NZDUSD": 1.0,
+    "USDCAD": 0.7,
+    "EURGBP": 0.7,
+    "EURJPY": 0.4,
+    "GBPJPY": 0.4,
+    "USDJPY": 0.4,
 }
 
 # Max position size per symbol (lots)
 MAX_LOTS_PER_SYMBOL = {
-    "EURUSD": 0.50, "GBPUSD": 0.40, "USDCHF": 0.50, "AUDUSD": 0.50, "NZDUSD": 0.50,
-    "USDCAD": 0.30, "EURGBP": 0.30,
-    "EURJPY": 0.20, "GBPJPY": 0.20, "USDJPY": 0.20,
+    "EURUSD": 0.50,
+    "GBPUSD": 0.40,
+    "USDCHF": 0.50,
+    "AUDUSD": 0.50,
+    "NZDUSD": 0.50,
+    "USDCAD": 0.30,
+    "EURGBP": 0.30,
+    "EURJPY": 0.20,
+    "GBPJPY": 0.20,
+    "USDJPY": 0.20,
 }
 
 # Contract sizes for correct position sizing
 CONTRACT_SIZES = {
-    "EURUSD": 100000, "GBPUSD": 100000, "USDJPY": 100000,
-    "AUDUSD": 100000, "USDCAD": 100000, "USDCHF": 100000,
-    "NZDUSD": 100000, "EURJPY": 100000, "GBPJPY": 100000,
+    "EURUSD": 100000,
+    "GBPUSD": 100000,
+    "USDJPY": 100000,
+    "AUDUSD": 100000,
+    "USDCAD": 100000,
+    "USDCHF": 100000,
+    "NZDUSD": 100000,
+    "EURJPY": 100000,
+    "GBPJPY": 100000,
 }
 
 CORRELATIONS = {
@@ -140,9 +160,9 @@ CORRELATIONS = {
 }
 
 # Session hours (UTC) — Only trade during optimal liquidity
-SESSION_LONDON = (7, 16)   # London session
-SESSION_NY = (12, 21)      # New York session
-SESSION_OVERLAP = (12, 16) # London-NY overlap (best spreads)
+SESSION_LONDON = (7, 16)  # London session
+SESSION_NY = (12, 21)  # New York session
+SESSION_OVERLAP = (12, 16)  # London-NY overlap (best spreads)
 
 # Exit optimizer cooldown — don't run exit optimizer within first N cycles
 # after a position is registered (prevents premature closure on engine restart)
@@ -153,30 +173,27 @@ EXIT_OPTIMIZER_COOLDOWN_CYCLES = 2
 # ═══════════════════════════════════════════════════════════════
 CONFIG = {
     # ── Risk Management ──
-    "max_risk_pct": 0.10,              # 10% risk per trade (reduced from 25% for safety)
+    "max_risk_pct": 0.10,  # 10% risk per trade (reduced from 25% for safety)
     "max_position_pct": 0.15,
     "kelly_win_rate": 0.55,
     "kelly_avg_win": 1.5,
     "kelly_avg_loss": 1.0,
-    "hold_bars": 96,                    # Hold up to 96 hours (4 days for H1)
+    "hold_bars": 96,  # Hold up to 96 hours (4 days for H1)
     "min_confidence": 0.25,
     "min_score": 2,
-
     # ── Daily ROI Limits ──
-    "daily_profit_target_pct": 0.02,   # Stop trading after +2% daily gain
-    "daily_loss_limit_pct": 0.015,     # Stop trading after -1.5% daily loss
-    "daily_risk_per_trade_pct": 0.005, # 0.5% risk per trade (conservative)
-    "daily_reset_hour_utc": 0,         # Reset counters at midnight UTC
+    "daily_profit_target_pct": 0.02,  # Stop trading after +2% daily gain
+    "daily_loss_limit_pct": 0.015,  # Stop trading after -1.5% daily loss
+    "daily_risk_per_trade_pct": 0.005,  # 0.5% risk per trade (conservative)
+    "daily_reset_hour_utc": 0,  # Reset counters at midnight UTC
     "daily_extraction_enabled": True,  # Enable weekly profit extraction
-    "extraction_day": "friday",        # Extract profits on Friday
-    "extraction_pct": 0.30,           # Extract 30% of weekly profits
-
+    "extraction_day": "friday",  # Extract profits on Friday
+    "extraction_pct": 0.30,  # Extract 30% of weekly profits
     # ── ML Live Learning ──
     "ml_live_learning_enabled": True,  # Enable live learning from real trades
-    "ml_retrain_interval": 20,        # Retrain every 20 trades
-    "ml_min_diversity": 5,            # Min 5 wins AND 5 losses before retraining
-    "ml_max_training_data": 200,      # Keep last 200 trades for training
-
+    "ml_retrain_interval": 20,  # Retrain every 20 trades
+    "ml_min_diversity": 5,  # Min 5 wins AND 5 losses before retraining
+    "ml_max_training_data": 200,  # Keep last 200 trades for training
     # ── Dual Kelly Profiles (LLM picks per-trade) ──
     "kelly_profiles": {
         "aggressive": {
@@ -199,7 +216,6 @@ CONFIG = {
         },
     },
     "strategy_selector_enabled": True,
-
     # ── Symbol-Specific Default Profiles ──
     "symbol_default_profiles": {
         # Stable pairs → aggressive default
@@ -217,103 +233,147 @@ CONFIG = {
         "AUDJPY": "conservative",
         "XAUUSD": "conservative",
     },
-
     # ── Session Strategy Bias ──
     "session_strategy_bias": {
         # Hour (UTC): "aggressive" or "conservative"
         # London/NY overlap: aggressive (high liquidity, big moves)
-        13: "aggressive", 14: "aggressive", 15: "aggressive", 16: "aggressive",
+        13: "aggressive",
+        14: "aggressive",
+        15: "aggressive",
+        16: "aggressive",
         # London open: slightly aggressive
-        7: "neutral", 8: "neutral", 9: "neutral", 10: "neutral",
-        11: "neutral", 12: "neutral",
+        7: "neutral",
+        8: "neutral",
+        9: "neutral",
+        10: "neutral",
+        11: "neutral",
+        12: "neutral",
         # NY afternoon: neutral
-        17: "neutral", 18: "neutral",
+        17: "neutral",
+        18: "neutral",
         # Off-peak: conservative
-        19: "conservative", 20: "conservative", 21: "conservative",
+        19: "conservative",
+        20: "conservative",
+        21: "conservative",
         # Asian session: conservative (low liquidity)
-        0: "conservative", 1: "conservative", 2: "conservative", 3: "conservative",
-        4: "conservative", 5: "conservative", 6: "conservative",
-        22: "conservative", 23: "conservative",
+        0: "conservative",
+        1: "conservative",
+        2: "conservative",
+        3: "conservative",
+        4: "conservative",
+        5: "conservative",
+        6: "conservative",
+        22: "conservative",
+        23: "conservative",
     },
-
     # ── Safety Limits ──
-    "max_correlated_trades": 2,      # Max 2 correlated pairs open
+    "max_correlated_trades": 2,  # Max 2 correlated pairs open
     "max_total_exposure_pct": 0.50,  # Max 50% equity in open trades
     "max_drawdown_pause_pct": 0.15,  # Pause trading at 15% DD
-    "equity_curve_ma_period": 20,    # Pause if equity below 20-day MA
+    "equity_curve_ma_period": 20,  # Pause if equity below 20-day MA
     "session_filter_enabled": True,  # Only trade during optimal sessions
     "correlation_filter_enabled": True,
-
     # ── Session Filtering ──
     "session_hours": set(range(7, 22)),
     "optimal_sessions": [13, 14, 15, 16],
     "session_risk_mult": {
-        0: 0.5, 1: 0.5, 2: 0.6, 3: 0.6, 4: 0.7, 5: 0.7, 6: 0.6,  # Asian/AU hours
-        7: 0.5, 8: 0.7, 9: 0.8, 10: 0.9, 11: 1.0, 12: 1.0,
-        13: 1.0, 14: 1.0, 15: 1.0, 16: 1.0, 17: 0.9, 18: 0.8,
-        19: 0.7, 20: 0.6, 21: 0.5,
+        0: 0.5,
+        1: 0.5,
+        2: 0.6,
+        3: 0.6,
+        4: 0.7,
+        5: 0.7,
+        6: 0.6,  # Asian/AU hours
+        7: 0.5,
+        8: 0.7,
+        9: 0.8,
+        10: 0.9,
+        11: 1.0,
+        12: 1.0,
+        13: 1.0,
+        14: 1.0,
+        15: 1.0,
+        16: 1.0,
+        17: 0.9,
+        18: 0.8,
+        19: 0.7,
+        20: 0.6,
+        21: 0.5,
     },
-
     # ── Asian/Australian Session (select pairs only) ──
     "asian_session_enabled": True,
     "asian_session_hours": set(range(0, 7)),  # 00:00-06:59 UTC
     "asian_session_symbols": {"USDJPY", "AUDUSD", "NZDUSD", "XAUUSD"},
     "asian_session_risk_mult": 0.7,  # Slightly lower risk during thin liquidity
-
     # ── Indicators ──
     "adx_threshold": 20,
-    "sl_atr_mult": 1.5,              # V3: default SL (per-symbol overrides below)
-    "tp_atr_mult": 4.0,              # V3: default TP (per-symbol overrides below)
+    "sl_atr_mult": 1.5,  # V3: default SL (per-symbol overrides below)
+    "tp_atr_mult": 4.0,  # V3: default TP (per-symbol overrides below)
     "vol_sizing": True,
-
     # ── V3 Per-Symbol SL/TP/Trail/Risk Configs (optimized backtest) ──
     "v3_symbol_configs": {
         "EURUSD": {"sl": 1.5, "tp": 4.0, "trail": 1.0, "risk": 0.03, "cooldown": 3},
         "GBPUSD": {"sl": 1.5, "tp": 4.0, "trail": 2.0, "risk": 0.03, "cooldown": 5},
-        "USDJPY": {"sl": 1.5, "tp": 4.0, "trail": 1.0, "risk": 0.03, "cooldown": 3},  # was sl=2.0/tp=3.0 (R:R 1.5→2.67)
+        "USDJPY": {
+            "sl": 1.5,
+            "tp": 4.0,
+            "trail": 1.0,
+            "risk": 0.03,
+            "cooldown": 3,
+        },  # was sl=2.0/tp=3.0 (R:R 1.5→2.67)
         "XAUUSD": {"sl": 1.5, "tp": 3.0, "trail": 2.0, "risk": 0.02, "cooldown": 5},
-        "USDCHF": {"sl": 1.5, "tp": 4.0, "trail": 2.0, "risk": 0.02, "cooldown": 3},  # was sl=2.0/tp=3.0 (R:R 1.5→2.67)
+        "USDCHF": {
+            "sl": 1.5,
+            "tp": 4.0,
+            "trail": 2.0,
+            "risk": 0.02,
+            "cooldown": 3,
+        },  # was sl=2.0/tp=3.0 (R:R 1.5→2.67)
         "AUDUSD": {"sl": 1.5, "tp": 4.0, "trail": 2.0, "risk": 0.03, "cooldown": 3},
         "USDCAD": {"sl": 2.0, "tp": 4.0, "trail": 1.0, "risk": 0.03, "cooldown": 5},
-        "NZDUSD": {"sl": 2.0, "tp": 5.0, "trail": 1.0, "risk": 0.03, "cooldown": 3},  # was sl=2.5/tp=4.0 (R:R 1.6→2.5)
-        "EURGBP": {"sl": 1.5, "tp": 4.0, "trail": 1.0, "risk": 0.03, "cooldown": 3},  # was sl=2.0/tp=3.0 (R:R 1.5→2.67)
+        "NZDUSD": {
+            "sl": 2.0,
+            "tp": 5.0,
+            "trail": 1.0,
+            "risk": 0.03,
+            "cooldown": 3,
+        },  # was sl=2.5/tp=4.0 (R:R 1.6→2.5)
+        "EURGBP": {
+            "sl": 1.5,
+            "tp": 4.0,
+            "trail": 1.0,
+            "risk": 0.03,
+            "cooldown": 3,
+        },  # was sl=2.0/tp=3.0 (R:R 1.5→2.67)
         "EURJPY": {"sl": 1.5, "tp": 4.0, "trail": 2.0, "risk": 0.03, "cooldown": 3},
     },
-
     # ── Portfolio Limits ──
     "max_concurrent_trades": 6,
     "max_correlated_trades": 2,
     "circuit_breaker_losses": 3,
     "circuit_breaker_cooldown_min": 60,
-
     # ── Drawdown Throttle ──
     "drawdown_warning_pct": 0.05,
     "drawdown_critical_pct": 0.10,
     "drawdown_pause_pct": 0.15,
-
     # ── Partial Take-Profit ──
     "partial_tp_enabled": True,
-    "partial_tp_pct": 0.30,             # Take 30% at TP (was 50% — let winners run longer)
-    "partial_tp_rr": 1.5,               # Trigger at 1.5R (was 1.0 — allow more room before partial exit)
-
+    "partial_tp_pct": 0.30,  # Take 30% at TP (was 50% — let winners run longer)
+    "partial_tp_rr": 1.5,  # Trigger at 1.5R (was 1.0 — allow more room before partial exit)
     # ── Trailing Stop ──
     "trailing_enabled": True,
     "trailing_breakeven_rr": 1.0,
     "trailing_step_rr": 2.0,
     "trailing_atr_mult": 2.0,
-
     # ── DDFX Bollinger Band Stop ──
     "bbstop_enabled": True,
-
     # ── LLM Integration ──
     "llm_enabled": True,
     "llm_confirm_trades": True,
     "llm_analyze_interval": 5,
-
     # ── ML Integration ──
     "ml_enabled": True,
     "ml_min_confidence": 0.50,
-
     # ── NEW FEATURES ──
     "regime_enabled": True,
     "sentiment_enabled": True,
@@ -325,26 +385,29 @@ CONFIG = {
     "ga_optimization_enabled": True,
     "rl_execution_enabled": True,
     "alternative_data_enabled": True,
-
     # ── ANALYST CONSENSUS (Phase 1) ──
     "analyst_consensus_enabled": True,
-    "analyst_min_agreement": 0.50,       # Min % of analysts that must agree to boost
-    "analyst_block_threshold": 0.50,     # If >50% disagree → block trade
-    "analyst_confidence_boost": 0.20,    # Boost confidence by 20% on strong agreement
+    "analyst_min_agreement": 0.50,  # Min % of analysts that must agree to boost
+    "analyst_block_threshold": 0.50,  # If >50% disagree → block trade
+    "analyst_confidence_boost": 0.20,  # Boost confidence by 20% on strong agreement
     "analyst_confidence_penalty": 0.15,  # Reduce confidence by 15% on weak agreement
-
     # ── LEGENDARY CONSENSUS (Phase 2) ──
     "legendary_consensus_enabled": True,
-
     # ── MTF Analysis ──
     "multi_timeframe_enabled": True,
     "mtf_timeframes": ["M15", "M30", "H1", "H4", "D1", "W1", "MN1"],
     "mtf_min_agree": 2,
     "mtf_weights": {
-        "M15": 0.05, "M30": 0.08, "H1": 0.12,
-        "H4": 0.25, "D1": 0.30, "W1": 0.15, "MN1": 0.05,
+        "M15": 0.05,
+        "M30": 0.08,
+        "H1": 0.12,
+        "H4": 0.25,
+        "D1": 0.30,
+        "W1": 0.15,
+        "MN1": 0.05,
     },
-
+    # ── Main Engine Trading (signal generation + execution) ──
+    "main_engine_enabled": True,  # Master toggle: False = only scalping strategies run
     # ── MTF Cascading Scalper ──
     "mtf_cascading_scalper_enabled": True,
     "scalper_timeframes": ["M1", "M5", "M15", "M30", "H1", "H4", "D1", "W1", "MN1"],
@@ -370,6 +433,28 @@ CONFIG = {
     "scalper_trailing_breakeven_rr": 1.0,  # Move SL to entry at 1:1 R:R
     "scalper_trailing_step_pips": 5,  # Trail by 5 pips
     "scalper_prefer_groups": ["G3", "G4", "G5"],  # Prefer M15-H1-H4 range
+    # ── GOLD HEDGE EA ──
+    "gold_hedge_ea_enabled": False,  # Default OFF, toggle via config
+    "gold_hedge_ea_config": {
+        "symbol": "XAUUSD",
+        "htf": "H4",
+        "entry_tf": "M5",
+        "lot_progression": [0.01, 0.02, 0.03, 0.05, 0.08],
+        "max_hedge_levels": 5,
+        "basket_tp_usd": 50.0,
+        "min_profit_floor_usd": 10.0,
+        "freeze_loss_usd": 200.0,
+        "trailing_tp_enabled": True,
+        "trailing_tp_step_usd": 10.0,
+        "hedge_distance_atr": 1.5,
+        "ema_fast": 20,
+        "ema_slow": 50,
+        "rsi_period": 14,
+        "atr_period": 14,
+        "check_interval_seconds": 60,
+        "magic_base": 234020,
+        "enabled": False,
+    },
 }
 
 TIMEFRAME = "H1"
@@ -382,10 +467,12 @@ DATA_DIR.mkdir(exist_ok=True)
 # DATA STRUCTURES
 # ═══════════════════════════════════════════════════════════════
 
+
 class SignalDirection(Enum):
     BUY = "BUY"
     SELL = "SELL"
     HOLD = "HOLD"
+
 
 @dataclass
 class Signal:
@@ -405,6 +492,7 @@ class Signal:
     tp_price: float = 0.0
     timestamp: str = ""
 
+
 @dataclass
 class Trade:
     symbol: str
@@ -419,6 +507,7 @@ class Trade:
     exit_price: float = 0.0
     exit_time: str = ""
     bars_held: int = 0
+
 
 @dataclass
 class AccountState:
@@ -440,6 +529,7 @@ class AccountState:
 # ═══════════════════════════════════════════════════════════════
 # LAYER 1: TECHNICAL INDICATORS
 # ═══════════════════════════════════════════════════════════════
+
 
 def compute_indicators(df: pd.DataFrame) -> pd.DataFrame:
     """Compute all technical indicators."""
@@ -478,7 +568,9 @@ def compute_indicators(df: pd.DataFrame) -> pd.DataFrame:
     df["bb_width"] = (df["bb_upper"] - df["bb_lower"]) / df["bb_mid"]
 
     # ATR
-    tr = np.maximum(h - l, np.maximum(np.abs(h - np.roll(c, 1)), np.abs(l - np.roll(c, 1))))
+    tr = np.maximum(
+        h - l, np.maximum(np.abs(h - np.roll(c, 1)), np.abs(l - np.roll(c, 1)))
+    )
     df["atr"] = pd.Series(tr).rolling(14).mean().values
 
     # ADX
@@ -520,18 +612,28 @@ def compute_indicators(df: pd.DataFrame) -> pd.DataFrame:
     ema_26 = pd.Series(c).ewm(span=26).mean()
     df["ppo"] = ((ema_12 - ema_26) / ema_26 * 100).values
     df["ppo_signal"] = pd.Series(df["ppo"]).ewm(span=9).mean().values
-    df["ppo_hist"] = (df["ppo"] - df["ppo_signal"])
+    df["ppo_hist"] = df["ppo"] - df["ppo_signal"]
 
     # ── DDFX Bollinger Band Stop (3-band system) ──
     # BB1 = 1.0 std (tight stop), BB2 = 1.5 std (medium), BB3 = 2.0 std (wide stop)
     bb_sma = pd.Series(c).rolling(20).mean()
     bb_std_20 = pd.Series(c).rolling(20).std()
-    df["bbstop_upper"] = (bb_sma + 1.5 * bb_std_20).values   # Stop level for BUY (close above = exit)
-    df["bbstop_lower"] = (bb_sma - 1.5 * bb_std_20).values   # Stop level for SELL (close below = exit)
+    df["bbstop_upper"] = (
+        bb_sma + 1.5 * bb_std_20
+    ).values  # Stop level for BUY (close above = exit)
+    df["bbstop_lower"] = (
+        bb_sma - 1.5 * bb_std_20
+    ).values  # Stop level for SELL (close below = exit)
     df["bbstop_mid"] = bb_sma.values
 
     # Volume Ratio (MT5 uses 'tick_volume', not 'volume')
-    vol_col = "tick_volume" if "tick_volume" in df.columns else "volume" if "volume" in df.columns else None
+    vol_col = (
+        "tick_volume"
+        if "tick_volume" in df.columns
+        else "volume"
+        if "volume" in df.columns
+        else None
+    )
     if vol_col and df[vol_col].sum() > 0:
         df["vol_sma_20"] = pd.Series(df[vol_col].values).rolling(20).mean().values
         df["vol_ratio"] = df[vol_col] / df["vol_sma_20"].replace(0, 1)
@@ -561,9 +663,14 @@ def compute_daily_pivots(symbol: str) -> dict:
 
         return {
             "pivot": round(pp, 5),
-            "r1": round(r1, 5), "r2": round(r2, 5), "r3": round(r3, 5),
-            "s1": round(s1, 5), "s2": round(s2, 5), "s3": round(s3, 5),
-            "prev_high": round(high, 5), "prev_low": round(low, 5),
+            "r1": round(r1, 5),
+            "r2": round(r2, 5),
+            "r3": round(r3, 5),
+            "s1": round(s1, 5),
+            "s2": round(s2, 5),
+            "s3": round(s3, 5),
+            "prev_high": round(high, 5),
+            "prev_low": round(low, 5),
         }
     except Exception:
         return {}
@@ -573,7 +680,8 @@ def compute_daily_pivots(symbol: str) -> dict:
 # LAYER 2: SIGNAL GENERATION (Score-Based)
 # ═══════════════════════════════════════════════════════════════
 
-def generate_signal(row) -> Tuple[str, float, Dict[str, float]]:
+
+def generate_signal(row, symbol: str = "EURUSD") -> Tuple[str, float, Dict[str, float]]:
     """Generate signal from indicators. Returns (action, confidence, details)."""
     score = 0
     details = {}
@@ -692,15 +800,19 @@ def generate_signal(row) -> Tuple[str, float, Dict[str, float]]:
     # Price relative to pivot determines intraday bias
     # Cached per-symbol in pivot_cache to avoid recomputing every bar
     close = row["close"]
-    _pivot_cache = getattr(generate_signal, '_pivot_cache', {})
-    _pivot_cache_time = getattr(generate_signal, '_pivot_cache_time', {})
+    _pivot_cache = getattr(generate_signal, "_pivot_cache", {})
+    _pivot_cache_time = getattr(generate_signal, "_pivot_cache_time", {})
     now_ts = pd.Timestamp.now().timestamp()
-    cache_key = getattr(row, '_symbol', 'unknown') if hasattr(row, '_symbol') else 'unknown'
+    cache_key = symbol
     pivots = _pivot_cache.get(cache_key)
-    cache_age = now_ts - _pivot_cache_time.get(cache_key, 0) if cache_key in _pivot_cache_time else 99999
+    cache_age = (
+        now_ts - _pivot_cache_time.get(cache_key, 0)
+        if cache_key in _pivot_cache_time
+        else 99999
+    )
 
     if cache_age > 3600 or pivots is None:  # Recompute every hour
-        pivots = compute_daily_pivots(cache_key if cache_key != 'unknown' else 'EURUSD')
+        pivots = compute_daily_pivots(cache_key if cache_key != "unknown" else "EURUSD")
         _pivot_cache[cache_key] = pivots
         _pivot_cache_time[cache_key] = now_ts
         generate_signal._pivot_cache = _pivot_cache
@@ -741,7 +853,10 @@ TIMEFRAME_MAP = {
     "MN1": mt5.TIMEFRAME_MN1,
 }
 
-def fetch_mtf_data(symbol: str, timeframes: List[str] = None) -> Dict[str, pd.DataFrame]:
+
+def fetch_mtf_data(
+    symbol: str, timeframes: List[str] = None
+) -> Dict[str, pd.DataFrame]:
     """Fetch data across multiple timeframes."""
     if timeframes is None:
         timeframes = CONFIG["mtf_timeframes"]
@@ -764,7 +879,9 @@ def fetch_mtf_data(symbol: str, timeframes: List[str] = None) -> Dict[str, pd.Da
     return data
 
 
-def mtf_analysis(mtf_data: Dict[str, pd.DataFrame]) -> Tuple[str, float, Dict]:
+def mtf_analysis(
+    mtf_data: Dict[str, pd.DataFrame], symbol: str = "EURUSD"
+) -> Tuple[str, float, Dict]:
     """Analyze signal agreement across timeframes. Returns (direction, agreement_pct, details)."""
     votes = {"BUY": 0, "SELL": 0, "HOLD": 0}
     weighted_scores = 0.0
@@ -775,11 +892,15 @@ def mtf_analysis(mtf_data: Dict[str, pd.DataFrame]) -> Tuple[str, float, Dict]:
         if len(df) == 0:
             continue
         row = df.iloc[-1]
-        action, confidence, _ = generate_signal(row)
+        action, confidence, _ = generate_signal(row, symbol)
         weight = CONFIG["mtf_weights"].get(tf, 0.1)
 
         votes[action] += 1
-        weighted_scores += (1 if action == "BUY" else -1 if action == "SELL" else 0) * weight * confidence
+        weighted_scores += (
+            (1 if action == "BUY" else -1 if action == "SELL" else 0)
+            * weight
+            * confidence
+        )
         total_weight += weight
         details[tf] = {"action": action, "confidence": round(confidence, 3)}
 
@@ -856,13 +977,20 @@ Respond with ONLY this JSON:
 # LAYER 4: LLM MARKET ANALYSIS
 # ═══════════════════════════════════════════════════════════════
 
+
 def llm_analyze(symbol: str, indicators: Dict[str, float], action: str) -> Dict:
     """Use LLM (Ollama) to analyze the market and confirm/reject signal."""
     if not CONFIG["llm_enabled"]:
-        return {"signal": action, "confidence": 0.5, "reasoning": "LLM disabled", "approved": True}
+        return {
+            "signal": action,
+            "confidence": 0.5,
+            "reasoning": "LLM disabled",
+            "approved": True,
+        }
 
     try:
         from apps.llm.client import LLMClient
+
         client = LLMClient()
 
         # Build indicator string
@@ -883,7 +1011,7 @@ def llm_analyze(symbol: str, indicators: Dict[str, float], action: str) -> Dict:
             indicators=indicators,
         )
 
-        parsed = result.parsed if hasattr(result, 'parsed') and result.parsed else {}
+        parsed = result.parsed if hasattr(result, "parsed") and result.parsed else {}
         llm_signal = parsed.get("signal", action)
         llm_conf = parsed.get("confidence", 0.5)
         reasoning = parsed.get("reasoning", "")
@@ -899,12 +1027,18 @@ def llm_analyze(symbol: str, indicators: Dict[str, float], action: str) -> Dict:
         }
     except Exception as e:
         log.warning(f"LLM analysis failed for {symbol}: {e}")
-        return {"signal": action, "confidence": 0.5, "reasoning": f"LLM error: {e}", "approved": True}
+        return {
+            "signal": action,
+            "confidence": 0.5,
+            "reasoning": f"LLM error: {e}",
+            "approved": True,
+        }
 
 
 # ═══════════════════════════════════════════════════════════════
 # LAYER 5: ML SIGNAL RANKING
 # ═══════════════════════════════════════════════════════════════
+
 
 def ml_rank(indicators: Dict[str, float]) -> float:
     """Use ML model to rank signal quality. Returns P(UP)."""
@@ -913,8 +1047,9 @@ def ml_rank(indicators: Dict[str, float]) -> float:
 
     try:
         from apps.ml.predictor import MLPredictor
+
         # Cache predictor instance to avoid re-loading model every call
-        if not hasattr(ml_rank, '_predictor'):
+        if not hasattr(ml_rank, "_predictor"):
             ml_rank._predictor = MLPredictor(model_type="xgboost")
         ml = ml_rank._predictor
 
@@ -926,18 +1061,22 @@ def ml_rank(indicators: Dict[str, float]) -> float:
         # price_momentum, volatility_regime, trend_strength,
         # support_distance, resistance_distance
         close = indicators.get("close", 1.0)
-        features = np.array([
-            indicators.get("rsi", 50),
-            indicators.get("macd_hist", 0),
-            indicators.get("bb_width", 0),
-            indicators.get("atr", 0) / close if close > 0 else 0,  # atr_pct
-            indicators.get("vol_ratio", 1.0),
-            indicators.get("momentum_5", 0),
-            indicators.get("volatility_regime", 1.0 if indicators.get("adx", 0) > 25 else 0.0),
-            indicators.get("adx", 0),  # trend_strength
-            indicators.get("support_distance", 0.0),  # real S/R distance
-            indicators.get("resistance_distance", 0.0),  # real S/R distance
-        ])
+        features = np.array(
+            [
+                indicators.get("rsi", 50),
+                indicators.get("macd_hist", 0),
+                indicators.get("bb_width", 0),
+                indicators.get("atr", 0) / close if close > 0 else 0,  # atr_pct
+                indicators.get("vol_ratio", 1.0),
+                indicators.get("momentum_5", 0),
+                indicators.get(
+                    "volatility_regime", 1.0 if indicators.get("adx", 0) > 25 else 0.0
+                ),
+                indicators.get("adx", 0),  # trend_strength
+                indicators.get("support_distance", 0.0),  # real S/R distance
+                indicators.get("resistance_distance", 0.0),  # real S/R distance
+            ]
+        )
 
         pred = ml.predict_from_features(features)
         return pred.p_up
@@ -950,11 +1089,12 @@ def ml_rank(indicators: Dict[str, float]) -> float:
 # LAYER 6: RISK MANAGEMENT (All-in-One)
 # ═══════════════════════════════════════════════════════════════
 
+
 class RiskManager:
     """SINGLE SOURCE OF TRUTH for risk management.
-    
+
     Combined risk management: Kelly + Circuit Breaker + Drawdown + Correlation + Daily Limits.
-    
+
     This is the ONLY RiskManager used by the live trading engine.
     The deprecated version in execution/risk_manager.py is NOT used.
     """
@@ -1016,7 +1156,9 @@ class RiskManager:
     def check_circuit_breaker(self) -> bool:
         if self.circuit_breaker_state == "OPEN":
             if self.cb_opened_at:
-                elapsed = (datetime.now(timezone.utc) - self.cb_opened_at).total_seconds() / 60
+                elapsed = (
+                    datetime.now(timezone.utc) - self.cb_opened_at
+                ).total_seconds() / 60
                 if elapsed >= CONFIG["circuit_breaker_cooldown_min"]:
                     self.circuit_breaker_state = "HALF_OPEN"
                     return True
@@ -1029,11 +1171,13 @@ class RiskManager:
         self.daily_pnl += pnl_pct
 
         # Record trade in trade_log (BUG FIX: was never populated)
-        self.trade_log.append({
-            "pnl": pnl,
-            "pnl_pct": pnl_pct,
-            "time": datetime.now(timezone.utc).isoformat(),
-        })
+        self.trade_log.append(
+            {
+                "pnl": pnl,
+                "pnl_pct": pnl_pct,
+                "time": datetime.now(timezone.utc).isoformat(),
+            }
+        )
 
         # ── Daily Tracking ──
         self.daily_trades += 1
@@ -1073,21 +1217,27 @@ class RiskManager:
         if daily_return >= CONFIG["daily_profit_target_pct"]:
             if not self.daily_target_hit:
                 self.daily_target_hit = True
-                log.warning(f"  DAILY PROFIT TARGET HIT: {daily_return:.2%} >= {CONFIG['daily_profit_target_pct']:.2%}")
+                log.warning(
+                    f"  DAILY PROFIT TARGET HIT: {daily_return:.2%} >= {CONFIG['daily_profit_target_pct']:.2%}"
+                )
 
         # Loss limit hit
         if daily_return <= -CONFIG["daily_loss_limit_pct"]:
             if not self.daily_limit_hit:
                 self.daily_limit_hit = True
-                log.warning(f"  DAILY LOSS LIMIT HIT: {daily_return:.2%} <= -{CONFIG['daily_loss_limit_pct']:.2%}")
+                log.warning(
+                    f"  DAILY LOSS LIMIT HIT: {daily_return:.2%} <= -{CONFIG['daily_loss_limit_pct']:.2%}"
+                )
 
     def reset_daily_counters(self):
         """Reset daily counters at midnight UTC."""
         now = datetime.now(timezone.utc).date()
         if now != self.daily_date:
-            log.info(f"  DAILY RESET: {self.daily_date} → {now} | "
-                     f"P&L=${self.daily_pnl_dollar:+.2f} | "
-                     f"Trades={self.daily_trades} | WR={self.daily_wins}/{self.daily_trades}")
+            log.info(
+                f"  DAILY RESET: {self.daily_date} → {now} | "
+                f"P&L=${self.daily_pnl_dollar:+.2f} | "
+                f"Trades={self.daily_trades} | WR={self.daily_wins}/{self.daily_trades}"
+            )
             self.daily_start_balance = self.balance
             self.daily_trades = 0
             self.daily_wins = 0
@@ -1109,7 +1259,11 @@ class RiskManager:
     def get_daily_status(self) -> Dict:
         """Get daily trading status."""
         self.reset_daily_counters()  # Auto-reset at midnight
-        daily_return = self.daily_pnl_dollar / self.daily_start_balance if self.daily_start_balance > 0 else 0
+        daily_return = (
+            self.daily_pnl_dollar / self.daily_start_balance
+            if self.daily_start_balance > 0
+            else 0
+        )
         return {
             "date": str(self.daily_date),
             "start_balance": round(self.daily_start_balance, 2),
@@ -1118,7 +1272,9 @@ class RiskManager:
             "daily_return": round(daily_return, 4),
             "daily_trades": self.daily_trades,
             "daily_wins": self.daily_wins,
-            "daily_win_rate": round(self.daily_wins / self.daily_trades, 2) if self.daily_trades > 0 else 0,
+            "daily_win_rate": round(self.daily_wins / self.daily_trades, 2)
+            if self.daily_trades > 0
+            else 0,
             "profit_target": CONFIG["daily_profit_target_pct"],
             "loss_limit": CONFIG["daily_loss_limit_pct"],
             "target_hit": self.daily_target_hit,
@@ -1135,12 +1291,22 @@ class RiskManager:
         extraction_day = CONFIG.get("extraction_day", "friday").lower()
 
         # Check if it's the extraction day
-        day_map = {"monday": 0, "tuesday": 1, "wednesday": 2, "thursday": 3,
-                   "friday": 4, "saturday": 5, "sunday": 6}
+        day_map = {
+            "monday": 0,
+            "tuesday": 1,
+            "wednesday": 2,
+            "thursday": 3,
+            "friday": 4,
+            "saturday": 5,
+            "sunday": 6,
+        }
         target_day = day_map.get(extraction_day, 4)
 
         if now.weekday() != target_day:
-            return {"extract": False, "reason": f"not {extraction_day} (today={now.strftime('%A')})"}
+            return {
+                "extract": False,
+                "reason": f"not {extraction_day} (today={now.strftime('%A')})",
+            }
 
         # Check if already extracted today
         if self.last_extraction_date == now.date():
@@ -1151,7 +1317,10 @@ class RiskManager:
         extraction_amount = self.weekly_pnl * extraction_pct
 
         if extraction_amount <= 0:
-            return {"extract": False, "reason": f"no profits to extract (weekly P&L=${self.weekly_pnl:+.2f})"}
+            return {
+                "extract": False,
+                "reason": f"no profits to extract (weekly P&L=${self.weekly_pnl:+.2f})",
+            }
 
         return {
             "extract": True,
@@ -1165,7 +1334,9 @@ class RiskManager:
         """Record that a profit extraction was made."""
         self.last_extraction_date = datetime.now(timezone.utc).date()
         self.weekly_pnl -= amount
-        log.info(f"  PROFIT EXTRACTION: ${amount:.2f} | Remaining weekly P&L: ${self.weekly_pnl:+.2f}")
+        log.info(
+            f"  PROFIT EXTRACTION: ${amount:.2f} | Remaining weekly P&L: ${self.weekly_pnl:+.2f}"
+        )
 
     def check_correlation(self, symbol: str) -> bool:
         max_correlated = CONFIG["max_correlated_trades"]
@@ -1176,8 +1347,15 @@ class RiskManager:
     def check_portfolio_limits(self) -> bool:
         return len(self.open_positions) < CONFIG["max_concurrent_trades"]
 
-    def calculate_position_size(self, price: float, atr: float, confidence: float,
-                                 session_hour: int, volatility: float, symbol: str = None) -> float:
+    def calculate_position_size(
+        self,
+        price: float,
+        atr: float,
+        confidence: float,
+        session_hour: int,
+        volatility: float,
+        symbol: str = None,
+    ) -> float:
         """Equity-based auto lot sizing with tier risk and safety limits."""
         risk_mult = self.get_risk_multiplier()
         if risk_mult <= 0:
@@ -1194,7 +1372,7 @@ class RiskManager:
         tier_mult = TIER_RISK_MULT.get(symbol, 0.5) if symbol else 1.0
 
         # Base risk = EQUITY × risk percentage (always use equity, not balance)
-        equity = getattr(self, 'equity', self.balance)
+        equity = getattr(self, "equity", self.balance)
         # V3: Use per-symbol risk if available
         v3_configs = CONFIG.get("v3_symbol_configs", {})
         if symbol and symbol in v3_configs:
@@ -1229,7 +1407,9 @@ class RiskManager:
 
         return round(lots, 2)
 
-    def calculate_sl_tp(self, price: float, atr: float, action: str, symbol: str = None) -> Tuple[float, float]:
+    def calculate_sl_tp(
+        self, price: float, atr: float, action: str, symbol: str = None
+    ) -> Tuple[float, float]:
         """ATR-based SL/TP with V3 per-symbol configs."""
         # V3: Use per-symbol config if available
         v3_configs = CONFIG.get("v3_symbol_configs", {})
@@ -1271,6 +1451,7 @@ class RiskManager:
 # MT5 DIRECT COMMUNICATION
 # ═══════════════════════════════════════════════════════════════
 
+
 class MT5Client:
     """Direct MT5 communication layer."""
 
@@ -1278,7 +1459,9 @@ class MT5Client:
         self.connected = False
 
     def connect(self) -> bool:
-        if not mt5.initialize(path=MT5_PATH, login=MT5_LOGIN, password=MT5_PASSWORD, server=MT5_SERVER):
+        if not mt5.initialize(
+            path=MT5_PATH, login=MT5_LOGIN, password=MT5_PASSWORD, server=MT5_SERVER
+        ):
             log.error(f"MT5 connect failed: {mt5.last_error()}")
             return False
         info = mt5.account_info()
@@ -1309,20 +1492,22 @@ class MT5Client:
             return []
         result = []
         for p in positions:
-            result.append({
-                "ticket": p.ticket,
-                "symbol": p.symbol,
-                "action": "BUY" if p.type == 0 else "SELL",
-                "lots": p.volume,
-                "entry_price": p.price_open,
-                "current_price": p.price_current,
-                "sl": p.sl,
-                "tp": p.tp,
-                "profit": p.profit,
-                "swap": p.swap,
-                "magic": p.magic,
-                "time": datetime.fromtimestamp(p.time, tz=timezone.utc).isoformat(),
-            })
+            result.append(
+                {
+                    "ticket": p.ticket,
+                    "symbol": p.symbol,
+                    "action": "BUY" if p.type == 0 else "SELL",
+                    "lots": p.volume,
+                    "entry_price": p.price_open,
+                    "current_price": p.price_current,
+                    "sl": p.sl,
+                    "tp": p.tp,
+                    "profit": p.profit,
+                    "swap": p.swap,
+                    "magic": p.magic,
+                    "time": datetime.fromtimestamp(p.time, tz=timezone.utc).isoformat(),
+                }
+            )
         return result
 
     def get_symbol_info(self, symbol: str):
@@ -1333,7 +1518,9 @@ class MT5Client:
         """Get current tick (ask/bid). Used by scalping engine."""
         return mt5.symbol_info_tick(symbol)
 
-    def fetch_candles(self, symbol: str, timeframe: str, count: int = 200) -> Optional[pd.DataFrame]:
+    def fetch_candles(
+        self, symbol: str, timeframe: str, count: int = 200
+    ) -> Optional[pd.DataFrame]:
         info = mt5.symbol_info(symbol)
         if info is None:
             return None
@@ -1341,9 +1528,12 @@ class MT5Client:
             mt5.symbol_select(symbol, True)
 
         tf_map = {
-            "M15": mt5.TIMEFRAME_M15, "M30": mt5.TIMEFRAME_M30,
-            "H1": mt5.TIMEFRAME_H1, "H4": mt5.TIMEFRAME_H4,
-            "D1": mt5.TIMEFRAME_D1, "W1": mt5.TIMEFRAME_W1,
+            "M15": mt5.TIMEFRAME_M15,
+            "M30": mt5.TIMEFRAME_M30,
+            "H1": mt5.TIMEFRAME_H1,
+            "H4": mt5.TIMEFRAME_H4,
+            "D1": mt5.TIMEFRAME_D1,
+            "W1": mt5.TIMEFRAME_W1,
             "MN1": mt5.TIMEFRAME_MN1,
         }
         mt5_tf = tf_map.get(timeframe, mt5.TIMEFRAME_H1)
@@ -1356,8 +1546,15 @@ class MT5Client:
         df = df.set_index("timestamp")[["open", "high", "low", "close", "volume"]]
         return df
 
-    def place_order(self, symbol: str, action: str, lots: float,
-                     sl: float, tp: float, magic: int = MT5_MAGIC) -> Optional[int]:
+    def place_order(
+        self,
+        symbol: str,
+        action: str,
+        lots: float,
+        sl: float,
+        tp: float,
+        magic: int = MT5_MAGIC,
+    ) -> Optional[int]:
         info = mt5.symbol_info(symbol)
         if info is None:
             return None
@@ -1386,7 +1583,9 @@ class MT5Client:
 
         result = mt5.order_send(request)
         if result and result.retcode == mt5.TRADE_RETCODE_DONE:
-            log.info(f"ORDER OK: {action} {lots} {symbol} @ {price:.5f} ticket={result.order}")
+            log.info(
+                f"ORDER OK: {action} {lots} {symbol} @ {price:.5f} ticket={result.order}"
+            )
             return result.order
         else:
             log.error(f"ORDER FAIL: {result}")
@@ -1453,6 +1652,7 @@ class MT5Client:
 # UNIFIED ENGINE — MAIN TRADING LOOP
 # ═══════════════════════════════════════════════════════════════
 
+
 class UnifiedEngine:
     """All-in-one trading engine combining every layer."""
 
@@ -1494,18 +1694,32 @@ class UnifiedEngine:
             self.execution_optimizer = None
             self.alternative_data = None
 
-        # Initialize MTF Cascading Scalper
-        if CONFIG.get("mtf_cascading_scalper_enabled"):
-            from apps.legendary.mtf_cascading_scalper import MTFCascadingScalper
-            self.scalper = MTFCascadingScalper(self.mt5, self.risk, CONFIG)
-        else:
-            self.scalper = None
+        # Initialize MTF Cascading Scalper (always create; self-gates via config flag)
+        from apps.legendary.mtf_cascading_scalper import MTFCascadingScalper
+
+        self.scalper = MTFCascadingScalper(self.mt5, self.risk, CONFIG)
+
+        # Initialize Gold Hedge EA (standalone, uses MT5Connector for pending orders)
+        self.gold_hedge = None
+        if CONFIG.get("gold_hedge_ea_enabled"):
+            try:
+                from apps.hedging.gold_hedge_ea import GoldHedgeIntegration
+                from execution.mt5_connector import MT5Connector
+
+                gold_config = CONFIG.get("gold_hedge_ea_config", {})
+                self.gold_hedge = GoldHedgeIntegration(gold_config, MT5Connector())
+                log.info("  Gold Hedge EA initialized (enabled)")
+            except Exception as e:
+                log.debug(f"  Gold Hedge EA not available: {e}")
 
         # ── ConsensusGates: ML + LLM gating as additional safety layer ──
         try:
             from apps.consensus.gates import ConsensusGates
             from apps.ml.predictor import MLPredictor
-            self.consensus_gates = ConsensusGates(ml_predictor=MLPredictor(model_type="xgboost"))
+
+            self.consensus_gates = ConsensusGates(
+                ml_predictor=MLPredictor(model_type="xgboost")
+            )
             log.info("  ConsensusGates initialized (ML gate active)")
         except Exception as e:
             self.consensus_gates = None
@@ -1514,7 +1728,9 @@ class UnifiedEngine:
         # ── Phase 4: Equity Curve MA + Kelly Criterion ──
         self.equity_curve = []  # Rolling equity history for MA
         self.equity_curve_ma_period = CONFIG.get("equity_curve_ma_period", 20)
-        self.kelly_fraction = CONFIG.get("kelly_win_rate", 0.55)  # Start with config default
+        self.kelly_fraction = CONFIG.get(
+            "kelly_win_rate", 0.55
+        )  # Start with config default
         self._trade_results = []  # Track wins/losses for dynamic Kelly
 
         # ── Strategy Profile Performance Tracker ──
@@ -1543,7 +1759,7 @@ class UnifiedEngine:
 
     def _sync_scalp_results(self):
         """Feed scalper trade results into main engine's learning systems.
-        
+
         This ensures:
         - Scalp wins/losses feed into Kelly calculation
         - Scalp trades update win/loss streaks
@@ -1585,7 +1801,9 @@ class UnifiedEngine:
                     self._trade_results = self._trade_results[-50:]
 
                 # 2. Update risk manager
-                self.risk.record_trade_result(pnl, pnl / self.risk.balance if self.risk.balance > 0 else 0)
+                self.risk.record_trade_result(
+                    pnl, pnl / self.risk.balance if self.risk.balance > 0 else 0
+                )
 
                 # 3. Update streaks
                 self._update_streaks(pnl)
@@ -1593,8 +1811,10 @@ class UnifiedEngine:
                 # 4. Log the integration
                 direction = scalp.get("direction", "?")
                 group = scalp.get("group", "?")
-                log.info(f"  SCALP SYNCED: {direction} {symbol} ({group}) | P&L=${pnl:+.2f} | "
-                         f"Kelly={len(self._trade_results)} trades | Streak=W{self.consecutive_wins}/L{self.consecutive_losses}")
+                log.info(
+                    f"  SCALP SYNCED: {direction} {symbol} ({group}) | P&L=${pnl:+.2f} | "
+                    f"Kelly={len(self._trade_results)} trades | Streak=W{self.consecutive_wins}/L{self.consecutive_losses}"
+                )
 
             # Store profit in scalp dict for scalper's streak-based sizing
             scalp["profit"] = pnl
@@ -1603,7 +1823,10 @@ class UnifiedEngine:
             scalp["_synced"] = True
 
             # Remove from risk manager open_positions
-            if symbol in self.risk.open_positions and self.risk.open_positions[symbol].get("source") == "scalper":
+            if (
+                symbol in self.risk.open_positions
+                and self.risk.open_positions[symbol].get("source") == "scalper"
+            ):
                 del self.risk.open_positions[symbol]
 
         # Cap trade_history to prevent memory leak (keep last 200)
@@ -1619,9 +1842,10 @@ class UnifiedEngine:
         try:
             from apps.scalping.engine import ScalpingEngine
             from apps.scalping.config import is_any_strategy_enabled
+
             if not is_any_strategy_enabled():
                 return
-            if not hasattr(self, '_scalping_engine'):
+            if not hasattr(self, "_scalping_engine"):
                 # Pass the actual MT5Client and RiskManager instances
                 self._scalping_engine = ScalpingEngine(self.mt5, self.risk)
             self._scalping_engine.run_cycle(WATCHLIST)
@@ -1630,11 +1854,11 @@ class UnifiedEngine:
 
     def _sync_scalping_results(self):
         """Feed scalping trades into main engine's RiskManager."""
-        if not hasattr(self, '_scalping_engine'):
+        if not hasattr(self, "_scalping_engine"):
             return
         results = self._scalping_engine.get_trade_results()
         for trade in results:
-            pnl = trade.get('pnl', 0.0)
+            pnl = trade.get("pnl", 0.0)
             # Update RiskManager using correct attribute names
             if pnl > 0:
                 self.risk.consecutive_wins += 1
@@ -1650,11 +1874,19 @@ class UnifiedEngine:
     # PHASE 2: ML LIVE LEARNING LOOP
     # ═══════════════════════════════════════════════════════════════
 
-    def _record_trade_for_ml(self, symbol: str, action: str, indicators: Dict,
-                              confidence: float, pnl: float, entry_price: float,
-                              exit_price: float, atr: float):
+    def _record_trade_for_ml(
+        self,
+        symbol: str,
+        action: str,
+        indicators: Dict,
+        confidence: float,
+        pnl: float,
+        entry_price: float,
+        exit_price: float,
+        atr: float,
+    ):
         """Record trade features + outcome for ML live learning.
-        
+
         Stores (features, label) pairs that will be used to retrain
         the XGBoost model periodically.
         """
@@ -1666,11 +1898,11 @@ class UnifiedEngine:
         resistance_dist = 0.0
         volatility_regime = 1.0 if indicators.get("adx", 0) > 25 else 0.0
         try:
-            rates = self.mt5.copy_rates_from_pos(symbol, self.mt5.TIMEFRAME_H1, 0, 30)
-            if rates is not None and len(rates) >= 20:
-                closes = np.array([r['close'] for r in rates])
-                highs = np.array([r['high'] for r in rates])
-                lows = np.array([r['low'] for r in rates])
+            df = self.mt5.fetch_candles(symbol, "H1", 30)
+            if df is not None and len(df) >= 20:
+                closes = df["close"].values
+                highs = df["high"].values
+                lows = df["low"].values
                 # Support distance: (close - 20-period low) / close
                 support_level = float(np.min(lows[-20:]))
                 resistance_level = float(np.max(highs[-20:]))
@@ -1681,9 +1913,11 @@ class UnifiedEngine:
                 # Volatility regime: ATR percentile rank
                 atrs = []
                 for i in range(1, min(30, len(highs))):
-                    tr = max(highs[i] - lows[i],
-                             abs(highs[i] - closes[i-1]),
-                             abs(lows[i] - closes[i-1]))
+                    tr = max(
+                        highs[i] - lows[i],
+                        abs(highs[i] - closes[i - 1]),
+                        abs(lows[i] - closes[i - 1]),
+                    )
                     atrs.append(tr)
                 if len(atrs) >= 14:
                     recent_atr = np.mean(atrs[-14:])
@@ -1732,8 +1966,10 @@ class UnifiedEngine:
         if len(self._ml_training_data) > max_data:
             self._ml_training_data = self._ml_training_data[-max_data:]
 
-        log.info(f"  ML DATA: recorded trade #{len(self._ml_training_data)} | "
-                 f"{symbol} {action} | P&L=${pnl:+.2f} | Label={label}")
+        log.info(
+            f"  ML DATA: recorded trade #{len(self._ml_training_data)} | "
+            f"{symbol} {action} | P&L=${pnl:+.2f} | Label={label}"
+        )
 
         # Check if it's time to retrain
         self._maybe_retrain_ml()
@@ -1741,12 +1977,15 @@ class UnifiedEngine:
     def _maybe_retrain_ml(self):
         """Retrain ML model every N trades from real data."""
         retrain_interval = CONFIG.get("ml_retrain_interval", 20)
-        
+
         if len(self._ml_training_data) < retrain_interval:
             return  # Not enough data yet
 
         # Don't retrain more than once per cycle
-        if hasattr(self, '_last_ml_retrain_cycle') and self._last_ml_retrain_cycle == self.cycle_count:
+        if (
+            hasattr(self, "_last_ml_retrain_cycle")
+            and self._last_ml_retrain_cycle == self.cycle_count
+        ):
             return
 
         # Check if we have enough diverse data
@@ -1757,7 +1996,9 @@ class UnifiedEngine:
         # Need minimum wins and losses for meaningful training (configurable)
         min_diversity = CONFIG.get("ml_min_diversity", 5)
         if wins < min_diversity or losses < min_diversity:
-            log.info(f"  ML RETRAIN SKIPPED: need more diversity (W={wins} L={losses}, need {min_diversity} each)")
+            log.info(
+                f"  ML RETRAIN SKIPPED: need more diversity (W={wins} L={losses}, need {min_diversity} each)"
+            )
             return
 
         try:
@@ -1778,6 +2019,7 @@ class UnifiedEngine:
 
             if model_path.exists():
                 import shutil
+
                 shutil.copy2(model_path, backup_path)
 
             new_model.save(str(model_path))
@@ -1785,8 +2027,10 @@ class UnifiedEngine:
             self._last_ml_retrain_cycle = self.cycle_count
             self._ml_retrain_count += 1
 
-            log.info(f"  ML RETRAIN #{self._ml_retrain_count}: trained on {len(y)} samples "
-                     f"(W={wins} L={losses}) | Saved to {model_path}")
+            log.info(
+                f"  ML RETRAIN #{self._ml_retrain_count}: trained on {len(y)} samples "
+                f"(W={wins} L={losses}) | Saved to {model_path}"
+            )
 
         except Exception as e:
             log.warning(f"  ML RETRAIN FAILED: {e}")
@@ -1806,18 +2050,23 @@ class UnifiedEngine:
 
         # Keep only last N periods
         if len(self.equity_curve) > self.equity_curve_ma_period * 2:
-            self.equity_curve = self.equity_curve[-self.equity_curve_ma_period * 2:]
+            self.equity_curve = self.equity_curve[-self.equity_curve_ma_period * 2 :]
 
         # Need at least MA period data points
         if len(self.equity_curve) < self.equity_curve_ma_period:
             return True  # Not enough data, allow trading
 
         # Calculate MA
-        ma = sum(self.equity_curve[-self.equity_curve_ma_period:]) / self.equity_curve_ma_period
+        ma = (
+            sum(self.equity_curve[-self.equity_curve_ma_period :])
+            / self.equity_curve_ma_period
+        )
 
         if equity < ma:
-            log.warning(f"  EQUITY CURVE PAUSE: equity ${equity:.2f} < MA ${ma:.2f} "
-                       f"(period={self.equity_curve_ma_period})")
+            log.warning(
+                f"  EQUITY CURVE PAUSE: equity ${equity:.2f} < MA ${ma:.2f} "
+                f"(period={self.equity_curve_ma_period})"
+            )
             return False  # Pause trading
 
         return True  # OK to trade
@@ -1826,20 +2075,25 @@ class UnifiedEngine:
     # STRATEGY SELECTOR — LLM + rules pick aggressive vs conservative
     # ═══════════════════════════════════════════════════════════════
 
-    def _select_strategy_profile(self, symbol: str, indicators: Dict, action: str,
-                                  confidence: float, atr: float) -> Dict:
+    def _select_strategy_profile(
+        self, symbol: str, indicators: Dict, action: str, confidence: float, atr: float
+    ) -> Dict:
         """Select aggressive or conservative Kelly profile based on market conditions.
-        
+
         Uses a hybrid approach:
         1. Rule-based scoring (fast, deterministic)
         2. LLM reasoning (slow, contextual) — when available
         3. Final decision combines both with override logic
-        
+
         Returns: {"profile": "aggressive"|"conservative", "reason": str, "confidence": float}
         """
         profiles = CONFIG.get("kelly_profiles", {})
         if not profiles:
-            return {"profile": "conservative", "reason": "no profiles configured", "confidence": 0.5}
+            return {
+                "profile": "conservative",
+                "reason": "no profiles configured",
+                "confidence": 0.5,
+            }
 
         # ── RULE-BASED SCORING ──
         # Score > 0 → aggressive, Score < 0 → conservative
@@ -1924,7 +2178,9 @@ class UnifiedEngine:
                 reasons.append(f"Win streak: {wins}/{len(recent)} recent")
             elif wins <= 1:
                 score -= 1
-                reasons.append(f"Loss streak: {len(recent)-wins}/{len(recent)} recent")
+                reasons.append(
+                    f"Loss streak: {len(recent) - wins}/{len(recent)} recent"
+                )
 
         # Factor 8: ATR relative (volatility opportunity)
         atr_pct = (atr / close * 100) if close > 0 else 0
@@ -1941,6 +2197,7 @@ class UnifiedEngine:
         if CONFIG.get("strategy_selector_enabled") and CONFIG.get("llm_enabled"):
             try:
                 from apps.llm.client import LLMClient
+
                 client = LLMClient()
 
                 prompt = STRATEGY_SELECTION_PROMPT.format(
@@ -1959,12 +2216,20 @@ class UnifiedEngine:
                     confidence=confidence,
                     current_balance=f"{self.risk.balance:.2f}",
                     open_positions=len(self.risk.open_positions),
-                    recent_wins=sum(1 for r in self._trade_results[-10:] if r > 0) if self._trade_results else 0,
-                    recent_losses=sum(1 for r in self._trade_results[-10:] if r <= 0) if self._trade_results else 0,
+                    recent_wins=sum(1 for r in self._trade_results[-10:] if r > 0)
+                    if self._trade_results
+                    else 0,
+                    recent_losses=sum(1 for r in self._trade_results[-10:] if r <= 0)
+                    if self._trade_results
+                    else 0,
                 )
 
                 response = client.analyze(prompt, task="analysis")
-                parsed = client._try_parse_json(response.text) if hasattr(client, '_try_parse_json') else {}
+                parsed = (
+                    client._try_parse_json(response.text)
+                    if hasattr(client, "_try_parse_json")
+                    else {}
+                )
                 if parsed:
                     llm_choice = parsed.get("profile", "conservative")
                     llm_reason = parsed.get("reasoning", "")
@@ -1994,7 +2259,9 @@ class UnifiedEngine:
         perf_bias = self._get_performance_bias()
         if perf_bias != 0:
             score += perf_bias
-            reasons.append(f"Performance bias: {perf_bias:+d} (better profile gets edge)")
+            reasons.append(
+                f"Performance bias: {perf_bias:+d} (better profile gets edge)"
+            )
             # Recompute with performance bias
             if score > 1:
                 rule_decision = "aggressive"
@@ -2026,9 +2293,11 @@ class UnifiedEngine:
 
         profile_data = profiles.get(final_decision, profiles.get("conservative", {}))
 
-        log.info(f"  STRATEGY {symbol}: {final_decision.upper()} "
-                 f"(score={score}, llm={llm_choice or 'N/A'}) | "
-                 f"{override_reason}")
+        log.info(
+            f"  STRATEGY {symbol}: {final_decision.upper()} "
+            f"(score={score}, llm={llm_choice or 'N/A'}) | "
+            f"{override_reason}"
+        )
 
         return {
             "profile": final_decision,
@@ -2096,15 +2365,21 @@ class UnifiedEngine:
     # PHASE 4: KELLY CRITERION — Dynamic position sizing
     # ═══════════════════════════════════════════════════════════════
 
-    def _calculate_kelly_fraction(self, avg_win: float = None, avg_loss: float = None) -> float:
+    def _calculate_kelly_fraction(
+        self, avg_win: float = None, avg_loss: float = None
+    ) -> float:
         """Calculate Kelly fraction from recent trade history.
         Uses quarter-Kelly capped at 0.25 for safety.
         If avg_win/avg_loss provided (from strategy profile), use those."""
         win_rate = CONFIG.get("kelly_win_rate", 0.55)
         if avg_win is None:
-            avg_win = CONFIG.get("kelly_avg_win", 1.75)   # Aligned with V3 neutral profile
+            avg_win = CONFIG.get(
+                "kelly_avg_win", 1.75
+            )  # Aligned with V3 neutral profile
         if avg_loss is None:
-            avg_loss = CONFIG.get("kelly_avg_loss", 0.75)  # Aligned with V3 neutral profile
+            avg_loss = CONFIG.get(
+                "kelly_avg_loss", 0.75
+            )  # Aligned with V3 neutral profile
 
         # If we have enough trade results, compute dynamic Kelly
         if len(self._trade_results) >= 10:
@@ -2133,7 +2408,9 @@ class UnifiedEngine:
     # PHASE 4: CORRELATION HEDGING — Auto-hedge correlated positions
     # ═══════════════════════════════════════════════════════════════
 
-    def _check_hedging(self, signal_symbol: str, signal_direction: str, signal_size: float):
+    def _check_hedging(
+        self, signal_symbol: str, signal_direction: str, signal_size: float
+    ):
         """Check if correlation hedging is needed after executing a trade."""
         if not CONFIG.get("hedging_enabled") or not self.hedging:
             return
@@ -2144,6 +2421,7 @@ class UnifiedEngine:
         # Build price data for correlation computation
         try:
             import pandas as pd
+
             price_data = {}
             for sym in list(self.risk.open_positions.keys()) + [signal_symbol]:
                 df = self.mt5.get_candles(sym, "H1", 50)
@@ -2159,15 +2437,20 @@ class UnifiedEngine:
 
             # Check if we need to hedge
             hedge_decision = self.hedging.should_hedge(
-                signal_symbol, signal_direction, signal_size,
-                self.risk.open_positions, corr_matrix
+                signal_symbol,
+                signal_direction,
+                signal_size,
+                self.risk.open_positions,
+                corr_matrix,
             )
 
             if hedge_decision.get("hedge"):
-                log.info(f"  HEDGE NEEDED: {hedge_decision['reason']} "
-                        f"→ hedge {hedge_decision['hedge_symbol']} "
-                        f"{hedge_decision['hedge_direction']} "
-                        f"size={hedge_decision['hedge_size']}")
+                log.info(
+                    f"  HEDGE NEEDED: {hedge_decision['reason']} "
+                    f"→ hedge {hedge_decision['hedge_symbol']} "
+                    f"{hedge_decision['hedge_direction']} "
+                    f"size={hedge_decision['hedge_size']}"
+                )
 
         except Exception as e:
             log.debug(f"  Hedging check skipped: {e}")
@@ -2187,9 +2470,17 @@ class UnifiedEngine:
                 "current_price": pos.get("current_price", 0),
                 "direction": pos.get("action", "BUY"),
                 "atr": pos.get("atr", 0),
-                "volatility": pos.get("atr", 0) / pos.get("entry_price", 1) if pos.get("entry_price", 0) > 0 else 0,
+                "volatility": pos.get("atr", 0) / pos.get("entry_price", 1)
+                if pos.get("entry_price", 0) > 0
+                else 0,
                 "momentum": 0,
-                "time_in_trade": (datetime.now(timezone.utc) - datetime.fromisoformat(pos.get("entry_time", datetime.now(timezone.utc).isoformat()))).total_seconds() / 3600,
+                "time_in_trade": (
+                    datetime.now(timezone.utc)
+                    - datetime.fromisoformat(
+                        pos.get("entry_time", datetime.now(timezone.utc).isoformat())
+                    )
+                ).total_seconds()
+                / 3600,
                 "unrealized_pnl": pos.get("profit", 0),
                 "rsi": 50,
                 "bb_position": 0.5,
@@ -2223,10 +2514,10 @@ class UnifiedEngine:
 
             # Adjust confidence based on regime
             adjustments = {
-                "TRENDING_UP": 1.1,    # Boost trend-following confidence
+                "TRENDING_UP": 1.1,  # Boost trend-following confidence
                 "TRENDING_DOWN": 1.1,
-                "RANGING": 0.85,       # Reduce confidence in ranging markets
-                "VOLATILE": 0.9,       # Slightly reduce in volatile markets
+                "RANGING": 0.85,  # Reduce confidence in ranging markets
+                "VOLATILE": 0.9,  # Slightly reduce in volatile markets
             }
 
             adj = adjustments.get(current_regime, 1.0)
@@ -2262,7 +2553,9 @@ class UnifiedEngine:
                 max_spread = 2.0
 
             if spread_pips > max_spread:
-                log.info(f"  SPREAD FILTER {symbol}: {spread_pips:.1f} pips > max {max_spread:.1f}")
+                log.info(
+                    f"  SPREAD FILTER {symbol}: {spread_pips:.1f} pips > max {max_spread:.1f}"
+                )
                 return False
 
             return True
@@ -2279,13 +2572,13 @@ class UnifiedEngine:
         """Get position size multiplier based on win/loss streak.
         Increase on wins (momentum), reduce on losses (protection)."""
         if self.consecutive_wins >= 5:
-            return 1.3   # Hot streak: increase 30%
+            return 1.3  # Hot streak: increase 30%
         elif self.consecutive_wins >= 3:
             return 1.15  # Winning: increase 15%
         elif self.consecutive_losses >= 3:
-            return 0.5   # Cold streak: reduce 50%
+            return 0.5  # Cold streak: reduce 50%
         elif self.consecutive_losses >= 2:
-            return 0.7   # Losing: reduce 30%
+            return 0.7  # Losing: reduce 30%
         return 1.0
 
     def _update_streaks(self, pnl: float):
@@ -2309,16 +2602,16 @@ class UnifiedEngine:
 
         # London-NY overlap (12-16 UTC) — best liquidity, tightest spreads
         if 12 <= hour <= 16:
-            return 1.2   # +20% aggression
+            return 1.2  # +20% aggression
         # London session (7-12 UTC)
         elif 7 <= hour <= 12:
-            return 1.0   # Normal
+            return 1.0  # Normal
         # NY session (13-21 UTC)
         elif 13 <= hour <= 21:
-            return 1.1   # Slight boost
+            return 1.1  # Slight boost
         # Asian session (22-6 UTC) — low liquidity
         else:
-            return 0.7   # -30% aggression
+            return 0.7  # -30% aggression
 
     # ═══════════════════════════════════════════════════════════════
     # PHASE 5: PORTFOLIO HEAT MANAGEMENT
@@ -2367,10 +2660,18 @@ class UnifiedEngine:
 
         if rm_pos["action"] == "BUY":
             unrealized = current - entry
-            sl_distance = entry - rm_pos.get("sl", entry - atr) if rm_pos.get("sl", 0) > 0 else atr
+            sl_distance = (
+                entry - rm_pos.get("sl", entry - atr)
+                if rm_pos.get("sl", 0) > 0
+                else atr
+            )
         else:
             unrealized = entry - current
-            sl_distance = rm_pos.get("sl", entry + atr) - entry if rm_pos.get("sl", 0) > 0 else atr
+            sl_distance = (
+                rm_pos.get("sl", entry + atr) - entry
+                if rm_pos.get("sl", 0) > 0
+                else atr
+            )
 
         rr_ratio = unrealized / sl_distance if sl_distance > 0 else 0
 
@@ -2383,14 +2684,18 @@ class UnifiedEngine:
                     success = self.mt5.modify_sl_tp(pos["ticket"], tp=round(new_tp, 5))
                     if success:
                         rm_pos["tp"] = new_tp
-                        log.info(f"  TRAILING TP {symbol}: BUY TP → {new_tp:.5f} (was {tp:.5f}) at {rr_ratio:.1f}R")
+                        log.info(
+                            f"  TRAILING TP {symbol}: BUY TP → {new_tp:.5f} (was {tp:.5f}) at {rr_ratio:.1f}R"
+                        )
             else:
                 new_tp = entry - new_tp_distance
                 if new_tp < tp:
                     success = self.mt5.modify_sl_tp(pos["ticket"], tp=round(new_tp, 5))
                     if success:
                         rm_pos["tp"] = new_tp
-                        log.info(f"  TRAILING TP {symbol}: SELL TP → {new_tp:.5f} (was {tp:.5f}) at {rr_ratio:.1f}R")
+                        log.info(
+                            f"  TRAILING TP {symbol}: SELL TP → {new_tp:.5f} (was {tp:.5f}) at {rr_ratio:.1f}R"
+                        )
 
     # ═══════════════════════════════════════════════════════════════
     # PHASE 5: DYNAMIC ATR SL RECALCULATION
@@ -2421,19 +2726,27 @@ class UnifiedEngine:
                 if rm_pos["action"] == "BUY":
                     new_sl = entry - new_sl_distance
                     if new_sl > rm_pos.get("sl", 0):
-                        success = self.mt5.modify_sl_tp(rm_pos["ticket"], sl=round(new_sl, 5))
+                        success = self.mt5.modify_sl_tp(
+                            rm_pos["ticket"], sl=round(new_sl, 5)
+                        )
                         if success:
                             rm_pos["sl"] = new_sl
                             rm_pos["atr"] = current_atr
-                            log.info(f"  SL RECALC {symbol}: BUY SL → {new_sl:.5f} (ATR {original_atr:.5f}→{current_atr:.5f})")
+                            log.info(
+                                f"  SL RECALC {symbol}: BUY SL → {new_sl:.5f} (ATR {original_atr:.5f}→{current_atr:.5f})"
+                            )
                 else:
                     new_sl = entry + new_sl_distance
-                    if new_sl < rm_pos.get("sl", float('inf')):
-                        success = self.mt5.modify_sl_tp(rm_pos["ticket"], sl=round(new_sl, 5))
+                    if new_sl < rm_pos.get("sl", float("inf")):
+                        success = self.mt5.modify_sl_tp(
+                            rm_pos["ticket"], sl=round(new_sl, 5)
+                        )
                         if success:
                             rm_pos["sl"] = new_sl
                             rm_pos["atr"] = current_atr
-                            log.info(f"  SL RECALC {symbol}: SELL SL → {new_sl:.5f} (ATR {original_atr:.5f}→{current_atr:.5f})")
+                            log.info(
+                                f"  SL RECALC {symbol}: SELL SL → {new_sl:.5f} (ATR {original_atr:.5f}→{current_atr:.5f})"
+                            )
 
         except Exception as e:
             log.debug(f"  SL recalculation failed for {symbol}: {e}")
@@ -2452,7 +2765,9 @@ class UnifiedEngine:
         acct = self.mt5.get_account_info()
         if acct:
             self.risk.update_balance(acct["balance"])
-            log.info(f"  Balance: ${acct['balance']:.2f} | Equity: ${acct['equity']:.2f}")
+            log.info(
+                f"  Balance: ${acct['balance']:.2f} | Equity: ${acct['equity']:.2f}"
+            )
 
         # Sync existing positions (skip scalper-owned positions to avoid double-tracking)
         SCALPER_MAGIC = 20260911  # Scalper uses different magic number
@@ -2475,7 +2790,9 @@ class UnifiedEngine:
 
         self.running = True
         self.start_time = datetime.now(timezone.utc)
-        log.info(f"  Cycle interval: {CYCLE_INTERVAL}s | Duration: {DURATION_DAYS} days")
+        log.info(
+            f"  Cycle interval: {CYCLE_INTERVAL}s | Duration: {DURATION_DAYS} days"
+        )
         log.info("=" * 70)
         return True
 
@@ -2512,6 +2829,7 @@ class UnifiedEngine:
         active_analysts = 0
 
         import importlib
+
         for name, mod_path, cls_name in analyst_classes:
             try:
                 mod = importlib.import_module(mod_path)
@@ -2520,12 +2838,15 @@ class UnifiedEngine:
 
                 # Run analyst asynchronously if needed
                 import asyncio
+
                 loop = asyncio.new_event_loop()
                 result = loop.run_until_complete(analyst.analyze(symbol, timeframe))
                 loop.close()
 
-                signal = result.signal.upper() if hasattr(result, 'signal') else "HOLD"
-                confidence = float(result.confidence) if hasattr(result, 'confidence') else 0.5
+                signal = result.signal.upper() if hasattr(result, "signal") else "HOLD"
+                confidence = (
+                    float(result.confidence) if hasattr(result, "confidence") else 0.5
+                )
 
                 if signal not in ("BUY", "SELL", "HOLD"):
                     signal = "HOLD"
@@ -2534,21 +2855,31 @@ class UnifiedEngine:
                 total_confidence += confidence
                 active_analysts += 1
 
-                analyst_results.append({
-                    "name": name,
-                    "signal": signal,
-                    "confidence": round(confidence, 3),
-                    "reasoning": (result.reasoning[:150] if hasattr(result, 'reasoning') and result.reasoning else ""),
-                })
+                analyst_results.append(
+                    {
+                        "name": name,
+                        "signal": signal,
+                        "confidence": round(confidence, 3),
+                        "reasoning": (
+                            result.reasoning[:150]
+                            if hasattr(result, "reasoning") and result.reasoning
+                            else ""
+                        ),
+                    }
+                )
 
                 log.debug(f"    ANALYST {name:15} → {signal} ({confidence:.2f})")
 
             except Exception as e:
                 log.debug(f"    ANALYST {name:15} → ERROR: {str(e)[:80]}")
-                analyst_results.append({
-                    "name": name, "signal": "HOLD", "confidence": 0,
-                    "reasoning": f"Error: {str(e)[:100]}",
-                })
+                analyst_results.append(
+                    {
+                        "name": name,
+                        "signal": "HOLD",
+                        "confidence": 0,
+                        "reasoning": f"Error: {str(e)[:100]}",
+                    }
+                )
 
         if active_analysts == 0:
             return None, 0, {"analysts": [], "active": 0}
@@ -2607,9 +2938,11 @@ class UnifiedEngine:
             "timestamp": datetime.now(timezone.utc).isoformat(),
         }
 
-        log.info(f"  ANALYSTS [{active_analysts}] consensus={consensus_action} "
-                 f"agreement={agreement_pct:.0%} avg_conf={avg_confidence:.2f} "
-                 f"modifier={confidence_modifier:+.2f}")
+        log.info(
+            f"  ANALYSTS [{active_analysts}] consensus={consensus_action} "
+            f"agreement={agreement_pct:.0%} avg_conf={avg_confidence:.2f} "
+            f"modifier={confidence_modifier:+.2f}"
+        )
 
         return consensus_action, confidence_modifier, details
 
@@ -2638,6 +2971,7 @@ class UnifiedEngine:
         active_agents = 0
 
         import importlib
+
         for name, mod_path, cls_name in legendary_classes:
             try:
                 mod = importlib.import_module(mod_path)
@@ -2647,8 +2981,16 @@ class UnifiedEngine:
                 result = agent.analyze(df, symbol)
 
                 # Agents return Dict[str, Any], not objects — use dict access
-                signal = result.get("signal", "HOLD").upper() if isinstance(result, dict) else "HOLD"
-                confidence = float(result.get("confidence", 0.5)) if isinstance(result, dict) else 0.5
+                signal = (
+                    result.get("signal", "HOLD").upper()
+                    if isinstance(result, dict)
+                    else "HOLD"
+                )
+                confidence = (
+                    float(result.get("confidence", 0.5))
+                    if isinstance(result, dict)
+                    else 0.5
+                )
 
                 if signal not in ("BUY", "SELL", "HOLD"):
                     signal = "HOLD"
@@ -2657,11 +2999,13 @@ class UnifiedEngine:
                 total_confidence += confidence
                 active_agents += 1
 
-                agent_results.append({
-                    "name": name,
-                    "signal": signal,
-                    "confidence": round(confidence, 3),
-                })
+                agent_results.append(
+                    {
+                        "name": name,
+                        "signal": signal,
+                        "confidence": round(confidence, 3),
+                    }
+                )
 
             except Exception as e:
                 log.debug(f"    LEGENDARY {name:15} → ERROR: {str(e)[:80]}")
@@ -2715,9 +3059,11 @@ class UnifiedEngine:
             "timestamp": datetime.now(timezone.utc).isoformat(),
         }
 
-        log.info(f"  LEGENDARY [{active_agents}] consensus={consensus_action} "
-                 f"agreement={agreement_pct:.0%} avg_conf={avg_confidence:.2f} "
-                 f"modifier={confidence_modifier:+.2f}")
+        log.info(
+            f"  LEGENDARY [{active_agents}] consensus={consensus_action} "
+            f"agreement={agreement_pct:.0%} avg_conf={avg_confidence:.2f} "
+            f"modifier={confidence_modifier:+.2f}"
+        )
 
         return consensus_action, confidence_modifier, details
 
@@ -2726,23 +3072,31 @@ class UnifiedEngine:
         self.cycle_count += 1
         now = datetime.now(timezone.utc)
 
-        log.info(f"\n{'='*70}")
-        log.info(f"  CYCLE {self.cycle_count} | {now.strftime('%Y-%m-%d %H:%M:%S')} UTC")
+        log.info(f"\n{'=' * 70}")
+        log.info(
+            f"  CYCLE {self.cycle_count} | {now.strftime('%Y-%m-%d %H:%M:%S')} UTC"
+        )
 
         # Sync account
         acct = self.mt5.get_account_info()
         if acct:
             self.risk.update_balance(acct["balance"])
             self.risk.update_equity(acct["equity"])
-            log.info(f"  Balance: ${acct['balance']:.2f} | Equity: ${acct['equity']:.2f} | DD: {self.risk.get_drawdown_pct()*100:.1f}%")
+            log.info(
+                f"  Balance: ${acct['balance']:.2f} | Equity: ${acct['equity']:.2f} | DD: {self.risk.get_drawdown_pct() * 100:.1f}%"
+            )
 
         # ── DAILY LIMITS CHECK (before anything else) ──
         if not self.risk.can_trade_today():
             daily = self.risk.get_daily_status()
             if daily["target_hit"]:
-                log.warning(f"  DAILY TARGET HIT — stopping trades. P&L=${daily['daily_pnl']:+.2f} ({daily['daily_return']:.2%})")
+                log.warning(
+                    f"  DAILY TARGET HIT — stopping trades. P&L=${daily['daily_pnl']:+.2f} ({daily['daily_return']:.2%})"
+                )
             elif daily["limit_hit"]:
-                log.warning(f"  DAILY LOSS LIMIT — stopping trades. P&L=${daily['daily_pnl']:+.2f} ({daily['daily_return']:.2%})")
+                log.warning(
+                    f"  DAILY LOSS LIMIT — stopping trades. P&L=${daily['daily_pnl']:+.2f} ({daily['daily_return']:.2%})"
+                )
             # Still manage existing positions (trailing, exits) but no new trades
             self._manage_existing_positions()
             return
@@ -2750,24 +3104,34 @@ class UnifiedEngine:
         # Check drawdown pause
         risk_mult = self.risk.get_risk_multiplier()
         if risk_mult <= 0:
-            log.warning(f"  TRADING PAUSED — DD {self.risk.get_drawdown_pct()*100:.1f}% > {CONFIG['drawdown_pause_pct']*100:.0f}%")
+            log.warning(
+                f"  TRADING PAUSED — DD {self.risk.get_drawdown_pct() * 100:.1f}% > {CONFIG['drawdown_pause_pct'] * 100:.0f}%"
+            )
             return
 
         # Check circuit breaker
         if not self.risk.check_circuit_breaker():
-            log.warning(f"  CIRCUIT BREAKER ACTIVE — {self.risk.consecutive_losses} consecutive losses")
+            log.warning(
+                f"  CIRCUIT BREAKER ACTIVE — {self.risk.consecutive_losses} consecutive losses"
+            )
             return
 
         # Phase 4: Equity Curve MA — pause if equity below moving average
         if not self._update_equity_curve():
-            log.warning(f"  EQUITY CURVE PAUSE — equity below {self.equity_curve_ma_period}-period MA")
+            log.warning(
+                f"  EQUITY CURVE PAUSE — equity below {self.equity_curve_ma_period}-period MA"
+            )
             return
 
         # Manage existing positions (trailing stops, partial TP)
         self._manage_existing_positions()
 
         # ═══ COMPUTE RISK PARITY ONCE PER CYCLE (not per-symbol) ═══
-        if NEW_FEATURES_AVAILABLE and self.risk_parity and CONFIG.get("risk_parity_enabled"):
+        if (
+            NEW_FEATURES_AVAILABLE
+            and self.risk_parity
+            and CONFIG.get("risk_parity_enabled")
+        ):
             try:
                 if self.risk_parity.should_rebalance(interval_hours=4):
                     price_data = {}
@@ -2777,13 +3141,18 @@ class UnifiedEngine:
                             price_data[sym] = sym_df["close"]
                     if len(price_data) >= 2:
                         self.risk_parity.calculate_weights(price_data)
-                        log.info(f"  RISK PARITY: weights computed for {len(price_data)} symbols: "
-                                 + ", ".join(f"{s}={w:.2f}" for s, w in list(self.risk_parity.weights.items())[:5]))
+                        log.info(
+                            f"  RISK PARITY: weights computed for {len(price_data)} symbols: "
+                            + ", ".join(
+                                f"{s}={w:.2f}"
+                                for s, w in list(self.risk_parity.weights.items())[:5]
+                            )
+                        )
             except Exception as e:
                 log.debug(f"  Risk parity rebalance skipped: {e}")
 
         # MTF Cascading Scalper
-        if self.scalper:
+        if self.scalper and CONFIG.get("mtf_cascading_scalper_enabled", True):
             # ── CROSS-DEDUP: Prevent scalper from trading symbols already held by main engine ──
             scalp_blocked_symbols = set(self.risk.open_positions.keys())
             self.scalper.blocked_symbols = scalp_blocked_symbols
@@ -2807,50 +3176,73 @@ class UnifiedEngine:
                         "registered_at_cycle": self.cycle_count,
                     }
 
-        # Scan all symbols
-        signals = []
-        for symbol in WATCHLIST:
-            signal = self._analyze_symbol(symbol)
-            if signal and signal.direction != SignalDirection.HOLD:
-                signals.append(signal)
-                log.info(f"  SIGNAL {symbol}: {signal.direction.value} conf={signal.confidence:.3f}")
-        log.info(f"  SIGNALS: {len(signals)}/{len(WATCHLIST)} passed all gates")
+        # ── GOLD HEDGE EA: Run if enabled ──
+        if self.gold_hedge and self.gold_hedge.enabled:
+            try:
+                gold_symbol = self.gold_hedge.ea.config.get("symbol", "XAUUSD")
+                gold_tf = self.gold_hedge.ea.config.get("entry_tf", "M5")
+                gold_data = self.mt5.fetch_candles(gold_symbol, gold_tf, 100)
+                if gold_data is not None and len(gold_data) > 60:
+                    self.gold_hedge.tick(symbol=gold_symbol, data=gold_data)
+            except Exception as e:
+                log.debug(f"  Gold Hedge EA tick skipped: {e}")
 
-        # Sort by confidence
-        signals.sort(key=lambda s: s.confidence, reverse=True)
+        # ── MAIN ENGINE: Symbol scan + signal generation + execution ──
+        if CONFIG.get("main_engine_enabled", True):
+            signals = []
+            for symbol in WATCHLIST:
+                signal = self._analyze_symbol(symbol)
+                if signal and signal.direction != SignalDirection.HOLD:
+                    signals.append(signal)
+                    log.info(
+                        f"  SIGNAL {symbol}: {signal.direction.value} conf={signal.confidence:.3f}"
+                    )
+            log.info(f"  SIGNALS: {len(signals)}/{len(WATCHLIST)} passed all gates")
 
-        # Execute best signals
-        for signal in signals:
-            if not self.risk.check_portfolio_limits():
-                log.info(f"  Max positions reached ({len(self.risk.open_positions)})")
-                break
-            if not self.risk.check_correlation(signal.symbol):
-                log.info(f"  Correlation filter: {signal.symbol} blocked")
-                continue
-            if signal.symbol in self.risk.open_positions:
-                continue
-            # V3: Per-symbol cooldown check (cooldown in hours = bars on H1)
-            v3_configs = CONFIG.get("v3_symbol_configs", {})
-            if signal.symbol in v3_configs:
-                cd_hours = v3_configs[signal.symbol].get("cooldown", 3)
-                last_t = self.risk.last_trade_time.get(signal.symbol)
-                if last_t:
-                    from datetime import timezone as _tz
-                    now_utc = datetime.now(_tz.utc)
-                    elapsed_h = (now_utc - last_t).total_seconds() / 3600
-                    if elapsed_h < cd_hours:
-                        continue  # Still in cooldown
-            # ── CROSS-DEDUP: Skip if scalper already has this symbol open ──
-            if self.scalper:
-                scalper_has_symbol = any(
-                    s["symbol"] == signal.symbol and s["status"] == "OPEN"
-                    for s in self.scalper.open_scalps.values()
-                )
-                if scalper_has_symbol:
-                    log.info(f"  SKIP {signal.symbol} — scalper already has position")
+            # Sort by confidence
+            signals.sort(key=lambda s: s.confidence, reverse=True)
+
+            # Execute best signals
+            for signal in signals:
+                if not self.risk.check_portfolio_limits():
+                    log.info(
+                        f"  Max positions reached ({len(self.risk.open_positions)})"
+                    )
+                    break
+                if not self.risk.check_correlation(signal.symbol):
+                    log.info(f"  Correlation filter: {signal.symbol} blocked")
                     continue
+                if signal.symbol in self.risk.open_positions:
+                    continue
+                # V3: Per-symbol cooldown check (cooldown in hours = bars on H1)
+                v3_configs = CONFIG.get("v3_symbol_configs", {})
+                if signal.symbol in v3_configs:
+                    cd_hours = v3_configs[signal.symbol].get("cooldown", 3)
+                    last_t = self.risk.last_trade_time.get(signal.symbol)
+                    if last_t:
+                        from datetime import timezone as _tz
 
-            self._execute_trade(signal)
+                        now_utc = datetime.now(_tz.utc)
+                        elapsed_h = (now_utc - last_t).total_seconds() / 3600
+                        if elapsed_h < cd_hours:
+                            continue  # Still in cooldown
+                # ── CROSS-DEDUP: Skip if scalper already has this symbol open ──
+                if self.scalper:
+                    scalper_has_symbol = any(
+                        s["symbol"] == signal.symbol and s["status"] == "OPEN"
+                        for s in self.scalper.open_scalps.values()
+                    )
+                    if scalper_has_symbol:
+                        log.info(
+                            f"  SKIP {signal.symbol} — scalper already has position"
+                        )
+                        continue
+
+                self._execute_trade(signal)
+        else:
+            log.info(
+                "  MAIN ENGINE DISABLED — skipping symbol scan (only scalper/strategies active)"
+            )
 
         # ── WEEKLY PROFIT EXTRACTION CHECK ──
         extraction = self.risk.check_weekly_extraction()
@@ -2866,13 +3258,19 @@ class UnifiedEngine:
         scalp_status = ""
         if self.scalper:
             ss = self.scalper.get_status()
-            scalp_status = f" | Scalps={ss['open_scalps']}/{ss['total_trades']}({ss['symbol']})"
-        log.info(f"\n  SUMMARY: {state['open_positions']} open | {state['total_trades']} trades | "
-                 f"WR={state['wins']}/{state['total_trades']} | P&L=${state['total_pnl']:+.2f} | "
-                 f"CB={self.risk.circuit_breaker_state}{scalp_status}")
-        log.info(f"  DAILY: P&L=${daily['daily_pnl']:+.2f} ({daily['daily_return']:.2%}) | "
-                 f"Trades={daily['daily_trades']} | WR={daily['daily_wins']}/{daily['daily_trades']} | "
-                 f"Target={daily['profit_target']:.1%} Limit=-{daily['loss_limit']:.1%}")
+            scalp_status = (
+                f" | Scalps={ss['open_scalps']}/{ss['total_trades']}({ss['symbol']})"
+            )
+        log.info(
+            f"\n  SUMMARY: {state['open_positions']} open | {state['total_trades']} trades | "
+            f"WR={state['wins']}/{state['total_trades']} | P&L=${state['total_pnl']:+.2f} | "
+            f"CB={self.risk.circuit_breaker_state}{scalp_status}"
+        )
+        log.info(
+            f"  DAILY: P&L=${daily['daily_pnl']:+.2f} ({daily['daily_return']:.2%}) | "
+            f"Trades={daily['daily_trades']} | WR={daily['daily_wins']}/{daily['daily_trades']} | "
+            f"Target={daily['profit_target']:.1%} Limit=-{daily['loss_limit']:.1%}"
+        )
 
     def _analyze_symbol(self, symbol: str) -> Optional[Signal]:
         """Full analysis pipeline for one symbol."""
@@ -2891,16 +3289,17 @@ class UnifiedEngine:
             return None
 
         row = df.iloc[-1]
-        row._symbol = symbol  # Attach symbol for pivot point cache
-        action, confidence, details = generate_signal(row)
+        action, confidence, details = generate_signal(row, symbol)
 
         if action == "HOLD" or confidence < CONFIG["min_confidence"]:
-            log.info(f"  {symbol}: SKIP action={action} conf={confidence:.3f} < {CONFIG['min_confidence']}")
+            log.info(
+                f"  {symbol}: SKIP action={action} conf={confidence:.3f} < {CONFIG['min_confidence']}"
+            )
             return None
 
         # Layer 3: Multi-timeframe confirmation
         mtf_data = fetch_mtf_data(symbol, CONFIG["mtf_timeframes"])
-        mtf_dir, mtf_agreement, mtf_details = mtf_analysis(mtf_data)
+        mtf_dir, mtf_agreement, mtf_details = mtf_analysis(mtf_data, symbol)
 
         # Require MTF agreement
         if mtf_dir != action:
@@ -2913,14 +3312,16 @@ class UnifiedEngine:
         resistance_distance = 0.0
         try:
             if len(df) >= 20:
-                recent_lows = df['low'].tail(20).values
-                recent_highs = df['high'].tail(20).values
+                recent_lows = df["low"].tail(20).values
+                recent_highs = df["high"].tail(20).values
                 current_price = float(row.get("close", 0))
                 if current_price > 0:
                     support_level = float(np.min(recent_lows))
                     resistance_level = float(np.max(recent_highs))
                     support_distance = (current_price - support_level) / current_price
-                    resistance_distance = (resistance_level - current_price) / current_price
+                    resistance_distance = (
+                        resistance_level - current_price
+                    ) / current_price
         except Exception:
             pass
 
@@ -2954,37 +3355,63 @@ class UnifiedEngine:
         llm_result = llm_analyze(symbol, indicator_dict, action)
 
         # Layer 5: Analyst Consensus (Phase 1 — 6 working analysts + 5 legendary)
-        analyst_consensus_action, analyst_mod, analyst_details = self._run_analyst_consensus(symbol, TIMEFRAME, df)
-        legendary_consensus_action, legendary_mod, legendary_details = self._run_legendary_consensus(symbol, df)
+        analyst_consensus_action, analyst_mod, analyst_details = (
+            self._run_analyst_consensus(symbol, TIMEFRAME, df)
+        )
+        legendary_consensus_action, legendary_mod, legendary_details = (
+            self._run_legendary_consensus(symbol, df)
+        )
 
         # Apply confidence modifiers from analyst/legendary consensus
         total_modifier = analyst_mod + legendary_mod
         adjusted_confidence = max(0, min(1.0, confidence + total_modifier))
 
         # Check if analysts block the trade
-        if analyst_consensus_action and analyst_consensus_action != "HOLD" and analyst_consensus_action != action:
+        if (
+            analyst_consensus_action
+            and analyst_consensus_action != "HOLD"
+            and analyst_consensus_action != action
+        ):
             # Analysts disagree with indicator signal — check if they override
-            disagreement_count = sum(1 for a in analyst_details.get("analysts", [])
-                                    if a["signal"] == analyst_consensus_action and a["confidence"] > 0.6)
+            disagreement_count = sum(
+                1
+                for a in analyst_details.get("analysts", [])
+                if a["signal"] == analyst_consensus_action and a["confidence"] > 0.6
+            )
             if disagreement_count >= 4:  # Strong analyst disagreement
-                log.info(f"  BLOCKED by {disagreement_count} analysts: they say {analyst_consensus_action} vs {action}")
+                log.info(
+                    f"  BLOCKED by {disagreement_count} analysts: they say {analyst_consensus_action} vs {action}"
+                )
                 return None
             elif disagreement_count >= 3:
                 # Reduce confidence further
                 adjusted_confidence *= 0.7
-                log.info(f"  WARNING: {disagreement_count} analysts disagree → confidence reduced to {adjusted_confidence:.2f}")
+                log.info(
+                    f"  WARNING: {disagreement_count} analysts disagree → confidence reduced to {adjusted_confidence:.2f}"
+                )
 
         # If legendary agents strongly disagree, reduce confidence
-        if legendary_consensus_action and legendary_consensus_action != "HOLD" and legendary_consensus_action != action:
-            legendary_disagree = sum(1 for a in legendary_details.get("agents", [])
-                                    if a["signal"] == legendary_consensus_action)
+        if (
+            legendary_consensus_action
+            and legendary_consensus_action != "HOLD"
+            and legendary_consensus_action != action
+        ):
+            legendary_disagree = sum(
+                1
+                for a in legendary_details.get("agents", [])
+                if a["signal"] == legendary_consensus_action
+            )
             if legendary_disagree >= 4:
                 adjusted_confidence *= 0.75
-                log.info(f"  LEGENDARY WARNING: {legendary_disagree} agents disagree → confidence reduced to {adjusted_confidence:.2f}")
+                log.info(
+                    f"  LEGENDARY WARNING: {legendary_disagree} agents disagree → confidence reduced to {adjusted_confidence:.2f}"
+                )
 
         # Re-check minimum confidence after adjustments
         if adjusted_confidence < CONFIG["min_confidence"]:
-            log.info(f"  REJECTED: confidence {adjusted_confidence:.3f} < min {CONFIG['min_confidence']}")
+            log.info(
+                f"  REJECTED: confidence {adjusted_confidence:.3f} < min {CONFIG['min_confidence']}"
+            )
             return None
 
         # Layer 6: ML ranking — BOOST-ONLY mode (never penalize)
@@ -2995,24 +3422,34 @@ class UnifiedEngine:
         if action == "BUY" and ml_p_up > 0.65:
             ml_boost = (ml_p_up - 0.5) * 0.2
             adjusted_confidence = min(1.0, adjusted_confidence + ml_boost)
-            log.info(f"  ML BOOST {symbol}: BUY confirmed p_up={ml_p_up:.3f} → boost={ml_boost:.3f}")
+            log.info(
+                f"  ML BOOST {symbol}: BUY confirmed p_up={ml_p_up:.3f} → boost={ml_boost:.3f}"
+            )
         elif action == "SELL" and ml_p_up < 0.35:
             ml_boost = (0.5 - ml_p_up) * 0.2
             adjusted_confidence = min(1.0, adjusted_confidence + ml_boost)
-            log.info(f"  ML BOOST {symbol}: SELL confirmed p_up={ml_p_up:.3f} → boost={ml_boost:.3f}")
+            log.info(
+                f"  ML BOOST {symbol}: SELL confirmed p_up={ml_p_up:.3f} → boost={ml_boost:.3f}"
+            )
 
         # Layer 7: Regime detection — adjust confidence by market state
         regime_adj = self._get_regime_adjustment(symbol)
         # BUG FIX: Don't let regime push confidence below min_confidence
         adjusted_confidence = adjusted_confidence * regime_adj
-        adjusted_confidence = max(adjusted_confidence, CONFIG["min_confidence"] * 0.8)  # Allow slight dip but not full kill
+        adjusted_confidence = max(
+            adjusted_confidence, CONFIG["min_confidence"] * 0.8
+        )  # Allow slight dip but not full kill
         adjusted_confidence = min(1.0, adjusted_confidence)
         if regime_adj != 1.0:
-            log.info(f"  REGIME {symbol}: adjustment={regime_adj:.2f} → confidence={adjusted_confidence:.3f}")
+            log.info(
+                f"  REGIME {symbol}: adjustment={regime_adj:.2f} → confidence={adjusted_confidence:.3f}"
+            )
 
         # Re-check minimum after ML and regime adjustments
         if adjusted_confidence < CONFIG["min_confidence"]:
-            log.info(f"  REJECTED after ML/regime: confidence {adjusted_confidence:.3f} < min {CONFIG['min_confidence']}")
+            log.info(
+                f"  REJECTED after ML/regime: confidence {adjusted_confidence:.3f} < min {CONFIG['min_confidence']}"
+            )
             return None
 
         # Calculate SL/TP
@@ -3040,7 +3477,11 @@ class UnifiedEngine:
 
             # Feature 4: Volume profile filter
             if CONFIG.get("volume_profile_enabled") and self.volume_profile:
-                volumes = df["tick_volume"] if "tick_volume" in df.columns else pd.Series([1]*len(df))
+                volumes = (
+                    df["tick_volume"]
+                    if "tick_volume" in df.columns
+                    else pd.Series([1] * len(df))
+                )
                 zones = self.volume_profile.calculate(df["close"], volumes)
                 vol_filter = filter_by_volume(price, zones, action)
                 feature_data["volume_filter"] = vol_filter
@@ -3085,17 +3526,22 @@ class UnifiedEngine:
             "features": feature_data,
         }
 
-        log.info(f"  SIGNAL {symbol:8} {action:4} | Score={adjusted_confidence*8:.1f} "
-                 f"(orig={confidence*8:.1f} mod={total_modifier:+.2f}) | "
-                 f"MTF={mtf_agreement:.0%} | "
-                 f"LLM={llm_result.get('signal','?')}({llm_result.get('confidence',0):.2f}) | "
-                 f"ML={ml_p_up:.3f} | "
-                 f"Analysts={analyst_details.get('consensus','?')} "
-                 f"Legendary={legendary_details.get('consensus','?')}")
+        log.info(
+            f"  SIGNAL {symbol:8} {action:4} | Score={adjusted_confidence * 8:.1f} "
+            f"(orig={confidence * 8:.1f} mod={total_modifier:+.2f}) | "
+            f"MTF={mtf_agreement:.0%} | "
+            f"LLM={llm_result.get('signal', '?')}({llm_result.get('confidence', 0):.2f}) | "
+            f"ML={ml_p_up:.3f} | "
+            f"Analysts={analyst_details.get('consensus', '?')} "
+            f"Legendary={legendary_details.get('consensus', '?')}"
+        )
 
         # ── Monitor: log signal event ──
-        self.monitor_log(symbol, "signal",
-                         f"{action} score={adjusted_confidence*8:.1f} ML={ml_p_up:.3f} LLM={llm_result.get('signal','?')}({llm_result.get('confidence',0):.2f})")
+        self.monitor_log(
+            symbol,
+            "signal",
+            f"{action} score={adjusted_confidence * 8:.1f} ML={ml_p_up:.3f} LLM={llm_result.get('signal', '?')}({llm_result.get('confidence', 0):.2f})",
+        )
 
         return signal
 
@@ -3123,14 +3569,20 @@ class UnifiedEngine:
                 if signal.symbol in CORRELATIONS.get(open_sym, []):
                     correlated_count += 1
             if correlated_count >= CONFIG["max_correlated_trades"]:
-                log.info(f"  SKIP {signal.symbol} — too many correlated trades ({correlated_count})")
+                log.info(
+                    f"  SKIP {signal.symbol} — too many correlated trades ({correlated_count})"
+                )
                 return
 
         # SAFETY CHECK 3: Total exposure limit
-        total_exposure = sum(p.get("size", 0) for p in self.risk.open_positions.values())
+        total_exposure = sum(
+            p.get("size", 0) for p in self.risk.open_positions.values()
+        )
         max_exposure = self.risk.balance * CONFIG["max_total_exposure_pct"] / 100000
         if total_exposure >= max_exposure:
-            log.info(f"  SKIP {signal.symbol} — max exposure reached ({total_exposure:.2f} lots)")
+            log.info(
+                f"  SKIP {signal.symbol} — max exposure reached ({total_exposure:.2f} lots)"
+            )
             return
 
         # SAFETY CHECK 4: Drawdown pause
@@ -3152,23 +3604,34 @@ class UnifiedEngine:
         # Calculate position size with risk parity
         vol = float(signal.indicators.get("vol_ratio", 1.0))
         lots = self.risk.calculate_position_size(
-            signal.entry_price, signal.atr, signal.confidence,
-            now.hour, vol, symbol=signal.symbol
+            signal.entry_price,
+            signal.atr,
+            signal.confidence,
+            now.hour,
+            vol,
+            symbol=signal.symbol,
         )
 
         # Phase 4+: Strategy Profile Selection — LLM + rules pick aggressive/conservative
         strategy_profile = self._select_strategy_profile(
-            signal.symbol, signal.indicators, signal.direction.value,
-            signal.confidence, signal.atr
+            signal.symbol,
+            signal.indicators,
+            signal.direction.value,
+            signal.confidence,
+            signal.atr,
         )
         profile_avg_win = strategy_profile.get("avg_win", 1.5)
         profile_avg_loss = strategy_profile.get("avg_loss", 1.0)
         profile_name = strategy_profile.get("profile", "conservative")
 
         # Phase 4: Kelly Criterion — scale position size by Kelly fraction (using selected profile)
-        kelly = self._calculate_kelly_fraction(avg_win=profile_avg_win, avg_loss=profile_avg_loss)
+        kelly = self._calculate_kelly_fraction(
+            avg_win=profile_avg_win, avg_loss=profile_avg_loss
+        )
         # Kelly scale should be between 0.5 and 1.5 (never below half or above 1.5x)
-        kelly_scale = max(0.5, min(1.5, kelly / 0.10))  # Normalize to config max (0.10 = quarter Kelly)
+        kelly_scale = max(
+            0.5, min(1.5, kelly / 0.10)
+        )  # Normalize to config max (0.10 = quarter Kelly)
         lots = lots * kelly_scale
 
         # Phase 5: Session-based aggression multiplier
@@ -3183,19 +3646,28 @@ class UnifiedEngine:
         # Ensure minimum lot size
         if lots < 0.01:
             lots = 0.01
-        log.info(f"  SIZING: profile={profile_name} kelly={kelly_scale:.2f} session={session_mult:.2f} streak={streak_mult:.2f} → lots={lots:.2f}")
+        log.info(
+            f"  SIZING: profile={profile_name} kelly={kelly_scale:.2f} session={session_mult:.2f} streak={streak_mult:.2f} → lots={lots:.2f}"
+        )
 
         # Apply risk parity weighting
-        if CONFIG.get("risk_parity_enabled") and self.risk_parity and self.risk_parity.weights:
+        if (
+            CONFIG.get("risk_parity_enabled")
+            and self.risk_parity
+            and self.risk_parity.weights
+        ):
             parity_lots = self.risk_parity.get_position_size(
-                signal.symbol, self.risk.balance,
+                signal.symbol,
+                self.risk.balance,
                 CONFIG.get("daily_risk_per_trade_pct", CONFIG["max_risk_pct"]),
-                signal.entry_price
+                signal.entry_price,
             )
             # Blend: 70% original calculation, 30% risk parity
             lots = lots * 0.7 + parity_lots * 0.3
             lots = round(lots, 2)
-            log.info(f"  RISK PARITY: original={lots/0.7:.2f}, parity={parity_lots:.2f}, blended={lots:.2f}")
+            log.info(
+                f"  RISK PARITY: original={lots / 0.7:.2f}, parity={parity_lots:.2f}, blended={lots:.2f}"
+            )
 
         if lots <= 0:
             log.info(f"  SKIP {signal.symbol} — position size = 0")
@@ -3204,15 +3676,21 @@ class UnifiedEngine:
         # Get execution optimization plan
         exec_plan = None
         if CONFIG.get("rl_execution_enabled") and self.execution_optimizer:
-            exec_plan = self.execution_optimizer.get_execution_plan({
-                "spread": 0.0002,  # Default spread
-                "volatility": signal.atr / signal.entry_price if signal.entry_price > 0 else 0.01,
-                "time_of_day": now.hour,
-                "imbalance": 0,
-                "size": lots,
-                "urgency": signal.confidence,
-            })
-            log.info(f"  EXEC PLAN: type={exec_plan.get('type')}, split={exec_plan.get('split')}")
+            exec_plan = self.execution_optimizer.get_execution_plan(
+                {
+                    "spread": 0.0002,  # Default spread
+                    "volatility": signal.atr / signal.entry_price
+                    if signal.entry_price > 0
+                    else 0.01,
+                    "time_of_day": now.hour,
+                    "imbalance": 0,
+                    "size": lots,
+                    "urgency": signal.confidence,
+                }
+            )
+            log.info(
+                f"  EXEC PLAN: type={exec_plan.get('type')}, split={exec_plan.get('split')}"
+            )
 
         # ── CONSENSUS GATES: Multi-gate safety layer ──
         if self.consensus_gates:
@@ -3230,15 +3708,20 @@ class UnifiedEngine:
                     signal.indicators.get("support_distance", 0.0),
                     signal.indicators.get("resistance_distance", 0.0),
                 ]
-                ml_gate = self.consensus_gates.check_ml_model(ml_features, direction=signal.direction.value)
+                ml_gate = self.consensus_gates.check_ml_model(
+                    ml_features, direction=signal.direction.value
+                )
                 if not ml_gate.passed:
                     log.info(f"  ML GATE BLOCKED {signal.symbol} — {ml_gate.reason}")
-                    self.monitor_log(signal.symbol, "gate_blocked", f"ML: {ml_gate.reason}")
+                    self.monitor_log(
+                        signal.symbol, "gate_blocked", f"ML: {ml_gate.reason}"
+                    )
                     return
 
                 # Gate 4: Technical confidence — use engine's min_confidence (0.25)
                 # not the gate's default 0.70, since signal.confidence is already filtered
                 from apps.analysts.base import AnalystResult
+
                 tech_result = AnalystResult(
                     analyst_name="Technical",
                     symbol=signal.symbol,
@@ -3250,12 +3733,18 @@ class UnifiedEngine:
                 )
                 # Override threshold to match engine's min_confidence
                 old_threshold = self.consensus_gates.MIN_TECHNICAL_CONFIDENCE
-                self.consensus_gates.MIN_TECHNICAL_CONFIDENCE = CONFIG.get("min_confidence", 0.25)
+                self.consensus_gates.MIN_TECHNICAL_CONFIDENCE = CONFIG.get(
+                    "min_confidence", 0.25
+                )
                 tech_gate = self.consensus_gates.check_technical([tech_result])
                 self.consensus_gates.MIN_TECHNICAL_CONFIDENCE = old_threshold  # restore
                 if not tech_gate.passed:
-                    log.info(f"  TECHNICAL GATE BLOCKED {signal.symbol} — {tech_gate.reason}")
-                    self.monitor_log(signal.symbol, "gate_blocked", f"TECH: {tech_gate.reason}")
+                    log.info(
+                        f"  TECHNICAL GATE BLOCKED {signal.symbol} — {tech_gate.reason}"
+                    )
+                    self.monitor_log(
+                        signal.symbol, "gate_blocked", f"TECH: {tech_gate.reason}"
+                    )
                     return
 
                 # Gate 5: Edge after costs — DIRECTION-AWARE
@@ -3270,8 +3759,12 @@ class UnifiedEngine:
                 # Pass direction-correct edge to the gate (use 0.5 + edge as p_up equivalent)
                 edge_gate = self.consensus_gates.check_edge(0.5 + edge_value, 0.5)
                 if not edge_gate.passed:
-                    log.info(f"  EDGE GATE BLOCKED {signal.symbol} — {edge_gate.reason}")
-                    self.monitor_log(signal.symbol, "gate_blocked", f"EDGE: {edge_gate.reason}")
+                    log.info(
+                        f"  EDGE GATE BLOCKED {signal.symbol} — {edge_gate.reason}"
+                    )
+                    self.monitor_log(
+                        signal.symbol, "gate_blocked", f"EDGE: {edge_gate.reason}"
+                    )
                     return
 
                 # Gate 7: Liquidity / position limits
@@ -3280,20 +3773,32 @@ class UnifiedEngine:
                 risk_state["current_positions"] = len(self.risk.open_positions)
                 liq_gate = self.consensus_gates.check_liquidity_limits(risk_state)
                 if not liq_gate.passed:
-                    log.info(f"  LIQUIDITY GATE BLOCKED {signal.symbol} — {liq_gate.reason}")
-                    self.monitor_log(signal.symbol, "gate_blocked", f"LIQ: {liq_gate.reason}")
+                    log.info(
+                        f"  LIQUIDITY GATE BLOCKED {signal.symbol} — {liq_gate.reason}"
+                    )
+                    self.monitor_log(
+                        signal.symbol, "gate_blocked", f"LIQ: {liq_gate.reason}"
+                    )
                     return
 
-                log.info(f"  GATES PASSED {signal.symbol} — ML={ml_gate.passed} TECH={tech_gate.passed} EDGE={edge_gate.passed} LIQ={liq_gate.passed}")
-                self.monitor_log(signal.symbol, "gate_all_passed",
-                                 f"ML={ml_gate.value:.3f} TECH={tech_gate.value:.3f} EDGE={edge_gate.value:.3f}")
+                log.info(
+                    f"  GATES PASSED {signal.symbol} — ML={ml_gate.passed} TECH={tech_gate.passed} EDGE={edge_gate.passed} LIQ={liq_gate.passed}"
+                )
+                self.monitor_log(
+                    signal.symbol,
+                    "gate_all_passed",
+                    f"ML={ml_gate.value:.3f} TECH={tech_gate.value:.3f} EDGE={edge_gate.value:.3f}",
+                )
             except Exception as e:
                 log.debug(f"  ConsensusGates check failed (non-blocking): {e}")
 
         # Place order on MT5
         ticket = self.mt5.place_order(
-            signal.symbol, signal.direction.value, lots,
-            signal.sl_price, signal.tp_price
+            signal.symbol,
+            signal.direction.value,
+            lots,
+            signal.sl_price,
+            signal.tp_price,
         )
 
         if ticket:
@@ -3314,11 +3819,16 @@ class UnifiedEngine:
                 "confidence": signal.confidence,
                 "registered_at_cycle": self.cycle_count,
             }
-            log.info(f"  EXECUTED {signal.symbol:8} {signal.direction.value:4} @ {signal.entry_price:.5f} "
-                     f"lots={lots} SL={signal.sl_price:.5f} TP={signal.tp_price:.5f} "
-                     f"profile={profile_name} ticket={ticket}")
-            self.monitor_log(signal.symbol, "order_placed",
-                             f"{signal.direction.value} lots={lots} @ {signal.entry_price:.5f} ticket={ticket}")
+            log.info(
+                f"  EXECUTED {signal.symbol:8} {signal.direction.value:4} @ {signal.entry_price:.5f} "
+                f"lots={lots} SL={signal.sl_price:.5f} TP={signal.tp_price:.5f} "
+                f"profile={profile_name} ticket={ticket}"
+            )
+            self.monitor_log(
+                signal.symbol,
+                "order_placed",
+                f"{signal.direction.value} lots={lots} @ {signal.entry_price:.5f} ticket={ticket}",
+            )
             # V3: Record last trade time for per-symbol cooldown
             self.risk.last_trade_time[signal.symbol] = now
 
@@ -3326,7 +3836,9 @@ class UnifiedEngine:
             self._check_hedging(signal.symbol, signal.direction.value, lots)
         else:
             log.error(f"  FAILED {signal.symbol} — order not placed")
-            self.monitor_log(signal.symbol, "order_failed", "MT5 rejected or market closed")
+            self.monitor_log(
+                signal.symbol, "order_failed", "MT5 rejected or market closed"
+            )
 
     def _manage_existing_positions(self):
         """Check trailing stops, partial TP, and time exits.
@@ -3336,7 +3848,9 @@ class UnifiedEngine:
 
         # ── RECONCILIATION: Detect positions closed by MT5 (SL/TP hit server-side) ──
         mt5_symbols = {p["symbol"] for p in positions}
-        stale_symbols = [s for s in list(self.risk.open_positions.keys()) if s not in mt5_symbols]
+        stale_symbols = [
+            s for s in list(self.risk.open_positions.keys()) if s not in mt5_symbols
+        ]
         for sym in stale_symbols:
             rm_pos = self.risk.open_positions[sym]
             ticket = rm_pos.get("ticket", 0)
@@ -3366,12 +3880,18 @@ class UnifiedEngine:
                     self._trade_results.append(pnl)
                     if len(self._trade_results) > 50:
                         self._trade_results = self._trade_results[-50:]
-                self.risk.record_trade_result(pnl, pnl / self.risk.balance if self.risk.balance > 0 else 0)
+                self.risk.record_trade_result(
+                    pnl, pnl / self.risk.balance if self.risk.balance > 0 else 0
+                )
                 self._update_streaks(pnl)
-                log.info(f"  RECONCILED {sym} | ticket={ticket} source={source} | P&L=${pnl:+.2f} | "
-                         f"W={self.consecutive_wins} L={self.consecutive_losses}")
+                log.info(
+                    f"  RECONCILED {sym} | ticket={ticket} source={source} | P&L=${pnl:+.2f} | "
+                    f"W={self.consecutive_wins} L={self.consecutive_losses}"
+                )
             else:
-                log.info(f"  RECONCILED {sym} | ticket={ticket} source={source} | P&L=$0.00 (no deal data)")
+                log.info(
+                    f"  RECONCILED {sym} | ticket={ticket} source={source} | P&L=$0.00 (no deal data)"
+                )
 
             del self.risk.open_positions[sym]
 
@@ -3387,7 +3907,9 @@ class UnifiedEngine:
                     "sl": pos.get("sl", 0),
                     "tp": pos.get("tp", 0),
                     "ticket": pos["ticket"],
-                    "entry_time": pos.get("time", datetime.now(timezone.utc).isoformat()),
+                    "entry_time": pos.get(
+                        "time", datetime.now(timezone.utc).isoformat()
+                    ),
                     "partial_tp_done": False,
                     "atr": 0.001,
                     "source": "mt5_sync",
@@ -3395,7 +3917,9 @@ class UnifiedEngine:
                     "profit": pos.get("profit", 0),
                     "registered_at_cycle": self.cycle_count,
                 }
-                log.info(f"  SYNCED {symbol} from MT5 — ticket={pos['ticket']} {action} profit=${pos.get('profit', 0):+.2f}")
+                log.info(
+                    f"  SYNCED {symbol} from MT5 — ticket={pos['ticket']} {action} profit=${pos.get('profit', 0):+.2f}"
+                )
 
         for pos in positions:
             symbol = pos["symbol"]
@@ -3438,19 +3962,28 @@ class UnifiedEngine:
                 registered_at = rm_pos.get("registered_at_cycle", 0)
                 cycles_tracked = self.cycle_count - registered_at
                 if cycles_tracked < EXIT_OPTIMIZER_COOLDOWN_CYCLES:
-                    log.debug(f"  EXIT OPTIMIZER {symbol}: skipped (cooldown {cycles_tracked}/{EXIT_OPTIMIZER_COOLDOWN_CYCLES})")
+                    log.debug(
+                        f"  EXIT OPTIMIZER {symbol}: skipped (cooldown {cycles_tracked}/{EXIT_OPTIMIZER_COOLDOWN_CYCLES})"
+                    )
                 else:
                     exit_rec = self._get_optimized_exit(symbol, rm_pos)
-                    if exit_rec.get("method") != "none" and exit_rec.get("method") != "fallback":
+                    if (
+                        exit_rec.get("method") != "none"
+                        and exit_rec.get("method") != "fallback"
+                    ):
                         rec_price = exit_rec.get("exit_price", 0)
                         if rec_price > 0:
                             current = pos["current_price"]
                             if rm_pos["action"] == "BUY" and current >= rec_price:
-                                log.info(f"  EXIT OPTIMIZER {symbol}: BUY exit at {rec_price:.5f} (current={current:.5f})")
+                                log.info(
+                                    f"  EXIT OPTIMIZER {symbol}: BUY exit at {rec_price:.5f} (current={current:.5f})"
+                                )
                                 self._close_trade(symbol, ticket, "EXIT_OPTIMIZER")
                                 continue
                             elif rm_pos["action"] == "SELL" and current <= rec_price:
-                                log.info(f"  EXIT OPTIMIZER {symbol}: SELL exit at {rec_price:.5f} (current={current:.5f})")
+                                log.info(
+                                    f"  EXIT OPTIMIZER {symbol}: SELL exit at {rec_price:.5f} (current={current:.5f})"
+                                )
                                 self._close_trade(symbol, ticket, "EXIT_OPTIMIZER")
                                 continue
 
@@ -3469,9 +4002,13 @@ class UnifiedEngine:
                     sl_distance = sl - entry if sl > 0 else entry * 0.01
                 rr_ratio = unrealized / sl_distance if sl_distance > 0 else 0
                 if rr_ratio >= 1.0:
-                    log.info(f"  TIME EXIT SKIPPED {symbol} — held {bars_held:.0f}h but in profit ({rr_ratio:.1f}R)")
+                    log.info(
+                        f"  TIME EXIT SKIPPED {symbol} — held {bars_held:.0f}h but in profit ({rr_ratio:.1f}R)"
+                    )
                 else:
-                    log.info(f"  TIME EXIT {symbol} — held {bars_held:.0f}h, RR={rr_ratio:.1f}")
+                    log.info(
+                        f"  TIME EXIT {symbol} — held {bars_held:.0f}h, RR={rr_ratio:.1f}"
+                    )
                     self._close_trade(symbol, ticket, "TIME_EXIT")
                     continue
 
@@ -3496,13 +4033,21 @@ class UnifiedEngine:
                 rr_ratio = unrealized / sl_distance if sl_distance > 0 else 0
 
                 # ── PARTIAL TAKE-PROFIT: Close 50% at 1:1 R:R ──
-                if CONFIG.get("partial_tp_enabled", True) and not rm_pos.get("partial_tp_done", False):
+                if CONFIG.get("partial_tp_enabled", True) and not rm_pos.get(
+                    "partial_tp_done", False
+                ):
                     if rr_ratio >= CONFIG["partial_tp_rr"]:
-                        success = self.mt5.close_partial(ticket, CONFIG["partial_tp_pct"])
+                        success = self.mt5.close_partial(
+                            ticket, CONFIG["partial_tp_pct"]
+                        )
                         if success:
                             rm_pos["partial_tp_done"] = True
-                            rm_pos["size"] = rm_pos.get("size", 0) * (1 - CONFIG["partial_tp_pct"])
-                            log.info(f"  PARTIAL TP {symbol} — closed {CONFIG['partial_tp_pct']*100:.0f}% at {rr_ratio:.1f}R")
+                            rm_pos["size"] = rm_pos.get("size", 0) * (
+                                1 - CONFIG["partial_tp_pct"]
+                            )
+                            log.info(
+                                f"  PARTIAL TP {symbol} — closed {CONFIG['partial_tp_pct'] * 100:.0f}% at {rr_ratio:.1f}R"
+                            )
                             # Update entry to current for remaining position (lock in profit)
                             rm_pos["entry_price"] = current
                             continue
@@ -3515,20 +4060,26 @@ class UnifiedEngine:
                             success = self.mt5.modify_sl_tp(ticket, sl=new_sl)
                             if success:
                                 rm_pos["sl"] = new_sl
-                                log.info(f"  TRAILING BE {symbol} — SL → breakeven {new_sl:.5f}")
+                                log.info(
+                                    f"  TRAILING BE {symbol} — SL → breakeven {new_sl:.5f}"
+                                )
                     else:
                         new_sl = entry  # Breakeven
                         if sl > entry or sl == 0:
                             success = self.mt5.modify_sl_tp(ticket, sl=new_sl)
                             if success:
                                 rm_pos["sl"] = new_sl
-                                log.info(f"  TRAILING BE {symbol} — SL → breakeven {new_sl:.5f}")
+                                log.info(
+                                    f"  TRAILING BE {symbol} — SL → breakeven {new_sl:.5f}"
+                                )
 
                 # ── TRAILING STOP: Trail by ATR after 2:1 R:R ──
                 if rr_ratio >= CONFIG["trailing_step_rr"] and atr > 0:
                     # V3: Use per-symbol trail multiplier if available
                     v3_configs = CONFIG.get("v3_symbol_configs", {})
-                    trail_mult = v3_configs.get(symbol, {}).get("trail", CONFIG["trailing_atr_mult"])
+                    trail_mult = v3_configs.get(symbol, {}).get(
+                        "trail", CONFIG["trailing_atr_mult"]
+                    )
                     trail_distance = atr * trail_mult
                     if rm_pos["action"] == "BUY":
                         new_sl = current - trail_distance
@@ -3536,39 +4087,57 @@ class UnifiedEngine:
                             success = self.mt5.modify_sl_tp(ticket, sl=new_sl)
                             if success:
                                 rm_pos["sl"] = new_sl
-                                log.info(f"  TRAILING ATR {symbol} — SL → {new_sl:.5f} (ATR={atr:.5f}, dist={trail_distance:.5f})")
+                                log.info(
+                                    f"  TRAILING ATR {symbol} — SL → {new_sl:.5f} (ATR={atr:.5f}, dist={trail_distance:.5f})"
+                                )
                     else:
                         new_sl = current + trail_distance
                         if new_sl < rm_pos["sl"] or rm_pos["sl"] == 0:
                             success = self.mt5.modify_sl_tp(ticket, sl=new_sl)
                             if success:
                                 rm_pos["sl"] = new_sl
-                                log.info(f"  TRAILING ATR {symbol} — SL → {new_sl:.5f} (ATR={atr:.5f}, dist={trail_distance:.5f})")
+                                log.info(
+                                    f"  TRAILING ATR {symbol} — SL → {new_sl:.5f} (ATR={atr:.5f}, dist={trail_distance:.5f})"
+                                )
 
                 # ── DDFX BBStop: Volatility-adaptive trailing using Bollinger Band ──
                 # If price closes beyond the 1.5-std BB stop level, tighten trail
                 if CONFIG.get("bbstop_enabled", True) and rr_ratio >= 1.0:
                     try:
-                        sym_rates = mt5.copy_rates_from_pos(symbol, mt5.TIMEFRAME_H1, 0, 20)
+                        sym_rates = mt5.copy_rates_from_pos(
+                            symbol, mt5.TIMEFRAME_H1, 0, 20
+                        )
                         if sym_rates is not None and len(sym_rates) >= 20:
-                            closes_h1 = np.array([r['close'] for r in sym_rates])
+                            closes_h1 = np.array([r["close"] for r in sym_rates])
                             bb_sma = float(np.mean(closes_h1[-20:]))
                             bb_std = float(np.std(closes_h1[-20:]))
                             if rm_pos["action"] == "BUY":
                                 # BB stop = mid - 1.5*std (tighter than normal trailing)
                                 bb_stop = bb_sma - 1.5 * bb_std
                                 if bb_stop > rm_pos["sl"] and bb_stop < current:
-                                    success = self.mt5.modify_sl_tp(ticket, sl=round(bb_stop, 5))
+                                    success = self.mt5.modify_sl_tp(
+                                        ticket, sl=round(bb_stop, 5)
+                                    )
                                     if success:
                                         rm_pos["sl"] = round(bb_stop, 5)
-                                        log.info(f"  DDFX BBSTOP {symbol} — SL → {bb_stop:.5f} (BB tight stop, RR={rr_ratio:.1f})")
+                                        log.info(
+                                            f"  DDFX BBSTOP {symbol} — SL → {bb_stop:.5f} (BB tight stop, RR={rr_ratio:.1f})"
+                                        )
                             else:
                                 bb_stop = bb_sma + 1.5 * bb_std
-                                if bb_stop < rm_pos["sl"] or rm_pos["sl"] == 0 and bb_stop > current:
-                                    success = self.mt5.modify_sl_tp(ticket, sl=round(bb_stop, 5))
+                                if (
+                                    bb_stop < rm_pos["sl"]
+                                    or rm_pos["sl"] == 0
+                                    and bb_stop > current
+                                ):
+                                    success = self.mt5.modify_sl_tp(
+                                        ticket, sl=round(bb_stop, 5)
+                                    )
                                     if success:
                                         rm_pos["sl"] = round(bb_stop, 5)
-                                        log.info(f"  DDFX BBSTOP {symbol} — SL → {bb_stop:.5f} (BB tight stop, RR={rr_ratio:.1f})")
+                                        log.info(
+                                            f"  DDFX BBSTOP {symbol} — SL → {bb_stop:.5f} (BB tight stop, RR={rr_ratio:.1f})"
+                                        )
                     except Exception:
                         pass  # Non-critical, continue with standard trailing
 
@@ -3593,7 +4162,9 @@ class UnifiedEngine:
                 except Exception:
                     pass
 
-            self.risk.record_trade_result(pnl, pnl / self.risk.balance if self.risk.balance > 0 else 0)
+            self.risk.record_trade_result(
+                pnl, pnl / self.risk.balance if self.risk.balance > 0 else 0
+            )
 
             # Phase 4: Track trade result for dynamic Kelly
             self._trade_results.append(pnl)
@@ -3610,8 +4181,10 @@ class UnifiedEngine:
                 # Log profile performance
                 pp = self._profile_performance[profile]
                 wr = pp["wins"] / pp["trades"] * 100 if pp["trades"] > 0 else 0
-                log.info(f"  PROFILE {profile}: {pp['trades']} trades, {pp['wins']} wins ({wr:.0f}%), "
-                         f"P&L=${pp['total_pnl']:+.2f}")
+                log.info(
+                    f"  PROFILE {profile}: {pp['trades']} trades, {pp['wins']} wins ({wr:.0f}%), "
+                    f"P&L=${pp['total_pnl']:+.2f}"
+                )
 
             # Phase 5: Update win/loss streaks
             self._update_streaks(pnl)
@@ -3632,13 +4205,16 @@ class UnifiedEngine:
 
             del self.risk.open_positions[symbol]
             streak_info = f"W={self.consecutive_wins} L={self.consecutive_losses}"
-            log.info(f"  CLOSED {symbol} | Reason: {reason} | P&L=${pnl:+.2f} | Streak: {streak_info}")
+            log.info(
+                f"  CLOSED {symbol} | Reason: {reason} | P&L=${pnl:+.2f} | Streak: {streak_info}"
+            )
         else:
             log.error(f"  FAILED TO CLOSE {symbol} ticket={ticket}")
 
     def monitor_log(self, symbol: str, event: str, detail: str = ""):
         """Log a structured monitoring event."""
         import threading
+
         entry = {
             "time": datetime.now(timezone.utc).strftime("%H:%M:%S"),
             "symbol": symbol,
@@ -3648,7 +4224,7 @@ class UnifiedEngine:
         }
         self.monitor_events.append(entry)
         if len(self.monitor_events) > self.monitor_max_events:
-            self.monitor_events = self.monitor_events[-self.monitor_max_events:]
+            self.monitor_events = self.monitor_events[-self.monitor_max_events :]
 
     def get_monitor(self) -> Dict:
         """Get monitoring pipeline state for the dashboard."""
@@ -3668,9 +4244,20 @@ class UnifiedEngine:
         # Pipeline summary: last signal, gate result, order result per symbol
         pipeline = {}
         for sym, events in by_symbol.items():
-            last_signal = next((e for e in reversed(events) if e["event"] == "signal"), None)
-            last_gate = next((e for e in reversed(events) if e["event"].startswith("gate_")), None)
-            last_order = next((e for e in reversed(events) if e["event"] in ("order_placed", "order_failed", "order_closed")), None)
+            last_signal = next(
+                (e for e in reversed(events) if e["event"] == "signal"), None
+            )
+            last_gate = next(
+                (e for e in reversed(events) if e["event"].startswith("gate_")), None
+            )
+            last_order = next(
+                (
+                    e
+                    for e in reversed(events)
+                    if e["event"] in ("order_placed", "order_failed", "order_closed")
+                ),
+                None,
+            )
             pipeline[sym] = {
                 "signal": last_signal,
                 "gate": last_gate,
@@ -3679,13 +4266,17 @@ class UnifiedEngine:
 
         # Overall stats
         signals = [e for e in self.monitor_events if e["event"] == "signal"]
-        gates_passed = [e for e in self.monitor_events if e["event"] == "gate_all_passed"]
+        gates_passed = [
+            e for e in self.monitor_events if e["event"] == "gate_all_passed"
+        ]
         orders_placed = [e for e in self.monitor_events if e["event"] == "order_placed"]
         orders_failed = [e for e in self.monitor_events if e["event"] == "order_failed"]
 
         return {
             "cycle": self.cycle_count,
-            "uptime_seconds": (datetime.now(timezone.utc) - self.start_time).total_seconds(),
+            "uptime_seconds": (
+                datetime.now(timezone.utc) - self.start_time
+            ).total_seconds(),
             "total_events": len(self.monitor_events),
             "stats": {
                 "signals_generated": len(signals),
@@ -3707,13 +4298,25 @@ class UnifiedEngine:
         features_state = {}
         if NEW_FEATURES_AVAILABLE:
             features_state = {
-                "regime": self.ensemble.regime_detector.current_regime.value if self.ensemble else "unknown",
-                "sentiment_cache": len(self.sentiment.sentiment_cache) if self.sentiment else 0,
-                "hedge_positions": len(self.hedging.hedge_positions) if self.hedging else 0,
+                "regime": self.ensemble.regime_detector.current_regime.value
+                if self.ensemble
+                else "unknown",
+                "sentiment_cache": len(self.sentiment.sentiment_cache)
+                if self.sentiment
+                else 0,
+                "hedge_positions": len(self.hedging.hedge_positions)
+                if self.hedging
+                else 0,
                 "calendar_events": len(self.calendar.events) if self.calendar else 0,
                 "risk_parity": self.risk_parity.get_state() if self.risk_parity else {},
-                "execution_metrics": self.execution_optimizer.get_metrics() if self.execution_optimizer else {},
+                "execution_metrics": self.execution_optimizer.get_metrics()
+                if self.execution_optimizer
+                else {},
             }
+
+        # Add Gold Hedge EA status
+        if self.gold_hedge:
+            features_state["gold_hedge_ea"] = self.gold_hedge.get_status()
 
         return {
             "engine": {
@@ -3752,7 +4355,10 @@ class UnifiedEngine:
                 "training_samples": len(self._ml_training_data),
                 "retrain_count": self._ml_retrain_count,
                 "retrain_interval": CONFIG.get("ml_retrain_interval", 20),
-                "next_retrain": max(0, CONFIG.get("ml_retrain_interval", 20) - len(self._ml_training_data)),
+                "next_retrain": max(
+                    0,
+                    CONFIG.get("ml_retrain_interval", 20) - len(self._ml_training_data),
+                ),
             },
             # Strategy Profiles
             "strategy_profiles": self._profile_performance,
@@ -3776,6 +4382,7 @@ app.add_middleware(
 # Register scalping API routes
 try:
     from api.routes.scalping import router as scalping_router
+
     app.include_router(scalping_router, prefix="/api/v1/scalping", tags=["scalping"])
 except ImportError:
     pass
@@ -3798,6 +4405,7 @@ async def startup():
                     engine.running = False
                 except Exception as e:
                     import traceback
+
                     log.error(f"Engine error: {e}")
                     log.error(traceback.format_exc())
                     time.sleep(60)
@@ -3834,7 +4442,9 @@ def daily_status():
         "training_samples": len(engine._ml_training_data),
         "retrain_count": engine._ml_retrain_count,
         "retrain_interval": CONFIG.get("ml_retrain_interval", 20),
-        "next_retrain": max(0, CONFIG.get("ml_retrain_interval", 20) - len(engine._ml_training_data)),
+        "next_retrain": max(
+            0, CONFIG.get("ml_retrain_interval", 20) - len(engine._ml_training_data)
+        ),
     }
     return {
         "daily": daily,
@@ -3853,6 +4463,7 @@ AUTH_USERS = {
     "admin": hashlib.sha256("dutchkem".encode()).hexdigest(),
 }
 
+
 @app.post("/api/v1/auth/login")
 def auth_login(credentials: dict):
     """Authenticate user and return JWT token."""
@@ -3862,9 +4473,15 @@ def auth_login(credentials: dict):
 
     if username in AUTH_USERS and AUTH_USERS[username] == password_hash:
         token = f"dutchkem-jwt-{username}-{int(time.time())}"
-        return {"token": token, "access_token": token, "token_type": "bearer", "user": username}
+        return {
+            "token": token,
+            "access_token": token,
+            "token_type": "bearer",
+            "user": username,
+        }
 
     raise HTTPException(status_code=401, detail="Invalid credentials")
+
 
 @app.get("/api/v1/auth/me")
 def auth_me():
@@ -3876,33 +4493,40 @@ def auth_me():
 def serve_root():
     """Serve the landing page."""
     from fastapi.responses import HTMLResponse, RedirectResponse
+
     landing_path = Path("dashboard/landing.html")
     if landing_path.exists():
         return HTMLResponse(content=landing_path.read_text(encoding="utf-8"))
     return RedirectResponse(url="/dashboard")
 
+
 @app.get("/landing")
 def serve_landing():
     """Serve the landing page."""
     from fastapi.responses import HTMLResponse
+
     landing_path = Path("dashboard/landing.html")
     if landing_path.exists():
         return HTMLResponse(content=landing_path.read_text(encoding="utf-8"))
     return HTMLResponse(content="<h1>Landing page not found</h1>", status_code=404)
 
+
 @app.get("/login")
 def serve_login():
     """Serve the login page."""
     from fastapi.responses import HTMLResponse
+
     login_path = Path("dashboard/login.html")
     if login_path.exists():
         return HTMLResponse(content=login_path.read_text(encoding="utf-8"))
     return HTMLResponse(content="<h1>Login page not found</h1>", status_code=404)
 
+
 @app.get("/dashboard")
 def serve_dashboard():
     """Serve the live dashboard HTML."""
     from fastapi.responses import HTMLResponse
+
     dashboard_path = Path("dashboard/index.html")
     if dashboard_path.exists():
         return HTMLResponse(content=dashboard_path.read_text(encoding="utf-8"))
@@ -3914,7 +4538,7 @@ def positions():
     mt5_positions = engine.mt5.get_positions()
     # Add scalper positions if available
     scalp_positions = []
-    if getattr(engine, 'scalper', None):
+    if getattr(engine, "scalper", None):
         ss = engine.scalper.get_status()
         scalp_positions = ss.get("open_positions", [])
     return {
@@ -3927,7 +4551,12 @@ def positions():
 @app.get("/api/v1/calendar")
 def calendar_events():
     """Get upcoming economic events and blackout status."""
-    from apps.calendar.events import get_all_events, is_blackout_period, get_upcoming_events
+    from apps.calendar.events import (
+        get_all_events,
+        is_blackout_period,
+        get_upcoming_events,
+    )
+
     return {
         "all_events": get_all_events(),
         "upcoming_24h": get_upcoming_events(hours=24),
@@ -3980,7 +4609,13 @@ def manual_trade(symbol: str, action: str, lots: float = 0.01):
     price = price_info.ask if action == "BUY" else price_info.bid
     ticket = engine.mt5.place_order(symbol, action, lots, 0, 0)
     if ticket:
-        return {"status": "ok", "ticket": ticket, "symbol": symbol, "action": action, "lots": lots}
+        return {
+            "status": "ok",
+            "ticket": ticket,
+            "symbol": symbol,
+            "action": action,
+            "lots": lots,
+        }
     raise HTTPException(status_code=500, detail="Order failed")
 
 
@@ -4003,7 +4638,9 @@ def close_all_positions():
     for p in positions:
         try:
             if engine.mt5.close_position(p.ticket):
-                results.append({"ticket": p.ticket, "symbol": p.symbol, "profit": p.profit})
+                results.append(
+                    {"ticket": p.ticket, "symbol": p.symbol, "profit": p.profit}
+                )
         except Exception:
             pass
     return {"status": "closed", "closed_count": len(results), "trades": results}
@@ -4014,16 +4651,28 @@ def close_winning_positions():
     """Close all positions with profit > 0."""
     positions = mt5.positions_get()
     if not positions:
-        return {"status": "closed", "filter": "winning", "closed_count": 0, "trades": []}
+        return {
+            "status": "closed",
+            "filter": "winning",
+            "closed_count": 0,
+            "trades": [],
+        }
     results = []
     for p in positions:
         if p.profit > 0:
             try:
                 if engine.mt5.close_position(p.ticket):
-                    results.append({"ticket": p.ticket, "symbol": p.symbol, "profit": p.profit})
+                    results.append(
+                        {"ticket": p.ticket, "symbol": p.symbol, "profit": p.profit}
+                    )
             except Exception:
                 pass
-    return {"status": "closed", "filter": "winning", "closed_count": len(results), "trades": results}
+    return {
+        "status": "closed",
+        "filter": "winning",
+        "closed_count": len(results),
+        "trades": results,
+    }
 
 
 @app.post("/api/v1/positions/close-losing")
@@ -4037,10 +4686,17 @@ def close_losing_positions():
         if p.profit <= 0:
             try:
                 if engine.mt5.close_position(p.ticket):
-                    results.append({"ticket": p.ticket, "symbol": p.symbol, "profit": p.profit})
+                    results.append(
+                        {"ticket": p.ticket, "symbol": p.symbol, "profit": p.profit}
+                    )
             except Exception:
                 pass
-    return {"status": "closed", "filter": "losing", "closed_count": len(results), "trades": results}
+    return {
+        "status": "closed",
+        "filter": "losing",
+        "closed_count": len(results),
+        "trades": results,
+    }
 
 
 @app.post("/api/v1/positions/close-scalps")
@@ -4055,10 +4711,17 @@ def close_scalp_positions():
         if p.magic == SCALP_MAGIC:
             try:
                 if engine.mt5.close_position(p.ticket):
-                    results.append({"ticket": p.ticket, "symbol": p.symbol, "profit": p.profit})
+                    results.append(
+                        {"ticket": p.ticket, "symbol": p.symbol, "profit": p.profit}
+                    )
             except Exception:
                 pass
-    return {"status": "closed", "filter": "scalps", "closed_count": len(results), "trades": results}
+    return {
+        "status": "closed",
+        "filter": "scalps",
+        "closed_count": len(results),
+        "trades": results,
+    }
 
 
 @app.post("/api/v1/engine/start")
@@ -4101,7 +4764,10 @@ def toggle_feature(body: dict = Body(...)):
 
     config_key = feature_map.get(feature)
     if not config_key:
-        return {"error": f"Unknown feature: {feature}", "valid": list(feature_map.keys())}
+        return {
+            "error": f"Unknown feature: {feature}",
+            "valid": list(feature_map.keys()),
+        }
 
     if enabled is None:
         # Toggle current value
@@ -4114,13 +4780,14 @@ def toggle_feature(body: dict = Body(...)):
         "feature": feature,
         "config_key": config_key,
         "enabled": CONFIG[config_key],
-        "all_features": {k: CONFIG.get(k, False) for k in feature_map.values()}
+        "all_features": {k: CONFIG.get(k, False) for k in feature_map.values()},
     }
 
 
 # ═══════════════════════════════════════════════════════════════
 # MT5 OPERATIONS — Connect, Status, History, Symbol Info
 # ═══════════════════════════════════════════════════════════════
+
 
 @app.get("/api/v1/mt5/status")
 def mt5_status():
@@ -4142,7 +4809,9 @@ def mt5_status():
                 "name": acct.name,
                 "currency": acct.currency,
                 "company": acct.company,
-                "terminal": mt5.terminal_info().name if mt5.terminal_info() else "Unknown",
+                "terminal": mt5.terminal_info().name
+                if mt5.terminal_info()
+                else "Unknown",
             }
         else:
             info = {"connected": True, "login": MT5_LOGIN, "server": MT5_SERVER}
@@ -4158,6 +4827,7 @@ def mt5_connect(data: dict = None):
         if engine.mt5.connected:
             engine.mt5.disconnect()
             import time as _t
+
             _t.sleep(1)
 
         _login = (data or {}).get("login") or MT5_LOGIN
@@ -4165,10 +4835,7 @@ def mt5_connect(data: dict = None):
         _server = (data or {}).get("server") or MT5_SERVER
 
         result = mt5.initialize(
-            path=MT5_PATH,
-            login=_login,
-            password=_password,
-            server=_server
+            path=MT5_PATH, login=_login, password=_password, server=_server
         )
         if result:
             engine.mt5.connected = True
@@ -4200,6 +4867,7 @@ def mt5_history(days: int = 30):
     """Get trade history from MT5."""
     try:
         from datetime import timedelta
+
         now = datetime.now(timezone.utc)
         start = now - timedelta(days=days)
         deals = mt5.history_deals_get(start, now)
@@ -4208,21 +4876,23 @@ def mt5_history(days: int = 30):
 
         result = []
         for d in deals:
-            result.append({
-                "ticket": d.ticket,
-                "order": d.order,
-                "time": str(d.time),
-                "type": str(d.type),
-                "entry": str(d.entry),
-                "magic": d.magic,
-                "volume": d.volume,
-                "price": d.price,
-                "profit": d.profit,
-                "swap": d.swap,
-                "commission": d.commission,
-                "symbol": d.symbol,
-                "comment": d.comment,
-            })
+            result.append(
+                {
+                    "ticket": d.ticket,
+                    "order": d.order,
+                    "time": str(d.time),
+                    "type": str(d.type),
+                    "entry": str(d.entry),
+                    "magic": d.magic,
+                    "volume": d.volume,
+                    "price": d.price,
+                    "profit": d.profit,
+                    "swap": d.swap,
+                    "commission": d.commission,
+                    "symbol": d.symbol,
+                    "comment": d.comment,
+                }
+            )
         return {"deals": result, "total": len(result)}
     except Exception as e:
         return {"deals": [], "total": 0, "error": str(e)}
@@ -4264,7 +4934,10 @@ def mt5_symbols():
         symbols = mt5.symbols_get()
         if symbols is None:
             return {"symbols": []}
-        result = [{"name": s.name, "spread": s.spread, "trade_mode": str(s.trade_mode)} for s in symbols[:50]]
+        result = [
+            {"name": s.name, "spread": s.spread, "trade_mode": str(s.trade_mode)}
+            for s in symbols[:50]
+        ]
         return {"symbols": result, "total": len(symbols)}
     except Exception as e:
         return {"symbols": [], "error": str(e)}
@@ -4273,6 +4946,7 @@ def mt5_symbols():
 # ═══════════════════════════════════════════════════════════════
 # ACCOUNT — Funding, Withdrawal, Details
 # ═══════════════════════════════════════════════════════════════
+
 
 @app.get("/api/v1/account/details")
 def account_details():
@@ -4294,7 +4968,9 @@ def account_details():
         "margin_free": info.margin_free,
         "margin_level": info.margin_level,
         "profit": info.profit,
-        "deposit": info.balance + abs(info.profit) if info.profit < 0 else info.balance - info.profit,
+        "deposit": info.balance + abs(info.profit)
+        if info.profit < 0
+        else info.balance - info.profit,
         "withdrawal": 0,
         "credit": info.credit,
     }
@@ -4314,7 +4990,7 @@ def fund_account(data: dict = None):
         "status": "funded",
         "amount": amount,
         "message": f"Demo account funded with ${amount:,.2f}",
-        "note": "Contact your broker for live account funding"
+        "note": "Contact your broker for live account funding",
     }
 
 
@@ -4333,7 +5009,7 @@ def withdraw_account(data: dict = None):
         "status": "withdrawal_requested",
         "amount": amount,
         "message": f"Withdrawal of ${amount:,.2f} requested",
-        "note": "Contact your broker for live withdrawals"
+        "note": "Contact your broker for live withdrawals",
     }
 
 
@@ -4341,14 +5017,20 @@ def withdraw_account(data: dict = None):
 # CHART DATA — OHLC for enterprise charts
 # ═══════════════════════════════════════════════════════════════
 
+
 @app.get("/api/v1/chart/{symbol}")
 def chart_data(symbol: str, timeframe: str = "H1", count: int = 200):
     """Get OHLC candle data for charts."""
     try:
         tf_map = {
-            "M1": mt5.TIMEFRAME_M1, "M5": mt5.TIMEFRAME_M5, "M15": mt5.TIMEFRAME_M15,
-            "M30": mt5.TIMEFRAME_M30, "H1": mt5.TIMEFRAME_H1, "H4": mt5.TIMEFRAME_H4,
-            "D1": mt5.TIMEFRAME_D1, "W1": mt5.TIMEFRAME_W1,
+            "M1": mt5.TIMEFRAME_M1,
+            "M5": mt5.TIMEFRAME_M5,
+            "M15": mt5.TIMEFRAME_M15,
+            "M30": mt5.TIMEFRAME_M30,
+            "H1": mt5.TIMEFRAME_H1,
+            "H4": mt5.TIMEFRAME_H4,
+            "D1": mt5.TIMEFRAME_D1,
+            "W1": mt5.TIMEFRAME_W1,
         }
         tf = tf_map.get(timeframe.upper(), mt5.TIMEFRAME_H1)
         rates = mt5.copy_rates_from_pos(symbol, tf, 0, count)
@@ -4357,22 +5039,35 @@ def chart_data(symbol: str, timeframe: str = "H1", count: int = 200):
 
         candles = []
         for r in rates:
-            candles.append({
-                "time": int(r['time']),
-                "open": round(r['open'], 5),
-                "high": round(r['high'], 5),
-                "low": round(r['low'], 5),
-                "close": round(r['close'], 5),
-                "volume": int(r['tick_volume']),
-            })
-        return {"candles": candles, "symbol": symbol, "timeframe": timeframe, "count": len(candles)}
+            candles.append(
+                {
+                    "time": int(r["time"]),
+                    "open": round(r["open"], 5),
+                    "high": round(r["high"], 5),
+                    "low": round(r["low"], 5),
+                    "close": round(r["close"], 5),
+                    "volume": int(r["tick_volume"]),
+                }
+            )
+        return {
+            "candles": candles,
+            "symbol": symbol,
+            "timeframe": timeframe,
+            "count": len(candles),
+        }
     except Exception as e:
-        return {"candles": [], "symbol": symbol, "timeframe": timeframe, "error": str(e)}
+        return {
+            "candles": [],
+            "symbol": symbol,
+            "timeframe": timeframe,
+            "error": str(e),
+        }
 
 
 # ═══════════════════════════════════════════════════════════════
 # LIVE DATA — Real-time prices, WebSocket, Engine status
 # ═══════════════════════════════════════════════════════════════
+
 
 @app.get("/api/v1/live/prices")
 def live_prices():
@@ -4384,7 +5079,9 @@ def live_prices():
             prices[sym] = {
                 "bid": round(tick.bid, 5),
                 "ask": round(tick.ask, 5),
-                "spread": round((tick.ask - tick.bid) * (10000 if "JPY" not in sym else 100), 1),
+                "spread": round(
+                    (tick.ask - tick.bid) * (10000 if "JPY" not in sym else 100), 1
+                ),
                 "time": int(tick.time),
             }
     return {"prices": prices, "count": len(prices)}
@@ -4395,16 +5092,18 @@ def performance():
     """Historical performance: trades, win rate, P&L, drawdown."""
     try:
         import MetaTrader5 as mt5
+
         # Get account info
         acct = mt5.account_info()
         # Get deals (closed trades) from last 30 days
         from datetime import datetime, timedelta
+
         end = datetime.now()
         start = end - timedelta(days=30)
         deals = mt5.history_deals_get(start, end)
         if deals is None:
             deals = []
-        
+
         # Calculate stats
         wins = 0
         losses = 0
@@ -4412,7 +5111,7 @@ def performance():
         total_commission = 0
         total_swap = 0
         trade_history = []
-        
+
         for deal in deals:
             if deal.type == mt5.DEAL_TYPE_BUY or deal.type == mt5.DEAL_TYPE_SELL:
                 pnl = deal.profit + deal.swap + deal.commission
@@ -4423,21 +5122,25 @@ def performance():
                     wins += 1
                 elif pnl < 0:
                     losses += 1
-                trade_history.append({
-                    "ticket": deal.ticket,
-                    "time": deal.time.strftime("%Y-%m-%d %H:%M") if hasattr(deal.time, 'strftime') else str(deal.time),
-                    "symbol": deal.symbol,
-                    "type": "BUY" if deal.type == mt5.DEAL_TYPE_BUY else "SELL",
-                    "volume": deal.volume,
-                    "price": deal.price,
-                    "pnl": round(pnl, 2),
-                    "commission": round(deal.commission, 2),
-                    "swap": round(deal.swap, 2),
-                })
-        
+                trade_history.append(
+                    {
+                        "ticket": deal.ticket,
+                        "time": deal.time.strftime("%Y-%m-%d %H:%M")
+                        if hasattr(deal.time, "strftime")
+                        else str(deal.time),
+                        "symbol": deal.symbol,
+                        "type": "BUY" if deal.type == mt5.DEAL_TYPE_BUY else "SELL",
+                        "volume": deal.volume,
+                        "price": deal.price,
+                        "pnl": round(pnl, 2),
+                        "commission": round(deal.commission, 2),
+                        "swap": round(deal.swap, 2),
+                    }
+                )
+
         total_trades = wins + losses
         win_rate = (wins / total_trades * 100) if total_trades > 0 else 0
-        
+
         return {
             "balance": round(acct.balance, 2) if acct else 0,
             "equity": round(acct.equity, 2) if acct else 0,
@@ -4499,17 +5202,26 @@ def engine_status():
     return {
         "running": engine.running,
         "cycle": engine.cycle_count,
-        "uptime": str(datetime.now(timezone.utc) - engine.start_time) if engine.start_time else "0:00:00",
+        "uptime": str(datetime.now(timezone.utc) - engine.start_time)
+        if engine.start_time
+        else "0:00:00",
         "mt5_connected": engine.mt5.connected,
         "account": acct,
         "risk": state,
-        "positions_count": len(engine.risk.open_positions) if hasattr(engine.risk, 'open_positions') else 0,
+        "positions_count": len(engine.risk.open_positions)
+        if hasattr(engine.risk, "open_positions")
+        else 0,
         "last_signals": len(engine.last_signals),
         "watchlist": WATCHLIST,
         "features": {
-            "regime": getattr(getattr(engine, 'ensemble', None), 'current_regime', None) and str(getattr(engine.ensemble, 'current_regime', '')),
-            "calendar_loaded": len(getattr(getattr(engine, 'calendar', None), 'events', [])),
-            "risk_parity_weights": dict(getattr(getattr(engine, 'risk_parity', None), 'weights', {})),
+            "regime": getattr(getattr(engine, "ensemble", None), "current_regime", None)
+            and str(getattr(engine.ensemble, "current_regime", "")),
+            "calendar_loaded": len(
+                getattr(getattr(engine, "calendar", None), "events", [])
+            ),
+            "risk_parity_weights": dict(
+                getattr(getattr(engine, "risk_parity", None), "weights", {})
+            ),
         },
         "config": {
             "risk_pct": CONFIG["max_risk_pct"],
@@ -4523,7 +5235,9 @@ def engine_status():
             "calendar_enabled": CONFIG.get("calendar_enabled", False),
             "risk_parity_enabled": CONFIG.get("risk_parity_enabled", False),
             "multi_timeframe_enabled": CONFIG.get("multi_timeframe_enabled", False),
-            "mtf_cascading_scalper_enabled": CONFIG.get("mtf_cascading_scalper_enabled", False),
+            "mtf_cascading_scalper_enabled": CONFIG.get(
+                "mtf_cascading_scalper_enabled", False
+            ),
             "hedging_enabled": CONFIG.get("hedging_enabled", False),
             "exit_model_enabled": CONFIG.get("exit_model_enabled", False),
             "equity_curve_ma_period": CONFIG.get("equity_curve_ma_period", 20),
@@ -4532,20 +5246,35 @@ def engine_status():
             "asian_session_enabled": CONFIG.get("asian_session_enabled", False),
             "asian_session_symbols": list(CONFIG.get("asian_session_symbols", set())),
         },
-        "scalper": engine.scalper.get_status() if getattr(engine, 'scalper', None) else None,
+        "scalper": engine.scalper.get_status()
+        if getattr(engine, "scalper", None)
+        else None,
         "phase4": {
-            "equity_curve_len": len(getattr(engine, 'equity_curve', [])),
-            "equity_curve_ma": round(sum(getattr(engine, 'equity_curve', [0])[-20:]) / max(1, len(getattr(engine, 'equity_curve', [0])[-20:])), 2) if getattr(engine, 'equity_curve', []) else 0,
-            "kelly_fraction": round(getattr(engine, 'kelly_fraction', 0), 4),
-            "trade_results_count": len(getattr(engine, '_trade_results', [])),
-            "regime": getattr(getattr(engine, 'ensemble', None), 'current_regime', None) and str(getattr(engine.ensemble, 'current_regime', '')),
+            "equity_curve_len": len(getattr(engine, "equity_curve", [])),
+            "equity_curve_ma": round(
+                sum(getattr(engine, "equity_curve", [0])[-20:])
+                / max(1, len(getattr(engine, "equity_curve", [0])[-20:])),
+                2,
+            )
+            if getattr(engine, "equity_curve", [])
+            else 0,
+            "kelly_fraction": round(getattr(engine, "kelly_fraction", 0), 4),
+            "trade_results_count": len(getattr(engine, "_trade_results", [])),
+            "regime": getattr(getattr(engine, "ensemble", None), "current_regime", None)
+            and str(getattr(engine.ensemble, "current_regime", "")),
         },
         "phase5": {
-            "win_streak": getattr(engine, 'consecutive_wins', 0),
-            "loss_streak": getattr(engine, 'consecutive_losses', 0),
-            "streak_multiplier": round(getattr(engine, '_get_streak_multiplier', lambda: 1.0)(), 2),
-            "session_multiplier": round(getattr(engine, '_get_session_multiplier', lambda: 1.0)(), 2),
-            "portfolio_heat": round(getattr(engine, '_check_portfolio_heat', lambda: 0.0)(), 3),
+            "win_streak": getattr(engine, "consecutive_wins", 0),
+            "loss_streak": getattr(engine, "consecutive_losses", 0),
+            "streak_multiplier": round(
+                getattr(engine, "_get_streak_multiplier", lambda: 1.0)(), 2
+            ),
+            "session_multiplier": round(
+                getattr(engine, "_get_session_multiplier", lambda: 1.0)(), 2
+            ),
+            "portfolio_heat": round(
+                getattr(engine, "_check_portfolio_heat", lambda: 0.0)(), 3
+            ),
         },
     }
 
@@ -4553,10 +5282,19 @@ def engine_status():
 @app.get("/api/v1/scalper/status")
 def scalper_status():
     """MTF Cascading Scalper status endpoint."""
-    if not getattr(engine, 'scalper', None):
-        return {"enabled": False, "open_scalps": 0, "total_trades": 0,
-                "last_scan": None, "last_error": None, "symbol": None,
-                "tp_pips": 0, "sl_pips": 0, "max_concurrent": 0, "groups": []}
+    if not getattr(engine, "scalper", None):
+        return {
+            "enabled": False,
+            "open_scalps": 0,
+            "total_trades": 0,
+            "last_scan": None,
+            "last_error": None,
+            "symbol": None,
+            "tp_pips": 0,
+            "sl_pips": 0,
+            "max_concurrent": 0,
+            "groups": [],
+        }
     return engine.scalper.get_status()
 
 
@@ -4574,7 +5312,10 @@ def toggle_scalper(body: dict = Body(...)):
 
     config_key = feature_map.get(feature)
     if not config_key:
-        return {"error": f"Unknown feature: {feature}", "valid": list(feature_map.keys())}
+        return {
+            "error": f"Unknown feature: {feature}",
+            "valid": list(feature_map.keys()),
+        }
 
     if enabled is None:
         enabled = not CONFIG.get(config_key, False)
@@ -4582,7 +5323,7 @@ def toggle_scalper(body: dict = Body(...)):
     CONFIG[config_key] = bool(enabled)
 
     # Sync to scalper if it exists
-    if getattr(engine, 'scalper', None):
+    if getattr(engine, "scalper", None):
         engine.scalper.config[config_key] = bool(enabled)
 
     log.info(f"Scalper feature '{feature}' ({config_key}) set to {enabled}")
@@ -4590,14 +5331,16 @@ def toggle_scalper(body: dict = Body(...)):
     return {
         "feature": feature,
         "enabled": CONFIG[config_key],
-        "status": engine.scalper.get_status() if getattr(engine, 'scalper', None) else None,
+        "status": engine.scalper.get_status()
+        if getattr(engine, "scalper", None)
+        else None,
     }
 
 
 @app.get("/api/v1/scalper/quality-trades")
 def scalper_quality_trades():
     """Scan all symbols and return quality trade candidates with full analysis."""
-    if not getattr(engine, 'scalper', None):
+    if not getattr(engine, "scalper", None):
         return {"trades": [], "error": "Scalper not active"}
 
     try:
@@ -4635,6 +5378,7 @@ def live_tick(symbol: str):
 # ═══════════════════════════════════════════════════════════════
 # WEBSOCKET — Real-time chart data
 # ═══════════════════════════════════════════════════════════════
+
 
 @app.websocket("/ws/prices")
 async def ws_prices(websocket: WebSocket):
@@ -4683,6 +5427,7 @@ try:
     from apps.legendary.tudor_jones import TudorJonesAgent
     from apps.legendary.lynch import LynchAgent
     from apps.memory.situation_memory import FinancialSituationMemory
+
     ADVANCED_FEATURES_AVAILABLE = True
     log.info("Advanced features (analysts, legendary, memory) loaded successfully")
 except ImportError as e:
@@ -4694,7 +5439,7 @@ except ImportError as e:
 async def all_analysts(symbol: str = "EURUSD", timeframe: str = "H1"):
     """Get cached analyst results from the engine cycle, or run on-demand."""
     # FAST PATH: serve from engine cache (instant)
-    if hasattr(engine, 'last_analysis') and symbol in engine.last_analysis:
+    if hasattr(engine, "last_analysis") and symbol in engine.last_analysis:
         cached = engine.last_analysis[symbol]
         return {
             "symbol": symbol,
@@ -4709,10 +5454,16 @@ async def all_analysts(symbol: str = "EURUSD", timeframe: str = "H1"):
 
     # SLOW PATH: run analysts on-demand (only if no cache yet)
     if not ADVANCED_FEATURES_AVAILABLE:
-        return {"error": "Advanced features not available", "symbol": symbol, "analysts": [], "consensus": "HOLD"}
+        return {
+            "error": "Advanced features not available",
+            "symbol": symbol,
+            "analysts": [],
+            "consensus": "HOLD",
+        }
     # Shared LLM client for on-demand analyst runs
     try:
         from apps.llm.client import LLMClient as _LLM
+
         _llm = _LLM()
     except Exception:
         _llm = None
@@ -4735,24 +5486,39 @@ async def all_analysts(symbol: str = "EURUSD", timeframe: str = "H1"):
         try:
             a = cls(llm_client=_llm, **extra_kw)
             r = await a.analyze(symbol, timeframe)
-            results.append({
-                "name": name,
-                "signal": r.signal,
-                "confidence": round(r.confidence, 3),
-                "reasoning": r.reasoning[:200] if r.reasoning else "",
-            })
+            results.append(
+                {
+                    "name": name,
+                    "signal": r.signal,
+                    "confidence": round(r.confidence, 3),
+                    "reasoning": r.reasoning[:200] if r.reasoning else "",
+                }
+            )
         except Exception as e:
-            results.append({"name": name, "signal": "HOLD", "confidence": 0, "reasoning": str(e)[:100]})
+            results.append(
+                {
+                    "name": name,
+                    "signal": "HOLD",
+                    "confidence": 0,
+                    "reasoning": str(e)[:100],
+                }
+            )
 
     buys = sum(1 for r in results if r["signal"] == "BUY")
     sells = sum(1 for r in results if r["signal"] == "SELL")
     holds = sum(1 for r in results if r["signal"] == "HOLD")
     avg_conf = sum(r["confidence"] for r in results) / len(results) if results else 0
 
-    consensus = "BUY" if buys > sells and buys > holds else "SELL" if sells > buys and sells > holds else "HOLD"
+    consensus = (
+        "BUY"
+        if buys > sells and buys > holds
+        else "SELL"
+        if sells > buys and sells > holds
+        else "HOLD"
+    )
 
     # Cache slow-path results so subsequent calls are instant
-    if hasattr(engine, 'last_analysis'):
+    if hasattr(engine, "last_analysis"):
         engine.last_analysis[symbol] = {
             "analysts": results,
             "consensus": consensus,
@@ -4778,7 +5544,7 @@ def all_legendary(symbol: str = "EURUSD"):
     """Get cached legendary agent results, or run on-demand."""
     # FAST PATH: serve from cache
     cache_key = f"{symbol}_legendary"
-    if hasattr(engine, 'last_analysis') and cache_key in engine.last_analysis:
+    if hasattr(engine, "last_analysis") and cache_key in engine.last_analysis:
         cached = engine.last_analysis[cache_key]
         return {
             "symbol": symbol,
@@ -4793,7 +5559,12 @@ def all_legendary(symbol: str = "EURUSD"):
 
     # SLOW PATH: run on-demand (only if no cache yet)
     if not ADVANCED_FEATURES_AVAILABLE:
-        return {"error": "Advanced features not available", "symbol": symbol, "agents": [], "consensus": "HOLD"}
+        return {
+            "error": "Advanced features not available",
+            "symbol": symbol,
+            "agents": [],
+            "consensus": "HOLD",
+        }
     rates = mt5.copy_rates_from_pos(symbol, mt5.TIMEFRAME_H1, 0, 100)
     price_data = None
     if rates is not None:
@@ -4815,31 +5586,62 @@ def all_legendary(symbol: str = "EURUSD"):
                 r = a.analyze(price_data, symbol)
                 # Agents return dicts, not objects
                 if isinstance(r, dict):
-                    results.append({
-                        "name": name,
-                        "signal": r.get("signal", "HOLD"),
-                        "confidence": round(float(r.get("confidence", 0)), 3),
-                        "kelly_fraction": round(float(r.get("kelly_fraction", 0)), 3),
-                        "reasoning": str(r.get("reasoning", ""))[:200],
-                    })
+                    results.append(
+                        {
+                            "name": name,
+                            "signal": r.get("signal", "HOLD"),
+                            "confidence": round(float(r.get("confidence", 0)), 3),
+                            "kelly_fraction": round(
+                                float(r.get("kelly_fraction", 0)), 3
+                            ),
+                            "reasoning": str(r.get("reasoning", ""))[:200],
+                        }
+                    )
                 else:
-                    results.append({"name": name, "signal": "HOLD", "confidence": 0, "kelly_fraction": 0, "reasoning": "invalid return type"})
+                    results.append(
+                        {
+                            "name": name,
+                            "signal": "HOLD",
+                            "confidence": 0,
+                            "kelly_fraction": 0,
+                            "reasoning": "invalid return type",
+                        }
+                    )
             else:
-                results.append({"name": name, "signal": "HOLD", "confidence": 0, "kelly_fraction": 0, "reasoning": "insufficient data"})
+                results.append(
+                    {
+                        "name": name,
+                        "signal": "HOLD",
+                        "confidence": 0,
+                        "kelly_fraction": 0,
+                        "reasoning": "insufficient data",
+                    }
+                )
         except Exception as e:
-            results.append({"name": name, "signal": "HOLD", "confidence": 0, "kelly_fraction": 0, "reasoning": str(e)[:100]})
+            results.append(
+                {
+                    "name": name,
+                    "signal": "HOLD",
+                    "confidence": 0,
+                    "kelly_fraction": 0,
+                    "reasoning": str(e)[:100],
+                }
+            )
 
     buys = sum(1 for r in results if r["signal"] == "BUY")
     sells = sum(1 for r in results if r["signal"] == "SELL")
     consensus = "BUY" if buys > sells else "SELL" if sells > buys else "HOLD"
 
     # Cache slow-path results so subsequent calls are instant
-    if hasattr(engine, 'last_analysis'):
+    if hasattr(engine, "last_analysis"):
         engine.last_analysis[cache_key] = {
             "agents": results,
             "consensus": consensus,
             "votes": {"BUY": buys, "SELL": sells, "HOLD": len(results) - buys - sells},
-            "avg_confidence": round(sum(r["confidence"] for r in results) / len(results) if results else 0, 3),
+            "avg_confidence": round(
+                sum(r["confidence"] for r in results) / len(results) if results else 0,
+                3,
+            ),
             "total": len(results),
             "timestamp": datetime.now(timezone.utc).isoformat(),
         }
@@ -4857,14 +5659,26 @@ def all_legendary(symbol: str = "EURUSD"):
 def agents_status(symbol: str = "EURUSD"):
     """Unified endpoint: all 17 agents (12 analysts + 5 legendary) in one call."""
     if not ADVANCED_FEATURES_AVAILABLE:
-        return {"error": "Advanced features not available", "symbol": symbol, "analysts": [], "legendary": []}
+        return {
+            "error": "Advanced features not available",
+            "symbol": symbol,
+            "analysts": [],
+            "legendary": [],
+        }
 
     # ── 12 Analysts ──
     analyst_classes = [
-        ("Market", MarketAnalyst), ("News", NewsAnalyst), ("Sentiment", SentimentAnalyst),
-        ("Technical", TechnicalAnalyst), ("Fundamentals", FundamentalsAnalyst),
-        ("Options", OptionsAnalyst), ("OrderFlow", OrderFlowAnalyst), ("Risk", RiskAnalyst),
-        ("Macro", MacroAnalyst), ("OnChain", OnChainAnalyst), ("Quant", QuantAnalyst),
+        ("Market", MarketAnalyst),
+        ("News", NewsAnalyst),
+        ("Sentiment", SentimentAnalyst),
+        ("Technical", TechnicalAnalyst),
+        ("Fundamentals", FundamentalsAnalyst),
+        ("Options", OptionsAnalyst),
+        ("OrderFlow", OrderFlowAnalyst),
+        ("Risk", RiskAnalyst),
+        ("Macro", MacroAnalyst),
+        ("OnChain", OnChainAnalyst),
+        ("Quant", QuantAnalyst),
         ("Compliance", ComplianceAnalyst),
     ]
     analyst_results = []
@@ -4872,19 +5686,45 @@ def agents_status(symbol: str = "EURUSD"):
         try:
             a = cls()
             r = a.analyze(symbol, "H1")
-            analyst_results.append({
-                "name": name, "type": "analyst",
-                "signal": getattr(r, "signal", "HOLD") if hasattr(r, "signal") else r.get("signal", "HOLD"),
-                "confidence": round(float(getattr(r, "confidence", 0) if hasattr(r, "confidence") else r.get("confidence", 0)), 3),
-                "reasoning": str(getattr(r, "reasoning", "") if hasattr(r, "reasoning") else r.get("reasoning", ""))[:200],
-            })
+            analyst_results.append(
+                {
+                    "name": name,
+                    "type": "analyst",
+                    "signal": getattr(r, "signal", "HOLD")
+                    if hasattr(r, "signal")
+                    else r.get("signal", "HOLD"),
+                    "confidence": round(
+                        float(
+                            getattr(r, "confidence", 0)
+                            if hasattr(r, "confidence")
+                            else r.get("confidence", 0)
+                        ),
+                        3,
+                    ),
+                    "reasoning": str(
+                        getattr(r, "reasoning", "")
+                        if hasattr(r, "reasoning")
+                        else r.get("reasoning", "")
+                    )[:200],
+                }
+            )
         except Exception as e:
-            analyst_results.append({"name": name, "type": "analyst", "signal": "HOLD", "confidence": 0, "reasoning": str(e)[:100]})
+            analyst_results.append(
+                {
+                    "name": name,
+                    "type": "analyst",
+                    "signal": "HOLD",
+                    "confidence": 0,
+                    "reasoning": str(e)[:100],
+                }
+            )
 
     # ── 5 Legendary Agents ──
     legendary_classes = [
-        ("Soros", SorosAgent), ("Buffett", BuffettAgent),
-        ("Druckenmiller", DruckenmillerAgent), ("TudorJones", TudorJonesAgent),
+        ("Soros", SorosAgent),
+        ("Buffett", BuffettAgent),
+        ("Druckenmiller", DruckenmillerAgent),
+        ("TudorJones", TudorJonesAgent),
         ("Lynch", LynchAgent),
     ]
     rates = mt5.copy_rates_from_pos(symbol, mt5.TIMEFRAME_H1, 0, 100)
@@ -4896,19 +5736,48 @@ def agents_status(symbol: str = "EURUSD"):
             if price_data is not None and len(price_data) >= 20:
                 r = a.analyze(price_data, symbol)
                 if isinstance(r, dict):
-                    legendary_results.append({
-                        "name": name, "type": "legendary",
-                        "signal": r.get("signal", "HOLD"),
-                        "confidence": round(float(r.get("confidence", 0)), 3),
-                        "kelly_fraction": round(float(r.get("kelly_fraction", 0)), 3),
-                        "reasoning": str(r.get("reasoning", ""))[:200],
-                    })
+                    legendary_results.append(
+                        {
+                            "name": name,
+                            "type": "legendary",
+                            "signal": r.get("signal", "HOLD"),
+                            "confidence": round(float(r.get("confidence", 0)), 3),
+                            "kelly_fraction": round(
+                                float(r.get("kelly_fraction", 0)), 3
+                            ),
+                            "reasoning": str(r.get("reasoning", ""))[:200],
+                        }
+                    )
                 else:
-                    legendary_results.append({"name": name, "type": "legendary", "signal": "HOLD", "confidence": 0, "reasoning": "invalid return"})
+                    legendary_results.append(
+                        {
+                            "name": name,
+                            "type": "legendary",
+                            "signal": "HOLD",
+                            "confidence": 0,
+                            "reasoning": "invalid return",
+                        }
+                    )
             else:
-                legendary_results.append({"name": name, "type": "legendary", "signal": "HOLD", "confidence": 0, "reasoning": "insufficient data"})
+                legendary_results.append(
+                    {
+                        "name": name,
+                        "type": "legendary",
+                        "signal": "HOLD",
+                        "confidence": 0,
+                        "reasoning": "insufficient data",
+                    }
+                )
         except Exception as e:
-            legendary_results.append({"name": name, "type": "legendary", "signal": "HOLD", "confidence": 0, "reasoning": str(e)[:100]})
+            legendary_results.append(
+                {
+                    "name": name,
+                    "type": "legendary",
+                    "signal": "HOLD",
+                    "confidence": 0,
+                    "reasoning": str(e)[:100],
+                }
+            )
 
     all_agents = analyst_results + legendary_results
     buys = sum(1 for a in all_agents if a["signal"] == "BUY")
@@ -4934,7 +5803,7 @@ def fear_greed():
         if rates is None:
             return {"index": 50, "state": "Neutral", "positioning": "RANGING"}
 
-        closes = np.array([r['close'] for r in rates])
+        closes = np.array([r["close"] for r in rates])
 
         # RSI calculation
         deltas = np.diff(closes)
@@ -4957,7 +5826,7 @@ def fear_greed():
         rsi_score = 100 - rsi  # Inverted: high RSI = greed
         adx_score = min(100, adx)
         bb_score = min(100, bb_width * 10)
-        index = (rsi_score * 0.5 + adx_score * 0.25 + bb_score * 0.25)
+        index = rsi_score * 0.5 + adx_score * 0.25 + bb_score * 0.25
         index = max(0, min(100, index))
 
         if index < 10:
@@ -4989,7 +5858,12 @@ def fear_greed():
             "bb_width": round(bb_width, 3),
         }
     except Exception as e:
-        return {"index": 50, "state": "Neutral", "positioning": "RANGING", "error": str(e)}
+        return {
+            "index": 50,
+            "state": "Neutral",
+            "positioning": "RANGING",
+            "error": str(e),
+        }
 
 
 @app.get("/api/v1/defense/status")
@@ -5029,7 +5903,12 @@ def defense_status():
             "circuit_breaker": state.get("circuit_breaker", "CLOSED"),
         }
     except Exception as e:
-        return {"level": "NORMAL", "color": "#00CC88", "action": "Full trading enabled", "error": str(e)}
+        return {
+            "level": "NORMAL",
+            "color": "#00CC88",
+            "action": "Full trading enabled",
+            "error": str(e),
+        }
 
 
 @app.get("/api/v1/memory/recent")
@@ -5048,6 +5927,7 @@ async def debate_result(symbol: str):
     """Run bull vs bear debate."""
     try:
         from apps.debate.engine import DebateEngine
+
         engine_d = DebateEngine()
         context = {}
         rates = mt5.copy_rates_from_pos(symbol, mt5.TIMEFRAME_H1, 0, 50)
@@ -5060,8 +5940,16 @@ async def debate_result(symbol: str):
             context["highs"] = highs[-20:]
             context["lows"] = lows[-20:]
             context["current_price"] = float(closes[-1])
-            context["price_change_5"] = round((closes[-1] - closes[-6]) / closes[-6] * 100, 3) if len(closes) >= 6 else 0
-            context["price_change_20"] = round((closes[-1] - closes[0]) / closes[0] * 100, 3) if len(closes) >= 20 else 0
+            context["price_change_5"] = (
+                round((closes[-1] - closes[-6]) / closes[-6] * 100, 3)
+                if len(closes) >= 6
+                else 0
+            )
+            context["price_change_20"] = (
+                round((closes[-1] - closes[0]) / closes[0] * 100, 3)
+                if len(closes) >= 20
+                else 0
+            )
             context["high_20"] = max(highs[-20:]) if len(highs) >= 20 else max(highs)
             context["low_20"] = min(lows[-20:]) if len(lows) >= 20 else min(lows)
         result = await engine_d.debate(symbol, context)
@@ -5071,12 +5959,22 @@ async def debate_result(symbol: str):
             "bear_confidence": round(result.bear_confidence, 3),
             "rounds": result.rounds,
             "arguments": [
-                {"stance": a.stance, "confidence": round(a.confidence, 3), "reasoning": a.reasoning[:200]}
+                {
+                    "stance": a.stance,
+                    "confidence": round(a.confidence, 3),
+                    "reasoning": a.reasoning[:200],
+                }
                 for a in result.arguments
             ],
         }
     except Exception as e:
-        return {"winner": "NEUTRAL", "bull_confidence": 0, "bear_confidence": 0, "rounds": 0, "error": str(e)}
+        return {
+            "winner": "NEUTRAL",
+            "bull_confidence": 0,
+            "bear_confidence": 0,
+            "rounds": 0,
+            "error": str(e),
+        }
 
 
 # ═══════════════════════════════════════════════════════════════
@@ -5085,9 +5983,20 @@ async def debate_result(symbol: str):
 
 # --- Analysts list & individual analysis ---
 ANALYST_NAMES = [
-    "Market", "News", "Sentiment", "Technical", "Fundamentals",
-    "Options", "OrderFlow", "Risk", "Macro", "OnChain", "Quant", "Compliance",
+    "Market",
+    "News",
+    "Sentiment",
+    "Technical",
+    "Fundamentals",
+    "Options",
+    "OrderFlow",
+    "Risk",
+    "Macro",
+    "OnChain",
+    "Quant",
+    "Compliance",
 ]
+
 
 @app.get("/api/v1/analysts/")
 def list_analysts():
@@ -5098,7 +6007,10 @@ def list_analysts():
 def get_analyst(name: str):
     for n in ANALYST_NAMES:
         if n.lower() == name.lower():
-            return {"name": n, "capabilities": [f"Analyze {sym}" for sym in WATCHLIST[:5]]}
+            return {
+                "name": n,
+                "capabilities": [f"Analyze {sym}" for sym in WATCHLIST[:5]],
+            }
     raise HTTPException(status_code=404, detail=f"Analyst {name} not found")
 
 
@@ -5127,10 +6039,12 @@ def run_analyst(name: str, symbol: str = "EURUSD", timeframe: str = "H1"):
     try:
         mod_path, cls_name = analyst_map[key]
         import importlib
+
         mod = importlib.import_module(mod_path)
         cls = getattr(mod, cls_name)
         a = cls()
         import asyncio
+
         loop = asyncio.new_event_loop()
         r = loop.run_until_complete(a.analyze(symbol, timeframe))
         loop.close()
@@ -5168,10 +6082,12 @@ def get_consensus(symbol: str, timeframe: str = "H1"):
             "action": sig.direction.value,
             "confidence": round(sig.confidence, 3),
             "score": sig.score,
-            "votes": {"buy": 1 if sig.direction.value == "BUY" else 0,
-                       "sell": 1 if sig.direction.value == "SELL" else 0,
-                       "hold": 1 if sig.direction.value == "HOLD" else 0},
-            "mtf_agreement": getattr(sig, 'mtf_agreement', False),
+            "votes": {
+                "buy": 1 if sig.direction.value == "BUY" else 0,
+                "sell": 1 if sig.direction.value == "SELL" else 0,
+                "hold": 1 if sig.direction.value == "HOLD" else 0,
+            },
+            "mtf_agreement": getattr(sig, "mtf_agreement", False),
         }
     # Fallback: generate on-the-fly
     try:
@@ -5185,16 +6101,24 @@ def get_consensus(symbol: str, timeframe: str = "H1"):
                 "action": action,
                 "confidence": round(conf, 3),
                 "score": details.get("score", 0),
-                "votes": {"buy": 1 if action == "BUY" else 0,
-                           "sell": 1 if action == "SELL" else 0,
-                           "hold": 1 if action == "HOLD" else 0},
+                "votes": {
+                    "buy": 1 if action == "BUY" else 0,
+                    "sell": 1 if action == "SELL" else 0,
+                    "hold": 1 if action == "HOLD" else 0,
+                },
                 "mtf_agreement": False,
             }
     except Exception:
         pass
-    return {"symbol": symbol, "timeframe": timeframe, "action": "HOLD",
-            "confidence": 0, "score": 0,
-            "votes": {"buy": 0, "sell": 0, "hold": 1}, "mtf_agreement": False}
+    return {
+        "symbol": symbol,
+        "timeframe": timeframe,
+        "action": "HOLD",
+        "confidence": 0,
+        "score": 0,
+        "votes": {"buy": 0, "sell": 0, "hold": 1},
+        "mtf_agreement": False,
+    }
 
 
 @app.get("/api/v1/consensus/{symbol}/full")
@@ -5203,13 +6127,22 @@ def get_full_consensus(symbol: str, timeframe: str = "H1"):
     basic = get_consensus(symbol, timeframe)
     debate_data = None
     memory_data = []
-    gate_status = {"ml_gate": True, "sentiment_gate": True, "regime_gate": True, "calendar_gate": True}
+    gate_status = {
+        "ml_gate": True,
+        "sentiment_gate": True,
+        "regime_gate": True,
+        "calendar_gate": True,
+    }
     try:
         rates = mt5.copy_rates_from_pos(symbol, mt5.TIMEFRAME_H1, 0, 50)
         if rates is not None:
             df = pd.DataFrame(rates)
             closes = df["close"].tolist()
-            gate_status["volume_gate"] = float(df["tick_volume"].iloc[-1]) > 0 if "tick_volume" in df.columns else True
+            gate_status["volume_gate"] = (
+                float(df["tick_volume"].iloc[-1]) > 0
+                if "tick_volume" in df.columns
+                else True
+            )
     except Exception:
         pass
     return {
@@ -5224,7 +6157,12 @@ def get_full_consensus(symbol: str, timeframe: str = "H1"):
 def get_debate(symbol: str):
     """Bull vs Bear debate for a symbol."""
     # Reuse existing debate endpoint
-    return {"winner": "NEUTRAL", "bull_confidence": 0.5, "bear_confidence": 0.5, "rounds": 0}
+    return {
+        "winner": "NEUTRAL",
+        "bull_confidence": 0.5,
+        "bear_confidence": 0.5,
+        "rounds": 0,
+    }
 
 
 @app.get("/api/v1/consensus/{symbol}/memory")
@@ -5232,6 +6170,7 @@ def get_memory(symbol: str, timeframe: str = "H1"):
     """Memory recall for a symbol."""
     try:
         from apps.memory.situation_memory import FinancialSituationMemory
+
         mem = FinancialSituationMemory()
         situations = mem.retrieve(f"{symbol} trading situation", top_k=3)
         return {"symbol": symbol, "similar_situations": situations}
@@ -5243,7 +6182,12 @@ def get_memory(symbol: str, timeframe: str = "H1"):
 @app.get("/api/v1/scanner/{symbol}")
 def scan_symbol(symbol: str):
     """Multi-timeframe scan for a symbol."""
-    timeframes = {"M15": mt5.TIMEFRAME_M15, "H1": mt5.TIMEFRAME_H1, "H4": mt5.TIMEFRAME_H4, "D1": mt5.TIMEFRAME_D1}
+    timeframes = {
+        "M15": mt5.TIMEFRAME_M15,
+        "H1": mt5.TIMEFRAME_H1,
+        "H4": mt5.TIMEFRAME_H4,
+        "D1": mt5.TIMEFRAME_D1,
+    }
     tf_results = {}
     for tf_name, tf_const in timeframes.items():
         try:
@@ -5252,7 +6196,8 @@ def scan_symbol(symbol: str):
                 df = pd.DataFrame(rates)
                 action, conf, details = generate_signal(df.iloc[-1])
                 tf_results[tf_name] = {
-                    "signal": action, "confidence": round(conf, 3),
+                    "signal": action,
+                    "confidence": round(conf, 3),
                     "score": details.get("score", 0),
                 }
             else:
@@ -5267,41 +6212,96 @@ def scan_symbol(symbol: str):
 def legendary_seykota(symbol: str):
     try:
         from apps.legendary.seykota import SeykotaTrendModule
+
         rates = mt5.copy_rates_from_pos(symbol, mt5.TIMEFRAME_H1, 0, 200)
         df = pd.DataFrame(rates) if rates is not None else None
         if df is None or len(df) < 50:
-            return {"symbol": symbol, "result": {"signal": "HOLD", "confidence": 0, "reasoning": "Insufficient data"}}
+            return {
+                "symbol": symbol,
+                "result": {
+                    "signal": "HOLD",
+                    "confidence": 0,
+                    "reasoning": "Insufficient data",
+                },
+            }
         a = SeykotaTrendModule()
         # SeykotaTrendModule uses analyze_trend(data) — no symbol param
         r = a.analyze_trend(df)
         # Returns dict
         if isinstance(r, dict):
-            return {"symbol": symbol, "result": {"signal": r.get("signal", "HOLD"), "confidence": round(float(r.get("confidence", 0)), 3),
-                    "reasoning": str(r.get("reasoning", ""))[:300]}}
-        return {"symbol": symbol, "result": {"signal": "HOLD", "confidence": 0, "reasoning": "Invalid return"}}
+            return {
+                "symbol": symbol,
+                "result": {
+                    "signal": r.get("signal", "HOLD"),
+                    "confidence": round(float(r.get("confidence", 0)), 3),
+                    "reasoning": str(r.get("reasoning", ""))[:300],
+                },
+            }
+        return {
+            "symbol": symbol,
+            "result": {
+                "signal": "HOLD",
+                "confidence": 0,
+                "reasoning": "Invalid return",
+            },
+        }
     except Exception as e:
-        return {"symbol": symbol, "result": {"signal": "HOLD", "confidence": 0, "reasoning": str(e)[:200]}}
+        return {
+            "symbol": symbol,
+            "result": {"signal": "HOLD", "confidence": 0, "reasoning": str(e)[:200]},
+        }
 
 
 @app.get("/api/v1/legendary/turtle-soup/{symbol}")
 def legendary_turtle_soup(symbol: str):
     try:
         from apps.legendary.turtle_soup import TurtleSoupModule
+
         rates = mt5.copy_rates_from_pos(symbol, mt5.TIMEFRAME_H1, 0, 100)
         df = pd.DataFrame(rates) if rates is not None else None
         if df is None or len(df) < 21:
-            return {"symbol": symbol, "result": {"signal": "HOLD", "confidence": 0, "reasoning": "Insufficient data"}}
+            return {
+                "symbol": symbol,
+                "result": {
+                    "signal": "HOLD",
+                    "confidence": 0,
+                    "reasoning": "Insufficient data",
+                },
+            }
         s = TurtleSoupModule()
         # TurtleSoupModule uses detect_false_breakout(data) — no symbol param
         r = s.detect_false_breakout(df)
         if r is None:
-            return {"symbol": symbol, "result": {"signal": "HOLD", "confidence": 0, "reasoning": "No false breakout detected"}}
+            return {
+                "symbol": symbol,
+                "result": {
+                    "signal": "HOLD",
+                    "confidence": 0,
+                    "reasoning": "No false breakout detected",
+                },
+            }
         if isinstance(r, dict):
-            return {"symbol": symbol, "result": {"signal": r.get("signal", "HOLD"), "confidence": round(float(r.get("confidence", 0)), 3),
-                    "reasoning": str(r.get("reasoning", ""))[:300]}}
-        return {"symbol": symbol, "result": {"signal": "HOLD", "confidence": 0, "reasoning": "Invalid return"}}
+            return {
+                "symbol": symbol,
+                "result": {
+                    "signal": r.get("signal", "HOLD"),
+                    "confidence": round(float(r.get("confidence", 0)), 3),
+                    "reasoning": str(r.get("reasoning", ""))[:300],
+                },
+            }
+        return {
+            "symbol": symbol,
+            "result": {
+                "signal": "HOLD",
+                "confidence": 0,
+                "reasoning": "Invalid return",
+            },
+        }
     except Exception as e:
-        return {"symbol": symbol, "result": {"signal": "HOLD", "confidence": 0, "reasoning": str(e)[:200]}}
+        return {
+            "symbol": symbol,
+            "result": {"signal": "HOLD", "confidence": 0, "reasoning": str(e)[:200]},
+        }
 
 
 @app.get("/api/v1/legendary/pyramiding/{symbol}")
@@ -5309,10 +6309,18 @@ def legendary_pyramiding(symbol: str):
     try:
         from apps.legendary.pyramiding import PyramidingLogic
         from apps.legendary.seykota import SeykotaTrendModule
+
         rates = mt5.copy_rates_from_pos(symbol, mt5.TIMEFRAME_H1, 0, 200)
         df = pd.DataFrame(rates) if rates is not None else None
         if df is None or len(df) < 50:
-            return {"symbol": symbol, "result": {"signal": "HOLD", "confidence": 0, "reasoning": "Insufficient data"}}
+            return {
+                "symbol": symbol,
+                "result": {
+                    "signal": "HOLD",
+                    "confidence": 0,
+                    "reasoning": "Insufficient data",
+                },
+            }
         # PyramidingLogic needs a position dict + market data
         # For API: return current pyramiding assessment
         s = PyramidingLogic()
@@ -5321,18 +6329,35 @@ def legendary_pyramiding(symbol: str):
         if positions:
             pos = positions[0]
             position_dict = {
-                "profit_pips": (pos.price_current - pos.price_open) / (0.0001 if "JPY" not in symbol else 0.01),
+                "profit_pips": (pos.price_current - pos.price_open)
+                / (0.0001 if "JPY" not in symbol else 0.01),
                 "lot_size": pos.volume,
                 "action": "BUY" if pos.type == 0 else "SELL",
                 "entry_count": 1,
             }
             r = s.should_add_position(position_dict, df)
             if r and isinstance(r, dict):
-                return {"symbol": symbol, "result": {"signal": r.get("signal", "HOLD"), "confidence": round(float(r.get("confidence", 0)), 3),
-                        "reasoning": str(r.get("reasoning", ""))[:300]}}
-        return {"symbol": symbol, "result": {"signal": "HOLD", "confidence": 0, "reasoning": "No open position to pyramid"}}
+                return {
+                    "symbol": symbol,
+                    "result": {
+                        "signal": r.get("signal", "HOLD"),
+                        "confidence": round(float(r.get("confidence", 0)), 3),
+                        "reasoning": str(r.get("reasoning", ""))[:300],
+                    },
+                }
+        return {
+            "symbol": symbol,
+            "result": {
+                "signal": "HOLD",
+                "confidence": 0,
+                "reasoning": "No open position to pyramid",
+            },
+        }
     except Exception as e:
-        return {"symbol": symbol, "result": {"signal": "HOLD", "confidence": 0, "reasoning": str(e)[:200]}}
+        return {
+            "symbol": symbol,
+            "result": {"signal": "HOLD", "confidence": 0, "reasoning": str(e)[:200]},
+        }
 
 
 # --- Market endpoints ---
@@ -5344,30 +6369,56 @@ def market_price(symbol: str):
         raise HTTPException(status_code=404, detail=f"Symbol {symbol} not found")
     return {
         "symbol": symbol,
-        "data": {"price": tick.bid, "bid": tick.bid, "ask": tick.ask,
-                 "spread": round((tick.ask - tick.bid) * (10000 if "JPY" not in symbol else 100), 1),
-                 "time": int(tick.time)},
+        "data": {
+            "price": tick.bid,
+            "bid": tick.bid,
+            "ask": tick.ask,
+            "spread": round(
+                (tick.ask - tick.bid) * (10000 if "JPY" not in symbol else 100), 1
+            ),
+            "time": int(tick.time),
+        },
     }
 
 
 @app.get("/api/v1/market/{symbol}/analysis")
 def market_analysis(symbol: str, timeframe: str = "H1"):
     """Get analysis for a symbol."""
-    tf_map = {"M1": mt5.TIMEFRAME_M1, "M5": mt5.TIMEFRAME_M5, "15M": mt5.TIMEFRAME_M15, "15m": mt5.TIMEFRAME_M15,
-              "1H": mt5.TIMEFRAME_H1, "H1": mt5.TIMEFRAME_H1, "4H": mt5.TIMEFRAME_H4, "H4": mt5.TIMEFRAME_H4,
-              "1D": mt5.TIMEFRAME_D1, "D1": mt5.TIMEFRAME_D1}
+    tf_map = {
+        "M1": mt5.TIMEFRAME_M1,
+        "M5": mt5.TIMEFRAME_M5,
+        "15M": mt5.TIMEFRAME_M15,
+        "15m": mt5.TIMEFRAME_M15,
+        "1H": mt5.TIMEFRAME_H1,
+        "H1": mt5.TIMEFRAME_H1,
+        "4H": mt5.TIMEFRAME_H4,
+        "H4": mt5.TIMEFRAME_H4,
+        "1D": mt5.TIMEFRAME_D1,
+        "D1": mt5.TIMEFRAME_D1,
+    }
     tf = tf_map.get(timeframe, mt5.TIMEFRAME_H1)
     rates = mt5.copy_rates_from_pos(symbol, tf, 0, 100)
     if rates is None or len(rates) == 0:
-        return {"symbol": symbol, "timeframe": timeframe, "indicators": {}, "action": "HOLD", "confidence": 0}
+        return {
+            "symbol": symbol,
+            "timeframe": timeframe,
+            "indicators": {},
+            "action": "HOLD",
+            "confidence": 0,
+        }
     df = pd.DataFrame(rates)
     indicators = compute_indicators(df)
     action, conf, details = generate_signal(df.iloc[-1])
     return {
-        "symbol": symbol, "timeframe": timeframe,
-        "indicators": {k: (float(v) if isinstance(v, (np.floating, np.integer)) else v)
-                       for k, v in details.items() if k != "reasons"},
-        "action": action, "confidence": round(conf, 3),
+        "symbol": symbol,
+        "timeframe": timeframe,
+        "indicators": {
+            k: (float(v) if isinstance(v, (np.floating, np.integer)) else v)
+            for k, v in details.items()
+            if k != "reasons"
+        },
+        "action": action,
+        "confidence": round(conf, 3),
         "reasons": details.get("reasons", []),
     }
 
@@ -5378,6 +6429,7 @@ def list_trades():
     """List recent trades from MT5 history."""
     try:
         from datetime import timedelta
+
         now = datetime.now(timezone.utc)
         start = now - timedelta(days=30)
         deals = mt5.history_deals_get(start, now)
@@ -5385,16 +6437,22 @@ def list_trades():
             return {"trades": [], "count": 0}
         trades = []
         for d in deals:
-            trades.append({
-                "id": str(d.ticket),
-                "symbol": d.symbol,
-                "action": "BUY" if d.type == 0 else "SELL" if d.type == 1 else str(d.type),
-                "lots": d.volume,
-                "entry_price": d.price,
-                "status": "executed" if d.entry == 0 else "closed",
-                "profit": d.profit,
-                "time": str(d.time),
-            })
+            trades.append(
+                {
+                    "id": str(d.ticket),
+                    "symbol": d.symbol,
+                    "action": "BUY"
+                    if d.type == 0
+                    else "SELL"
+                    if d.type == 1
+                    else str(d.type),
+                    "lots": d.volume,
+                    "entry_price": d.price,
+                    "status": "executed" if d.entry == 0 else "closed",
+                    "profit": d.profit,
+                    "time": str(d.time),
+                }
+            )
         return {"trades": trades[:50], "count": len(trades)}
     except Exception as e:
         return {"trades": [], "count": 0, "error": str(e)}
@@ -5417,7 +6475,14 @@ def paper_trades_list():
 
 @app.get("/api/v1/paper-trades/stats")
 def paper_trades_stats():
-    return {"total_trades": 0, "buys": 0, "sells": 0, "holds": 0, "symbols": {}, "last_trade": None}
+    return {
+        "total_trades": 0,
+        "buys": 0,
+        "sells": 0,
+        "holds": 0,
+        "symbols": {},
+        "last_trade": None,
+    }
 
 
 # --- Positions endpoint (with trailing slash) ---
@@ -5432,7 +6497,10 @@ def positions_list():
 def live_setup():
     """Check MT5 setup status."""
     import os as _os
-    mt5_path = _os.environ.get("MT5_PATH", r"C:\Program Files\MetaTrader 5 EXNESS\terminal64.exe")
+
+    mt5_path = _os.environ.get(
+        "MT5_PATH", r"C:\Program Files\MetaTrader 5 EXNESS\terminal64.exe"
+    )
     installed = _os.path.exists(mt5_path)
     has_creds = bool(MT5_LOGIN and MT5_PASSWORD and MT5_SERVER)
     return {
@@ -5442,7 +6510,9 @@ def live_setup():
         "path": mt5_path,
         "has_credentials": has_creds,
         "needs_setup": not installed or not has_creds,
-        "setup_message": "Ready" if installed and has_creds else "Configure MT5 path and credentials in .env",
+        "setup_message": "Ready"
+        if installed and has_creds
+        else "Configure MT5 path and credentials in .env",
     }
 
 
@@ -5461,15 +6531,34 @@ def live_status():
         try:
             info = mt5.account_info()
             if info:
-                acct = {"login": info.login, "server": info.server, "name": info.name,
-                        "balance": info.balance, "equity": info.equity, "margin": info.margin,
-                        "margin_free": info.margin_free, "leverage": info.leverage,
-                        "currency": info.currency, "profit": info.profit}
+                acct = {
+                    "login": info.login,
+                    "server": info.server,
+                    "name": info.name,
+                    "balance": info.balance,
+                    "equity": info.equity,
+                    "margin": info.margin,
+                    "margin_free": info.margin_free,
+                    "leverage": info.leverage,
+                    "currency": info.currency,
+                    "profit": info.profit,
+                }
             pos = mt5.positions_get()
             if pos:
-                positions = [{"ticket": p.ticket, "symbol": p.symbol, "type": "BUY" if p.type == 0 else "SELL",
-                              "volume": p.volume, "price_open": p.price_open, "price_current": p.price_current,
-                              "profit": p.profit, "sl": p.sl, "tp": p.tp} for p in pos]
+                positions = [
+                    {
+                        "ticket": p.ticket,
+                        "symbol": p.symbol,
+                        "type": "BUY" if p.type == 0 else "SELL",
+                        "volume": p.volume,
+                        "price_open": p.price_open,
+                        "price_current": p.price_current,
+                        "profit": p.profit,
+                        "sl": p.sl,
+                        "tp": p.tp,
+                    }
+                    for p in pos
+                ]
         except Exception:
             pass
     return {
@@ -5477,16 +6566,29 @@ def live_status():
         "control": "RUNNING" if engine.running else "STOPPED",
         "state": {
             "balance": acct.get("balance", 0),
-            "consecutive_losses": getattr(engine.risk, 'consecutive_losses', 0) if hasattr(engine.risk, 'consecutive_losses') else 0,
+            "consecutive_losses": getattr(engine.risk, "consecutive_losses", 0)
+            if hasattr(engine.risk, "consecutive_losses")
+            else 0,
             "week_number": 1,
             "total_trades": engine.cycle_count,
-            "wins": 0, "losses": 0, "total_pnl": acct.get("profit", 0),
+            "wins": 0,
+            "losses": 0,
+            "total_pnl": acct.get("profit", 0),
             "active_improvements": {},
             "positions": {p["symbol"]: p for p in positions},
         },
-        "mt5": {"installed": True, "running": engine.mt5.connected, "connected": engine.mt5.connected},
-        "account": {**acct, "account_type": "Demo", "positions_count": len(positions),
-                    "positions": positions, "recent_deals": []},
+        "mt5": {
+            "installed": True,
+            "running": engine.mt5.connected,
+            "connected": engine.mt5.connected,
+        },
+        "account": {
+            **acct,
+            "account_type": "Demo",
+            "positions_count": len(positions),
+            "positions": positions,
+            "recent_deals": [],
+        },
         "engine_pid": None,
     }
 
@@ -5518,15 +6620,37 @@ def live_stop():
 @app.get("/api/v1/live/improvements")
 def live_improvements():
     """List available improvements."""
-    return {"improvements": [
-        {"name": "Correlation Filter", "key": "correlation_filter", "enabled": True},
-        {"name": "Dynamic Risk", "key": "dynamic_risk", "enabled": True},
-        {"name": "Spread Filter", "key": "spread_filter", "enabled": True},
-        {"name": "Risk Parity", "key": "risk_parity", "enabled": CONFIG.get("risk_parity_enabled", False)},
-        {"name": "ML Prediction", "key": "ml_prediction", "enabled": CONFIG.get("ml_enabled", False)},
-        {"name": "LLM Analysis", "key": "llm_analysis", "enabled": CONFIG.get("llm_enabled", False)},
-        {"name": "Regime Detection", "key": "regime_detection", "enabled": CONFIG.get("regime_enabled", False)},
-    ]}
+    return {
+        "improvements": [
+            {
+                "name": "Correlation Filter",
+                "key": "correlation_filter",
+                "enabled": True,
+            },
+            {"name": "Dynamic Risk", "key": "dynamic_risk", "enabled": True},
+            {"name": "Spread Filter", "key": "spread_filter", "enabled": True},
+            {
+                "name": "Risk Parity",
+                "key": "risk_parity",
+                "enabled": CONFIG.get("risk_parity_enabled", False),
+            },
+            {
+                "name": "ML Prediction",
+                "key": "ml_prediction",
+                "enabled": CONFIG.get("ml_enabled", False),
+            },
+            {
+                "name": "LLM Analysis",
+                "key": "llm_analysis",
+                "enabled": CONFIG.get("llm_enabled", False),
+            },
+            {
+                "name": "Regime Detection",
+                "key": "regime_detection",
+                "enabled": CONFIG.get("regime_enabled", False),
+            },
+        ]
+    }
 
 
 @app.get("/api/v1/live/positions")
@@ -5537,9 +6661,21 @@ def live_positions():
         try:
             pos = mt5.positions_get()
             if pos:
-                positions = [{"ticket": p.ticket, "symbol": p.symbol, "type": "BUY" if p.type == 0 else "SELL",
-                              "volume": p.volume, "price_open": p.price_open, "price_current": p.price_current,
-                              "profit": p.profit, "sl": p.sl, "tp": p.tp, "time": str(p.time)} for p in pos]
+                positions = [
+                    {
+                        "ticket": p.ticket,
+                        "symbol": p.symbol,
+                        "type": "BUY" if p.type == 0 else "SELL",
+                        "volume": p.volume,
+                        "price_open": p.price_open,
+                        "price_current": p.price_current,
+                        "profit": p.profit,
+                        "sl": p.sl,
+                        "tp": p.tp,
+                        "time": str(p.time),
+                    }
+                    for p in pos
+                ]
         except Exception:
             pass
     return {"positions": positions, "count": len(positions)}
@@ -5565,14 +6701,16 @@ if __name__ == "__main__":
     print(f"  Risk per trade: V3 per-symbol (2-3%)")
     print(f"  SL/TP: V3 per-symbol optimized configs")
     for sym, sc in CONFIG.get("v3_symbol_configs", {}).items():
-        print(f"    {sym}: SL={sc['sl']}x TP={sc['tp']}x Trail={sc['trail']}x Risk={sc['risk']*100:.0f}%")
+        print(
+            f"    {sym}: SL={sc['sl']}x TP={sc['tp']}x Trail={sc['trail']}x Risk={sc['risk'] * 100:.0f}%"
+        )
     print(f"  LLM: {'Enabled' if CONFIG['llm_enabled'] else 'Disabled'}")
     print(f"  ML: {'Enabled' if CONFIG['ml_enabled'] else 'Disabled'}")
     print(f"  Sessions: London/NY (07:00-21:00 UTC) + Asian (00:00-07:00 UTC)")
     asian_syms = CONFIG.get("asian_session_symbols", set())
     print(f"  Asian pairs: {', '.join(sorted(asian_syms))}")
-    print(f"  API Server: http://localhost:8888")
+    print(f"  API Server: http://localhost:5000")
     print("=" * 70)
     print("\n  Starting FastAPI server with embedded trading engine...\n")
 
-    uvicorn.run(app, host="0.0.0.0", port=8888, log_level="info")
+    uvicorn.run(app, host="0.0.0.0", port=5000, log_level="info")

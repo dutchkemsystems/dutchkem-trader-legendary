@@ -26,6 +26,7 @@ import { API_BASE_URL } from "./constants";
 const api = axios.create({
   baseURL: API_BASE_URL,
   headers: { "Content-Type": "application/json" },
+  timeout: 10000,
 });
 
 api.interceptors.request.use((config) => {
@@ -217,6 +218,80 @@ export async function getPaperTradesStats(): Promise<{
 
 export async function getScalperStatus(): Promise<ScalperStatus> {
   const res = await api.get<ScalperStatus>("/scalper/status");
+  return res.data;
+}
+
+// ---------------------------------------------------------------------------
+// Scalping Strategies API
+// ---------------------------------------------------------------------------
+
+export async function getScalpingStatus(): Promise<{
+  strategies: Array<{
+    name: string;
+    enabled: boolean;
+    trades: number;
+    winRate: number;
+    pnl: number;
+    status: string;
+  }>;
+  active_trades: Array<{
+    ticket: number;
+    symbol: string;
+    direction: string;
+    strategy: string;
+    entry: number;
+    pnl: number;
+    status: string;
+  }>;
+  total_pnl: number;
+  engine_toggles?: { main_engine: boolean; mtf_scalper: boolean };
+}> {
+  const res = await api.get("/scalping/status");
+  return res.data;
+}
+
+export async function toggleScalpingStrategy(
+  name: string,
+  enabled: boolean
+): Promise<{ success: boolean }> {
+  const res = await api.post(`/scalping/toggle/${name}`, { enabled });
+  return res.data;
+}
+
+export async function toggleScalpingEngine(
+  toggleName: string,
+  enabled: boolean
+): Promise<{ success: boolean }> {
+  const res = await api.post(`/scalping/engine-toggle/${toggleName}`, { enabled });
+  return res.data;
+}
+
+export async function getGoldHedgeStatus(): Promise<{
+  active: boolean;
+  symbol: string;
+  levels: number;
+  max_levels?: number;
+  total_lots: number;
+  directions?: string[];
+  peak_profit?: number;
+  is_frozen?: boolean;
+  created_at?: string;
+  enabled?: boolean;
+  pnl?: number;
+  config?: {
+    basket_tp_usd: number;
+    freeze_loss_usd: number;
+    trailing_tp_enabled: boolean;
+  };
+}> {
+  const res = await api.get("/scalping/gold-hedge");
+  return res.data;
+}
+
+export async function toggleGoldHedge(
+  enabled: boolean
+): Promise<{ success: boolean }> {
+  const res = await api.post("/scalping/toggle/gold_hedge_ea", { enabled });
   return res.data;
 }
 

@@ -20,6 +20,7 @@ export function useTrades() {
       setCount(result.count);
       setError(null);
     } catch (err) {
+      // Silently handle timeout errors — don't block dashboard
       setError(err instanceof Error ? err.message : "Failed to fetch trades");
     } finally {
       setLoading(false);
@@ -27,9 +28,13 @@ export function useTrades() {
   }, []);
 
   useEffect(() => {
-    fetchTrades();
-    intervalRef.current = setInterval(fetchTrades, POLL_INTERVAL);
+    const delay = Math.random() * 2000;
+    const timer = setTimeout(() => {
+      fetchTrades();
+      intervalRef.current = setInterval(fetchTrades, POLL_INTERVAL);
+    }, delay);
     return () => {
+      clearTimeout(timer);
       if (intervalRef.current) clearInterval(intervalRef.current);
     };
   }, [fetchTrades]);

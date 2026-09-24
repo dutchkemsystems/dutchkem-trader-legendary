@@ -3,6 +3,7 @@ Fundamentals Analyst — Uses yfinance for currency-related fundamentals.
 Fetches central bank rates, bond yields, and economic indicators.
 No API key required.
 """
+import asyncio
 import logging
 from datetime import datetime, timezone
 from .base import BaseAnalyst, AnalystResult
@@ -46,7 +47,7 @@ class FundamentalsAnalyst(BaseAnalyst):
                     f"inflation differentials, central bank policy outlook. "
                     f"Provide signal (BUY/SELL/HOLD) with confidence and reasoning."
                 )
-                response = self.llm_client.analyze(prompt)
+                response = await asyncio.to_thread(self.llm_client.analyze, prompt)
                 parsed = parse_llm_response(response.text, response.confidence)
                 return AnalystResult(
                     analyst_name="fundamentals",

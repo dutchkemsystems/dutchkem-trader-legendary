@@ -51,6 +51,7 @@ class MT5Connector(BaseBroker):
         self._sim_margin: Decimal = Decimal("0.00")
         self._sim_free_margin: Decimal = SIMULATED_BALANCE
         self._sim_positions: Dict[int, BrokerPosition] = {}
+        self._sim_pending: Dict[int, Dict] = {}  # Pending orders for sim mode
         self._next_ticket: int = 1
 
     # ------------------------------------------------------------------
@@ -227,6 +228,30 @@ class MT5Connector(BaseBroker):
         ticket = self._next_ticket
         self._next_ticket += 1
 
+        # Pending orders go to _sim_pending, not _sim_positions
+        if order.order_type in (OrderType.LIMIT, OrderType.STOP, OrderType.STOP_LIMIT):
+            self._sim_pending[ticket] = {
+                'symbol': order.symbol,
+                'type': f'{order.side.value}_{order.order_type.value}',
+                'volume': float(order.quantity),
+                'price': float(fill_price),
+                'sl': float(order.stop_loss) if order.stop_loss else None,
+                'tp': float(order.take_profit) if order.take_profit else None,
+                'magic': order.magic_number,
+                'comment': order.comment,
+            }
+            return BrokerFill(
+                order_id=str(uuid.uuid4()),
+                symbol=order.symbol,
+                side=order.side,
+                quantity=order.quantity,
+                price=fill_price,
+                commission=Decimal("0.00"),
+                slippage=slippage,
+                timestamp=datetime.now(timezone.utc),
+                broker_order_id=str(ticket),
+            )
+
         position = BrokerPosition(
             ticket=ticket,
             symbol=order.symbol,
@@ -394,6 +419,101 @@ class MT5Connector(BaseBroker):
             timestamp=datetime.now(timezone.utc),
             broker_order_id=str(ticket),
         )
+
+    # ------------------------------------------------------------------
+    # Pending order management (for Gold Hedge EA)
+    # ------------------------------------------------------------------
+
+    def cancel_pending_order(self, ticket: int) -> bool:
+        """Cancel a pending order by ticket."""
+        if MT5_AVAILABLE and self._connected:
+            req = {
+                "action": mt5.TRADE_ACTION_REMOVE,
+                "order": ticket,
+            }
+            result = mt5.order_send(req)
+            if result is None:
+                return False
+            return result.retcode == mt5.TRADE_RETCODE_DONE
+
+        # Sim mode: just remove from pending dict
+        if ticket in self._sim_pending:
+            del self._sim_pending[ticket]
+            return True
+        return False
+
+    def modify_pending_order(
+        self,
+        ticket: int,
+        price: Optional[Decimal] = None,
+        stop_loss: Optional[Decimal] = None,
+        take_profit: Optional[Decimal] = None,
+    ) -> bool:
+        """Modify price, SL, or TP of a pending order."""
+        if MT5_AVAILABLE and self._connected:
+            req = {
+                "action": mt5.TRADE_ACTION_SLTP,
+                "order": ticket,
+            }
+            if price is not None:
+                req["price"] = float(price)
+            if stop_loss is not None:
+                req["sl"] = float(stop_loss)
+            if take_profit is not None:
+                req["tp"] = float(take_profit)
+            result = mt5.order_send(req)
+            if result is None:
+                return False
+            return result.retcode == mt5.TRADE_RETCODE_DONE
+
+        # Sim mode
+        order = self._sim_pending.get(ticket)
+        if order is None:
+            return False
+        if price is not None:
+            order['price'] = price
+        if stop_loss is not None:
+            order['sl'] = stop_loss
+        if take_profit is not None:
+            order['tp'] = take_profit
+        return True
+
+    def get_pending_orders(self, symbol: str = None, magic: int = None) -> List[Dict]:
+        """Get all pending orders, optionally filtered by symbol/magic."""
+        if MT5_AVAILABLE and self._connected:
+            orders = mt5.orders_get()
+            if orders is None:
+                return []
+            result = []
+            for o in orders:
+                if symbol and o.symbol != symbol:
+                    continue
+                if magic and o.magic != magic:
+                    continue
+                result.append({
+                    'ticket': o.ticket,
+                    'symbol': o.symbol,
+                    'type': o.type,
+                    'volume': o.volume_current,
+                    'price': o.price_open,
+                    'sl': o.sl,
+                    'tp': o.tp,
+                    'magic': o.magic,
+                    'comment': o.comment,
+                    'time_setup': o.time_setup,
+                })
+            return result
+
+        # Sim mode: return from pending dict
+        result = []
+        for ticket, order in self._sim_pending.items():
+            if symbol and order.get('symbol') != symbol:
+                continue
+            if magic and order.get('magic') != magic:
+                continue
+            order['ticket'] = ticket
+            result.append(order)
+        return result
 
     # ------------------------------------------------------------------
     # Queries

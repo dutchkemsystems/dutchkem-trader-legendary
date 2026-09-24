@@ -4,6 +4,7 @@ Defense Status API — Defense level and circuit breaker state exposure.
 import sys
 sys.stdout.reconfigure(encoding="utf-8", errors="replace")
 
+import asyncio
 import json
 from datetime import datetime, timezone, date
 from pathlib import Path
@@ -186,39 +187,41 @@ def _determine_defense_level(defense: dict) -> tuple[str, str]:
 # ---------------------------------------------------------------------------
 
 @router.get("/status")
-def get_defense_status():
+async def get_defense_status():
     """Return defense status and circuit breaker state."""
-    defense = _update_defense_from_trades()
-    status, reason = _determine_defense_level(defense)
+    def _work():
+        defense = _update_defense_from_trades()
+        status, reason = _determine_defense_level(defense)
 
-    # Map circuit breaker: use file state if available, else infer from status
-    circuit_state = "CLOSED"
-    cb_file = TRADING_DIR / "trading_control.json"
-    if cb_file.exists():
-        try:
-            with open(cb_file, "r") as f:
-                cb_data = json.load(f)
-            control_status = cb_data.get("status", "running")
-            if control_status == "stopped":
-                circuit_state = "OPEN"
-        except Exception:
-            pass
+        # Map circuit breaker: use file state if available, else infer from status
+        circuit_state = "CLOSED"
+        cb_file = TRADING_DIR / "trading_control.json"
+        if cb_file.exists():
+            try:
+                with open(cb_file, "r") as f:
+                    cb_data = json.load(f)
+                control_status = cb_data.get("status", "running")
+                if control_status == "stopped":
+                    circuit_state = "OPEN"
+            except Exception:
+                pass
 
-    # If defense is EMERGENCY, force circuit to OPEN
-    if status == "EMERGENCY":
-        circuit_state = "OPEN"
-    elif status == "DEFENSE":
-        circuit_state = "HALF_OPEN" if circuit_state == "CLOSED" else circuit_state
-    elif status == "CAUTION":
-        circuit_state = "HALF_OPEN" if circuit_state == "CLOSED" else circuit_state
+        # If defense is EMERGENCY, force circuit to OPEN
+        if status == "EMERGENCY":
+            circuit_state = "OPEN"
+        elif status == "DEFENSE":
+            circuit_state = "HALF_OPEN" if circuit_state == "CLOSED" else circuit_state
+        elif status == "CAUTION":
+            circuit_state = "HALF_OPEN" if circuit_state == "CLOSED" else circuit_state
 
-    return DefenseResponse(
-        status=status,
-        reason=reason,
-        circuit_breaker_state=circuit_state,
-        consecutive_losses=defense.get("consecutive_losses", 0),
-        daily_loss_pct=defense.get("daily_loss_pct", 0.0),
-        daily_pnl=defense.get("daily_pnl", 0.0),
-        total_trades_today=defense.get("trades_today", 0),
-        timestamp=datetime.now(timezone.utc).isoformat(),
-    )
+        return DefenseResponse(
+            status=status,
+            reason=reason,
+            circuit_breaker_state=circuit_state,
+            consecutive_losses=defense.get("consecutive_losses", 0),
+            daily_loss_pct=defense.get("daily_loss_pct", 0.0),
+            daily_pnl=defense.get("daily_pnl", 0.0),
+            total_trades_today=defense.get("trades_today", 0),
+            timestamp=datetime.now(timezone.utc).isoformat(),
+        )
+    return await asyncio.to_thread(_work)

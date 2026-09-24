@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback, useRef } from "react";
-import { API_BASE_URL } from "@/lib/constants";
+import api from "@/lib/api";
 import type { Position } from "@/lib/types";
 
 const POLL_INTERVAL = 30000;
@@ -14,21 +14,8 @@ export function usePositions() {
 
   const fetchPositions = useCallback(async () => {
     try {
-      const res = await fetch(`${API_BASE_URL}/positions/`, {
-        headers: {
-          Authorization: `Bearer ${typeof window !== "undefined" ? localStorage.getItem("token") || "" : ""}`,
-          "Content-Type": "application/json",
-        },
-      });
-      if (res.status === 401) {
-        if (typeof window !== "undefined") {
-          localStorage.removeItem("token");
-          window.location.href = "/login";
-        }
-        return;
-      }
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
-      const data = await res.json();
+      const res = await api.get("/positions/");
+      const data = res.data;
       setPositions(data.positions ?? data);
       setError(null);
     } catch (err) {
@@ -39,9 +26,14 @@ export function usePositions() {
   }, []);
 
   useEffect(() => {
-    fetchPositions();
-    intervalRef.current = setInterval(fetchPositions, POLL_INTERVAL);
+    // Stagger initial load to avoid thundering herd
+    const delay = Math.random() * 2000;
+    const timer = setTimeout(() => {
+      fetchPositions();
+      intervalRef.current = setInterval(fetchPositions, POLL_INTERVAL);
+    }, delay);
     return () => {
+      clearTimeout(timer);
       if (intervalRef.current) clearInterval(intervalRef.current);
     };
   }, [fetchPositions]);

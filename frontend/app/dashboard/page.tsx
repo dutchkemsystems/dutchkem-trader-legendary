@@ -14,6 +14,7 @@ import { MemoryContextCard } from "@/components/dashboard/memory-context-card";
 import { PaperTradingCard } from "@/components/dashboard/paper-trading-card";
 import { ScalperDashboardPanel } from "@/components/dashboard/scalper-dashboard-panel";
 import { ScalpingStrategiesPanel } from "@/components/dashboard/scalping-strategies-panel";
+import { GoldHedgePanel } from "@/components/dashboard/gold-hedge-panel";
 import { LiveTradingCard } from "@/components/dashboard/live-trading-card";
 import { PriceChart } from "@/components/charts/price-chart";
 import { Indicators } from "@/components/charts/indicators";
@@ -46,37 +47,6 @@ export default function DashboardPage() {
   const { positions, loading: positionsLoading } = usePositions();
   const { data: fullConsensus, loading: consensusLoading } = useFullConsensus();
   const { status: scalperStatus, loading: scalperLoading } = useScalper();
-
-  if (tradesLoading && positionsLoading) {
-    return (
-      <PageWrapper
-        title="Dashboard"
-        description="Overview of your trading intelligence"
-      >
-        <StatsLoadingSkeleton />
-        <div className="grid gap-4 lg:grid-cols-3">
-          <div className="lg:col-span-2 space-y-4">
-            <div className="grid gap-4 sm:grid-cols-2">
-              <div className="h-[320px] rounded-lg border border-border bg-card animate-pulse" />
-              <div className="space-y-4">
-                <div className="h-[160px] rounded-lg border border-border bg-card animate-pulse" />
-                <div className="h-[80px] rounded-lg border border-border bg-card animate-pulse" />
-              </div>
-            </div>
-            <div className="grid gap-4 sm:grid-cols-2">
-              <div className="h-[200px] rounded-lg border border-border bg-card animate-pulse" />
-              <div className="h-[200px] rounded-lg border border-border bg-card animate-pulse" />
-            </div>
-          </div>
-          <div className="space-y-4">
-            <div className="h-[400px] rounded-lg border border-border bg-card animate-pulse" />
-            <div className="h-[400px] rounded-lg border border-border bg-card animate-pulse" />
-            <div className="h-[280px] rounded-lg border border-border bg-card animate-pulse" />
-          </div>
-        </div>
-      </PageWrapper>
-    );
-  }
 
   return (
     <PageWrapper
@@ -174,6 +144,11 @@ export default function DashboardPage() {
           {/* Scalping Strategies — 10 new parallel strategies */}
           <ErrorBoundary>
             <ScalpingStrategiesPanel />
+          </ErrorBoundary>
+
+          {/* Gold Hedge EA — XAUUSD basket hedging */}
+          <ErrorBoundary>
+            <GoldHedgePanel />
           </ErrorBoundary>
         </div>
 

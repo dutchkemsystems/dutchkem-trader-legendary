@@ -14,6 +14,8 @@ from .ema_pullback import EMAPullbackStrategy
 from .session_breakout import SessionBreakoutStrategy
 from .news_fade import NewsFadeStrategy
 from .fvg_confluence import FVGConfluenceStrategy
+from .smart_machine_ea import SmartMachineEA
+from .quantum_ai_strategy import QuantumAIStrategy
 
 ALL_STRATEGIES = {
     'chiaroscuro': ChiaroscuroStrategy,
@@ -26,4 +28,6 @@ ALL_STRATEGIES = {
     'session_breakout': SessionBreakoutStrategy,
     'news_fade': NewsFadeStrategy,
     'fvg_confluence': FVGConfluenceStrategy,
+    'smart_machine_ea': SmartMachineEA,
+    'quantum_ai': QuantumAIStrategy,
 }

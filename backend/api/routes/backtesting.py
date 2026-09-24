@@ -192,76 +192,82 @@ STRATEGIES = {
 # ---------------------------------------------------------------------------
 
 @router.post("/run")
-def run_backtest(payload: BacktestRunRequest):
+async def run_backtest(payload: BacktestRunRequest):
     """Run a backtest with the given candles and strategy."""
-    candles = [_candle_input_to_candle(c) for c in payload.candles]
+    def _work():
+        candles = [_candle_input_to_candle(c) for c in payload.candles]
 
-    engine = BacktestEngine(
-        symbol=payload.symbol,
-        timeframe=payload.timeframe,
-        initial_balance=Decimal(str(payload.initial_balance)),
-        risk_per_trade=payload.risk_per_trade,
-        stop_loss_pips=payload.stop_loss_pips,
-        take_profit_pips=payload.take_profit_pips,
-        contract_size=payload.contract_size,
-    )
-    engine.consensus_fn = _make_buy_and_hold()
+        engine = BacktestEngine(
+            symbol=payload.symbol,
+            timeframe=payload.timeframe,
+            initial_balance=Decimal(str(payload.initial_balance)),
+            risk_per_trade=payload.risk_per_trade,
+            stop_loss_pips=payload.stop_loss_pips,
+            take_profit_pips=payload.take_profit_pips,
+            contract_size=payload.contract_size,
+        )
+        engine.consensus_fn = _make_buy_and_hold()
 
-    result = engine.run(candles)
-    return _serialize_backtest_result(result)
+        result = engine.run(candles)
+        return _serialize_backtest_result(result)
+    return await asyncio.to_thread(_work)
 
 
 @router.post("/walk-forward")
-def run_walk_forward(payload: WalkForwardRequest):
+async def run_walk_forward(payload: WalkForwardRequest):
     """Run walk-forward optimization with rolling windows."""
-    candles = [_candle_input_to_candle(c) for c in payload.candles]
+    def _work():
+        candles = [_candle_input_to_candle(c) for c in payload.candles]
 
-    param_grid = None
-    if payload.param_grid:
-        param_grid = {k: [Decimal(str(v)) for v in vals]
-                      for k, vals in payload.param_grid.items()}
-        # WalkForwardConfig.param_grid expects plain floats
-        param_grid = payload.param_grid
+        param_grid = None
+        if payload.param_grid:
+            param_grid = {k: [Decimal(str(v)) for v in vals]
+                          for k, vals in payload.param_grid.items()}
+            # WalkForwardConfig.param_grid expects plain floats
+            param_grid = payload.param_grid
 
-    config = WalkForwardConfig(
-        symbol=payload.symbol,
-        timeframe=payload.timeframe,
-        initial_balance=Decimal(str(payload.initial_balance)),
-        in_sample_pct=payload.in_sample_pct,
-        n_splits=payload.n_splits,
-        risk_per_trade=payload.risk_per_trade,
-        stop_loss_pips=payload.stop_loss_pips,
-        take_profit_pips=payload.take_profit_pips,
-        contract_size=payload.contract_size,
-        param_grid=param_grid,
-    )
+        config = WalkForwardConfig(
+            symbol=payload.symbol,
+            timeframe=payload.timeframe,
+            initial_balance=Decimal(str(payload.initial_balance)),
+            in_sample_pct=payload.in_sample_pct,
+            n_splits=payload.n_splits,
+            risk_per_trade=payload.risk_per_trade,
+            stop_loss_pips=payload.stop_loss_pips,
+            take_profit_pips=payload.take_profit_pips,
+            contract_size=payload.contract_size,
+            param_grid=param_grid,
+        )
 
-    optimizer = WalkForwardOptimizer(config)
-    result = optimizer.run(candles, consensus_fn=_make_buy_and_hold())
-    return _serialize_walk_forward_result(result)
+        optimizer = WalkForwardOptimizer(config)
+        result = optimizer.run(candles, consensus_fn=_make_buy_and_hold())
+        return _serialize_walk_forward_result(result)
+    return await asyncio.to_thread(_work)
 
 
 @router.post("/monte-carlo")
-def run_monte_carlo(payload: MonteCarloRequest):
+async def run_monte_carlo(payload: MonteCarloRequest):
     """Run Monte Carlo simulation on trade records."""
-    trades: List[TradeRecord] = []
-    for t in payload.trades:
-        trades.append(TradeRecord(
-            symbol=t.symbol,
-            side=t.side,
-            quantity=Decimal(t.quantity),
-            entry_price=Decimal(t.entry_price),
-            exit_price=Decimal(t.exit_price),
-            pnl=Decimal(t.pnl),
-        ))
+    def _work():
+        trades: List[TradeRecord] = []
+        for t in payload.trades:
+            trades.append(TradeRecord(
+                symbol=t.symbol,
+                side=t.side,
+                quantity=Decimal(t.quantity),
+                entry_price=Decimal(t.entry_price),
+                exit_price=Decimal(t.exit_price),
+                pnl=Decimal(t.pnl),
+            ))
 
-    config = MonteCarloConfig(
-        n_simulations=payload.n_simulations,
-        confidence_level=payload.confidence_level,
-        initial_equity=payload.initial_equity,
-        seed=payload.seed,
-    )
+        config = MonteCarloConfig(
+            n_simulations=payload.n_simulations,
+            confidence_level=payload.confidence_level,
+            initial_equity=payload.initial_equity,
+            seed=payload.seed,
+        )
 
-    simulator = MonteCarloSimulator(config)
-    result = simulator.run(trades)
-    return _serialize_monte_carlo_result(result)
+        simulator = MonteCarloSimulator(config)
+        result = simulator.run(trades)
+        return _serialize_monte_carlo_result(result)
+    return await asyncio.to_thread(_work)

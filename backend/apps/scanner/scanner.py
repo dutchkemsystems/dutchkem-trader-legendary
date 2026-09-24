@@ -187,9 +187,28 @@ class MultiTimeframeScanner:
 
     async def scan(self, symbol: str) -> ScanResult:
         tasks = [self._analyze_timeframe(symbol, tf) for tf in self.timeframes]
-        results = await asyncio.gather(*tasks)
+        try:
+            results = await asyncio.wait_for(
+                asyncio.gather(*tasks, return_exceptions=True),
+                timeout=15.0
+            )
+        except asyncio.TimeoutError:
+            # Return partial results from whatever completed
+            results = [TimeframeResult(timeframe=tf, signal='HOLD', confidence=0.0, data={'error': 'timeout'})
+                       for tf in self.timeframes]
 
-        timeframe_results = {r.timeframe: r for r in results}
+        # Filter out exceptions, replace with HOLD
+        clean_results = []
+        for i, r in enumerate(results):
+            if isinstance(r, Exception):
+                clean_results.append(TimeframeResult(
+                    timeframe=self.timeframes[i], signal='HOLD', confidence=0.0,
+                    data={'error': str(r)}
+                ))
+            else:
+                clean_results.append(r)
+
+        timeframe_results = {r.timeframe: r for r in clean_results}
 
         h1_bias = timeframe_results['1H'].signal
 
@@ -218,7 +237,13 @@ class MultiTimeframeScanner:
         mt5_tf = MT5_TIMEFRAMES.get(timeframe, mt5.TIMEFRAME_H1)
 
         loop = asyncio.get_event_loop()
-        rates = await loop.run_in_executor(None, self._fetch_rates, symbol, mt5_tf, 200)
+        try:
+            rates = await asyncio.wait_for(
+                loop.run_in_executor(None, self._fetch_rates, symbol, mt5_tf, 200),
+                timeout=8.0
+            )
+        except (asyncio.TimeoutError, Exception):
+            rates = None
 
         if rates is None or len(rates) < 50:
             return TimeframeResult(
@@ -246,13 +271,17 @@ class MultiTimeframeScanner:
 
     @staticmethod
     def _fetch_rates(symbol: str, timeframe: int, count: int):
-        if not mt5.initialize(**MT5_CONFIG):
-            return None
         try:
-            rates = mt5.copy_rates_from_pos(symbol, timeframe, 0, count)
-            return rates
-        finally:
-            mt5.shutdown()
+            initialized = mt5.initialize(**MT5_CONFIG)
+            if not initialized:
+                return None
+            try:
+                rates = mt5.copy_rates_from_pos(symbol, timeframe, 0, count)
+                return rates
+            finally:
+                mt5.shutdown()
+        except Exception:
+            return None
 
     def _calculate_alignment(self, results: Dict[str, TimeframeResult]) -> float:
         signals = [r.signal for r in results.values()]

@@ -11,15 +11,43 @@ Trading-specific features:
 - Model selection by task type (analysis, debate, risk)
 """
 
+import asyncio
 import os
 import json
 import logging
 import re
+import time
+import threading
 from typing import Optional, Dict, Any, List
 from .models import LLMResponse
 from .mock_provider import MockProvider
 
 logger = logging.getLogger(__name__)
+
+
+class RateLimiter:
+    """Simple token-bucket rate limiter. Thread-safe."""
+
+    def __init__(self, max_calls: int = 30, period_seconds: float = 60.0):
+        self.max_calls = max_calls
+        self.period = period_seconds
+        self._timestamps: List[float] = []
+        self._lock = threading.Lock()
+
+    def wait(self):
+        """Block until a request slot is available."""
+        sleep_for = 0.0
+        with self._lock:
+            now = time.monotonic()
+            # Purge timestamps outside the window
+            self._timestamps = [t for t in self._timestamps if now - t < self.period]
+            if len(self._timestamps) >= self.max_calls:
+                sleep_for = self.period - (now - self._timestamps[0]) + 0.1
+            self._timestamps.append(time.monotonic())
+        # Sleep OUTSIDE the lock so other threads aren't blocked
+        if sleep_for > 0:
+            logger.info("Rate limit: sleeping %.1fs", sleep_for)
+            time.sleep(sleep_for)
 
 # ── Trading-specific prompt templates ──
 
@@ -109,7 +137,7 @@ Respond with ONLY the JSON object."""
 
 class LLMClient:
     def __init__(self):
-        self.nvidia_key = os.getenv("NVIDIA_API_KEY", "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")
+        self.nvidia_key = os.getenv("NVIDIA_API_KEY", "")
         self.ollama_url = os.getenv("OLLAMA_URL", "http://localhost:11434")
         # Storage-optimized: use qwen2.5:7b for all tasks (only 4.7GB model available)
         # qwen2:0.5b serves as ultra-fast fallback for lightweight tasks
@@ -118,6 +146,16 @@ class LLMClient:
         self.ollama_risk_model = os.getenv("OLLAMA_RISK_MODEL", "qwen2.5:7b")
         self.openrouter_key = os.getenv("OPENROUTER_API_KEY")
         self._available_ollama_models: List[str] = []
+
+        # Rate limiting + retry config
+        self._rate_limiter = RateLimiter(max_calls=120, period_seconds=60.0)
+        self._max_retries = 1  # per provider (reduced to avoid thread pool saturation)
+        self._backoff_base = 1.0  # seconds, exponential: 1s, 2s, 4s
+
+        # Request counter for monitoring
+        self._request_count = 0
+        self._error_count = 0
+
         self._init_providers()
 
     def _init_providers(self):
@@ -185,6 +223,9 @@ class LLMClient:
             "ollama_analysis_model": self.ollama_analysis_model,
             "ollama_debate_model": self.ollama_debate_model,
             "ollama_risk_model": self.ollama_risk_model,
+            "request_count": self._request_count,
+            "error_count": self._error_count,
+            "rate_limit": f"{self._rate_limiter.max_calls}/{self._rate_limiter.period}s",
         }
 
     def analyze(
@@ -194,25 +235,49 @@ class LLMClient:
         model: str = "meta/llama-3.2-11b-vision-instruct",
         task: str = "analysis",
     ) -> LLMResponse:
-        """Analyze with automatic provider fallback."""
+        """Analyze with automatic provider fallback, retry, and backoff."""
         if not self.providers:
             return self.mock_provider.analyze(prompt, output_schema)
 
         for provider_name, provider_config in self.providers:
-            try:
-                if provider_name == "nvidia_nim":
-                    return self._call_nvidia_nim(prompt, output_schema, provider_config, model)
-                elif provider_name == "ollama":
-                    ollama_model = self._pick_ollama_model(task)
-                    return self._call_ollama(prompt, output_schema, provider_config, ollama_model)
-                elif provider_name == "openrouter":
-                    return self._call_openrouter(prompt, output_schema, provider_config, model)
-            except Exception as e:
-                logger.debug("Provider %s failed: %s", provider_name, e)
-                continue
+            last_error = None
+            for attempt in range(1 + self._max_retries):
+                try:
+                    # Rate limit before each request
+                    self._rate_limiter.wait()
+                    self._request_count += 1
+
+                    if provider_name == "nvidia_nim":
+                        return self._call_nvidia_nim(prompt, output_schema, provider_config, model)
+                    elif provider_name == "ollama":
+                        ollama_model = self._pick_ollama_model(task)
+                        return self._call_ollama(prompt, output_schema, provider_config, ollama_model)
+                    elif provider_name == "openrouter":
+                        return self._call_openrouter(prompt, output_schema, provider_config, model)
+                except Exception as e:
+                    last_error = e
+                    self._error_count += 1
+                    if attempt < self._max_retries:
+                        backoff = self._backoff_base * (2 ** attempt)
+                        logger.warning("Provider %s attempt %d failed: %s — retrying in %.1fs",
+                                       provider_name, attempt + 1, e, backoff)
+                        time.sleep(backoff)
+                    else:
+                        logger.debug("Provider %s exhausted %d retries: %s", provider_name, self._max_retries + 1, e)
 
         # All providers failed → mock fallback
+        logger.warning("All LLM providers failed (errors=%d), using mock", self._error_count)
         return self.mock_provider.analyze(prompt, output_schema)
+
+    async def analyze_async(
+        self,
+        prompt: str,
+        output_schema: Optional[Dict[str, Any]] = None,
+        model: str = "meta/llama-3.2-11b-vision-instruct",
+        task: str = "analysis",
+    ) -> LLMResponse:
+        """Non-blocking version of analyze — runs in thread to avoid blocking event loop."""
+        return await asyncio.to_thread(self.analyze, prompt, output_schema, model, task)
 
     def analyze_trading_signal(self, symbol: str, timeframe: str, indicators: Dict[str, Any], price_action: str = "") -> LLMResponse:
         """Structured trading signal analysis."""
@@ -318,7 +383,7 @@ class LLMClient:
                 resp = httpx.post(
                     f"{self.ollama_url}/api/generate",
                     json={"model": model_name, "prompt": prompt, "stream": False},
-                    timeout=60,
+                    timeout=15,
                 )
                 resp.raise_for_status()
                 text = resp.json().get("response", "")

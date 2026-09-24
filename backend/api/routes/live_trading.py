@@ -3,6 +3,7 @@ Live Trading API routes — MT5 detection, setup wizard, credentials, start/stop
 """
 from __future__ import annotations
 
+import asyncio
 import json
 import os
 import subprocess
@@ -498,169 +499,189 @@ def get_engine_pid():
 # ---------------------------------------------------------------------------
 
 @router.get("/setup", response_model=MT5SetupResponse)
-def get_setup_status():
+async def get_setup_status():
     """Get MT5 setup status — tells the frontend what the user needs to do."""
-    mt5_info = detect_mt5()
-    creds = load_credentials()
-    has_creds = creds is not None and creds.get("login") is not None
+    def _work():
+        mt5_info = detect_mt5()
+        creds = load_credentials()
+        has_creds = creds is not None and creds.get("login") is not None
 
-    needs_setup = not mt5_info["installed"] or not has_creds or not mt5_info["connected"]
+        needs_setup = not mt5_info["installed"] or not has_creds or not mt5_info["connected"]
 
-    if not mt5_info["installed"]:
-        msg = "MT5 is not installed. Please download and install MetaTrader 5 from your broker, then restart this page."
-    elif not has_creds:
-        msg = "MT5 is installed but no account is configured. Please enter your MT5 login credentials."
-    elif not mt5_info["connected"]:
-        msg = "MT5 is installed but not connected. Please check your credentials and try again."
-    else:
-        msg = "MT5 is ready. You can start trading!"
+        if not mt5_info["installed"]:
+            msg = "MT5 is not installed. Please download and install MetaTrader 5 from your broker, then restart this page."
+        elif not has_creds:
+            msg = "MT5 is installed but no account is configured. Please enter your MT5 login credentials."
+        elif not mt5_info["connected"]:
+            msg = "MT5 is installed but not connected. Please check your credentials and try again."
+        else:
+            msg = "MT5 is ready. You can start trading!"
 
-    return MT5SetupResponse(
-        installed=mt5_info["installed"],
-        running=mt5_info["running"],
-        connected=mt5_info["connected"],
-        path=mt5_info["path"],
-        has_credentials=has_creds,
-        needs_setup=needs_setup,
-        setup_message=msg,
-    )
+        return MT5SetupResponse(
+            installed=mt5_info["installed"],
+            running=mt5_info["running"],
+            connected=mt5_info["connected"],
+            path=mt5_info["path"],
+            has_credentials=has_creds,
+            needs_setup=needs_setup,
+            setup_message=msg,
+        )
+    return await asyncio.to_thread(_work)
 
 
 @router.post("/connect", response_model=ConnectResponse)
-def connect_mt5_account(req: ConnectRequest):
+async def connect_mt5_account(req: ConnectRequest):
     """Connect to MT5 with credentials. Tests connection, then saves."""
-    # Try connecting
-    result = try_connect_mt5(
-        login=req.login,
-        password=req.password,
-        server=req.server,
-        mt5_path=req.mt5_path,
-    )
-
-    if result["success"]:
-        # Save credentials for future use
-        save_credentials(
+    def _work():
+        # Try connecting
+        result = try_connect_mt5(
             login=req.login,
             password=req.password,
             server=req.server,
             mt5_path=req.mt5_path,
         )
 
-    return ConnectResponse(
-        success=result["success"],
-        message=result["message"],
-        account_type=result.get("account_type", "UNKNOWN"),
-        balance=result.get("balance", 0),
-    )
+        if result["success"]:
+            # Save credentials for future use
+            save_credentials(
+                login=req.login,
+                password=req.password,
+                server=req.server,
+                mt5_path=req.mt5_path,
+            )
+
+        return ConnectResponse(
+            success=result["success"],
+            message=result["message"],
+            account_type=result.get("account_type", "UNKNOWN"),
+            balance=result.get("balance", 0),
+        )
+    return await asyncio.to_thread(_work)
 
 
 @router.get("/mt5/status", response_model=dict)
-def get_mt5_status():
+async def get_mt5_status():
     """Get MT5 installation and connection status."""
-    return detect_mt5()
+    def _work():
+        return detect_mt5()
+    return await asyncio.to_thread(_work)
 
 
 @router.get("/account")
-def get_account():
+async def get_account():
     """Get full MT5 account details."""
-    details = get_account_details()
-    if details is None:
-        return {
-            "login": None, "server": None, "balance": 0, "equity": 0,
-            "margin": 0, "margin_free": 0, "leverage": 0, "currency": "USD",
-            "profit": 0, "account_type": "UNKNOWN", "positions_count": 0,
-            "positions": [], "recent_deals": [],
-        }
-    return details
+    def _work():
+        details = get_account_details()
+        if details is None:
+            return {
+                "login": None, "server": None, "balance": 0, "equity": 0,
+                "margin": 0, "margin_free": 0, "leverage": 0, "currency": "USD",
+                "profit": 0, "account_type": "UNKNOWN", "positions_count": 0,
+                "positions": [], "recent_deals": [],
+            }
+        return details
+    return await asyncio.to_thread(_work)
 
 
 @router.get("/status")
-def get_status():
+async def get_status():
     """Get complete trading status (optimized — single MT5 call)."""
-    state = get_trading_state()
-    mt5_info = detect_mt5()
-    account = get_account_details()
+    def _work():
+        state = get_trading_state()
+        mt5_info = detect_mt5()
+        account = get_account_details()
 
-    return {
-        "active": read_control() == "running",
-        "control": read_control(),
-        "state": state,
-        "mt5": mt5_info,
-        "account": account or {},
-        "engine_pid": get_engine_pid(),
-    }
+        return {
+            "active": read_control() == "running",
+            "control": read_control(),
+            "state": state,
+            "mt5": mt5_info,
+            "account": account or {},
+            "engine_pid": get_engine_pid(),
+        }
+    return await asyncio.to_thread(_work)
 
 
 @router.post("/start", response_model=TradingControlResponse)
-def start_trading():
+async def start_trading():
     """Start live trading — checks MT5 first."""
-    # Pre-flight checks
-    mt5_info = detect_mt5()
-    if not mt5_info["installed"]:
-        return TradingControlResponse(
-            status="error",
-            message="MT5 is not installed. Please install MetaTrader 5 first.",
-        )
+    def _work():
+        # Pre-flight checks
+        mt5_info = detect_mt5()
+        if not mt5_info["installed"]:
+            return TradingControlResponse(
+                status="error",
+                message="MT5 is not installed. Please install MetaTrader 5 first.",
+            )
 
-    creds = load_credentials()
-    if not creds:
-        return TradingControlResponse(
-            status="error",
-            message="No MT5 account configured. Please connect to MT5 first.",
-        )
+        creds = load_credentials()
+        if not creds:
+            return TradingControlResponse(
+                status="error",
+                message="No MT5 account configured. Please connect to MT5 first.",
+            )
 
-    if not mt5_info["connected"]:
-        return TradingControlResponse(
-            status="error",
-            message="MT5 is not connected. Please check your credentials.",
-        )
+        if not mt5_info["connected"]:
+            return TradingControlResponse(
+                status="error",
+                message="MT5 is not connected. Please check your credentials.",
+            )
 
-    # Start the engine
-    result = start_trading_process()
-    return TradingControlResponse(
-        status=result["status"],
-        message=result.get("message", f"Trading {result['status']}" + (f" (PID: {result.get('pid')})" if result.get('pid') else "")),
-    )
+        # Start the engine
+        result = start_trading_process()
+        return TradingControlResponse(
+            status=result["status"],
+            message=result.get("message", f"Trading {result['status']}" + (f" (PID: {result.get('pid')})" if result.get('pid') else "")),
+        )
+    return await asyncio.to_thread(_work)
 
 
 @router.post("/stop", response_model=TradingControlResponse)
-def stop_trading():
+async def stop_trading():
     """Stop live trading."""
-    result = stop_trading_process()
-    return TradingControlResponse(status="stopped", message="Trading stopped")
+    def _work():
+        result = stop_trading_process()
+        return TradingControlResponse(status="stopped", message="Trading stopped")
+    return await asyncio.to_thread(_work)
 
 
 @router.get("/improvements", response_model=ImprovementsResponse)
-def get_improvements():
+async def get_improvements():
     """Get improvements status."""
-    state = get_trading_state()
-    week = state.get("week_number", 1)
-    active = state.get("active_improvements", {})
+    def _work():
+        state = get_trading_state()
+        week = state.get("week_number", 1)
+        active = state.get("active_improvements", {})
 
-    all_improvements = [
-        {"name": "Correlation Filter", "key": "correlation_filter", "week": 1, "description": "Skip correlated pairs to reduce risk"},
-        {"name": "Dynamic Risk Reduction", "key": "dynamic_risk", "week": 1, "description": "Reduce risk after consecutive losses"},
-        {"name": "Spread Filter", "key": "spread_filter", "week": 1, "description": "Skip trades with wide spreads"},
-        {"name": "News Avoidance", "key": "news_avoidance", "week": 3, "description": "Skip trading during high-impact news"},
-        {"name": "Breakout Detection", "key": "breakout_detection", "week": 3, "description": "Detect price breakouts for early entries"},
-        {"name": "Mean Reversion", "key": "mean_reversion", "week": 3, "description": "Trade oversold/overbought bounces"},
-        {"name": "Position Scaling", "key": "position_scaling", "week": 3, "description": "Add to winning positions (pyramiding)"},
-    ]
+        all_improvements = [
+            {"name": "Correlation Filter", "key": "correlation_filter", "week": 1, "description": "Skip correlated pairs to reduce risk"},
+            {"name": "Dynamic Risk Reduction", "key": "dynamic_risk", "week": 1, "description": "Reduce risk after consecutive losses"},
+            {"name": "Spread Filter", "key": "spread_filter", "week": 1, "description": "Skip trades with wide spreads"},
+            {"name": "News Avoidance", "key": "news_avoidance", "week": 3, "description": "Skip trading during high-impact news"},
+            {"name": "Breakout Detection", "key": "breakout_detection", "week": 3, "description": "Detect price breakouts for early entries"},
+            {"name": "Mean Reversion", "key": "mean_reversion", "week": 3, "description": "Trade oversold/overbought bounces"},
+            {"name": "Position Scaling", "key": "position_scaling", "week": 3, "description": "Add to winning positions (pyramiding)"},
+        ]
 
-    return ImprovementsResponse(
-        week_number=week,
-        active=active,
-        all_improvements=all_improvements,
-    )
+        return ImprovementsResponse(
+            week_number=week,
+            active=active,
+            all_improvements=all_improvements,
+        )
+    return await asyncio.to_thread(_work)
 
 
 @router.get("/trades")
-def get_trade_history():
+async def get_trade_history():
     """Get recent trades."""
-    return get_trades()
+    def _work():
+        return get_trades()
+    return await asyncio.to_thread(_work)
 
 
 @router.get("/positions")
-def get_positions():
+async def get_positions():
     """Get open MT5 positions."""
-    return get_account_details().get("positions", []) if get_account_details() else []
+    def _work():
+        return get_account_details().get("positions", []) if get_account_details() else []
+    return await asyncio.to_thread(_work)

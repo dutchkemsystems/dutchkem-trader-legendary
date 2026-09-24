@@ -2,9 +2,32 @@ import logging
 from decimal import Decimal, ROUND_HALF_UP
 from typing import Dict, List, Optional
 
-from django.contrib.auth.models import User
-from django.db import transaction
-from django.utils import timezone
+try:
+    from django.contrib.auth.models import User
+except Exception:
+    User = type("User", (), {"__init__": lambda *a, **kw: None})
+
+try:
+    from django.db import transaction
+except Exception:
+    from contextlib import contextmanager as _ctx
+
+    transaction = type("transaction", (), {"atomic": _ctx(lambda: (yield))})()
+
+try:
+    from django.utils import timezone
+except Exception:
+    from datetime import timezone as _tz, datetime
+
+    class timezone:
+        @staticmethod
+        def now():
+            return datetime.now(_tz.utc)
+
+        @staticmethod
+        def utc():
+            return _tz.utc
+
 
 from django_app.models import Position, Trade
 from execution.broker import (
@@ -45,10 +68,7 @@ class PositionManager:
     def sync_positions(self, user) -> List[Position]:
         """Sync broker positions with database."""
         broker_map = self._build_broker_position_map()
-        existing = {
-            p.ticker: p
-            for p in Position.objects.filter(user=user)
-        }
+        existing = {p.ticker: p for p in Position.objects.filter(user=user)}
         synced: List[Position] = []
 
         for symbol, bp in broker_map.items():
@@ -64,10 +84,15 @@ class PositionManager:
                 pos.avg_entry_price = bp.open_price
                 pos.current_price = bp.current_price
                 pos.unrealized_pnl = unrealized
-                pos.save(update_fields=[
-                    "quantity", "avg_entry_price", "current_price",
-                    "unrealized_pnl", "updated_at",
-                ])
+                pos.save(
+                    update_fields=[
+                        "quantity",
+                        "avg_entry_price",
+                        "current_price",
+                        "unrealized_pnl",
+                        "updated_at",
+                    ]
+                )
             else:
                 pos = Position.objects.create(
                     user=user,
@@ -103,9 +128,13 @@ class PositionManager:
             )
             pos.current_price = bp.current_price
             pos.unrealized_pnl = unrealized
-            pos.save(update_fields=[
-                "current_price", "unrealized_pnl", "updated_at",
-            ])
+            pos.save(
+                update_fields=[
+                    "current_price",
+                    "unrealized_pnl",
+                    "updated_at",
+                ]
+            )
             updated.append(pos)
 
         return updated
@@ -125,7 +154,9 @@ class PositionManager:
         if close_qty <= 0 or close_qty > position.quantity:
             logger.warning(
                 "Invalid close quantity %s for position %s (has %s)",
-                close_qty, position.ticker, position.quantity,
+                close_qty,
+                position.ticker,
+                position.quantity,
             )
             return None
 
@@ -168,9 +199,14 @@ class PositionManager:
             position.unrealized_pnl = self._calculate_unrealized_pnl(
                 side, position.avg_entry_price, fill.price, remaining
             )
-            position.save(update_fields=[
-                "quantity", "current_price", "unrealized_pnl", "updated_at",
-            ])
+            position.save(
+                update_fields=[
+                    "quantity",
+                    "current_price",
+                    "unrealized_pnl",
+                    "updated_at",
+                ]
+            )
 
         return trade
 
@@ -234,11 +270,15 @@ class PositionManager:
             if modified:
                 logger.info(
                     "Trailing stop updated for %s: %s -> %s",
-                    position.ticker, bp.stop_loss, new_stop,
+                    position.ticker,
+                    bp.stop_loss,
+                    new_stop,
                 )
             return modified
         except Exception as e:
-            logger.error("Failed to update trailing stop for %s: %s", position.ticker, e)
+            logger.error(
+                "Failed to update trailing stop for %s: %s", position.ticker, e
+            )
             return False
 
     def _get_pip_value(self, symbol: str) -> Decimal:
@@ -290,22 +330,26 @@ class PositionManager:
 
         for pos in positions:
             total_pnl += pos.unrealized_pnl
-            details.append({
-                "ticker": pos.ticker,
-                "quantity": str(pos.quantity),
-                "avg_entry_price": str(pos.avg_entry_price),
-                "current_price": str(pos.current_price),
-                "unrealized_pnl": str(pos.unrealized_pnl),
-                "pnl_percent": (
-                    str(
-                        (pos.unrealized_pnl / (pos.avg_entry_price * pos.quantity) * Decimal("100")).quantize(
-                            Decimal("0.01"), rounding=ROUND_HALF_UP
+            details.append(
+                {
+                    "ticker": pos.ticker,
+                    "quantity": str(pos.quantity),
+                    "avg_entry_price": str(pos.avg_entry_price),
+                    "current_price": str(pos.current_price),
+                    "unrealized_pnl": str(pos.unrealized_pnl),
+                    "pnl_percent": (
+                        str(
+                            (
+                                pos.unrealized_pnl
+                                / (pos.avg_entry_price * pos.quantity)
+                                * Decimal("100")
+                            ).quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
                         )
-                    )
-                    if pos.avg_entry_price > 0 and pos.quantity > 0
-                    else "0.00"
-                ),
-            })
+                        if pos.avg_entry_price > 0 and pos.quantity > 0
+                        else "0.00"
+                    ),
+                }
+            )
 
         return {
             "total_positions": len(positions),

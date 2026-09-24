@@ -1,3 +1,4 @@
+import asyncio
 from decimal import Decimal, InvalidOperation
 from typing import Optional
 
@@ -65,71 +66,81 @@ def _serialize_trade(trade) -> dict:
 # ---------------------------------------------------------------------------
 
 @router.get("/")
-def list_trades(limit: int = Query(50, ge=1, le=500)):
-    user = get_current_user()
-    if user is None:
-        raise HTTPException(status_code=401, detail="No authenticated user")
-    engine = get_execution_engine()
-    trades = engine.get_trade_history(user, limit=limit)
-    return {"trades": trades, "count": len(trades)}
+async def list_trades(limit: int = Query(50, ge=1, le=500)):
+    def _work():
+        user = get_current_user()
+        if user is None:
+            raise HTTPException(status_code=401, detail="No authenticated user")
+        engine = get_execution_engine()
+        trades = engine.get_trade_history(user, limit=limit)
+        return {"trades": trades, "count": len(trades)}
+    return await asyncio.to_thread(_work)
 
 
 @router.post("/")
-def create_trade(payload: TradeCreate):
-    user = get_current_user()
-    if user is None:
-        raise HTTPException(status_code=401, detail="No authenticated user")
+async def create_trade(payload: TradeCreate):
+    def _work():
+        user = get_current_user()
+        if user is None:
+            raise HTTPException(status_code=401, detail="No authenticated user")
 
-    if payload.action.upper() not in ("BUY", "SELL"):
-        raise HTTPException(status_code=400, detail="action must be BUY or SELL")
+        if payload.action.upper() not in ("BUY", "SELL"):
+            raise HTTPException(status_code=400, detail="action must be BUY or SELL")
 
-    engine = get_execution_engine()
+        engine = get_execution_engine()
 
-    try:
-        trade = engine.execute_trade(
-            user=user,
-            symbol=payload.symbol.upper(),
-            side=payload.action.upper(),
-            lot_size=_to_decimal(payload.lot_size),
-            entry_price=_to_decimal(payload.entry_price),
-            stop_loss=_to_decimal(payload.stop_loss),
-            take_profit=_to_decimal(payload.take_profit),
-            order_type=payload.order_type.upper(),
-            confidence=payload.confidence,
-            consensus_id=payload.consensus_id,
-        )
-    except Exception as exc:
-        raise HTTPException(status_code=500, detail=str(exc))
+        try:
+            trade = engine.execute_trade(
+                user=user,
+                symbol=payload.symbol.upper(),
+                side=payload.action.upper(),
+                lot_size=_to_decimal(payload.lot_size),
+                entry_price=_to_decimal(payload.entry_price),
+                stop_loss=_to_decimal(payload.stop_loss),
+                take_profit=_to_decimal(payload.take_profit),
+                order_type=payload.order_type.upper(),
+                confidence=payload.confidence,
+                consensus_id=payload.consensus_id,
+            )
+        except Exception as exc:
+            raise HTTPException(status_code=500, detail=str(exc))
 
-    serialized = _serialize_trade(trade)
-    return {"id": serialized["id"], "status": serialized["status"], "trade": serialized}
+        serialized = _serialize_trade(trade)
+        return {"id": serialized["id"], "status": serialized["status"], "trade": serialized}
+    return await asyncio.to_thread(_work)
 
 
 @router.get("/summary/daily")
-def daily_summary():
-    user = get_current_user()
-    if user is None:
-        raise HTTPException(status_code=401, detail="No authenticated user")
-    engine = get_execution_engine()
-    return engine.get_daily_summary(user)
+async def daily_summary():
+    def _work():
+        user = get_current_user()
+        if user is None:
+            raise HTTPException(status_code=401, detail="No authenticated user")
+        engine = get_execution_engine()
+        return engine.get_daily_summary(user)
+    return await asyncio.to_thread(_work)
 
 
 @router.get("/summary/monthly")
-def monthly_summary():
-    user = get_current_user()
-    if user is None:
-        raise HTTPException(status_code=401, detail="No authenticated user")
-    engine = get_execution_engine()
-    return engine.get_monthly_summary(user)
+async def monthly_summary():
+    def _work():
+        user = get_current_user()
+        if user is None:
+            raise HTTPException(status_code=401, detail="No authenticated user")
+        engine = get_execution_engine()
+        return engine.get_monthly_summary(user)
+    return await asyncio.to_thread(_work)
 
 
 @router.post("/close")
-def close_trade(payload: TradeClose):
-    user = get_current_user()
-    if user is None:
-        raise HTTPException(status_code=401, detail="No authenticated user")
-    engine = get_execution_engine()
-    trade = engine.close_trade(payload.trade_id, user)
-    if trade is None:
-        raise HTTPException(status_code=404, detail="Trade not found or already closed")
-    return _serialize_trade(trade)
+async def close_trade(payload: TradeClose):
+    def _work():
+        user = get_current_user()
+        if user is None:
+            raise HTTPException(status_code=401, detail="No authenticated user")
+        engine = get_execution_engine()
+        trade = engine.close_trade(payload.trade_id, user)
+        if trade is None:
+            raise HTTPException(status_code=404, detail="Trade not found or already closed")
+        return _serialize_trade(trade)
+    return await asyncio.to_thread(_work)
