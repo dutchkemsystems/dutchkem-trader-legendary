@@ -42,3 +42,13 @@ desktop.ini
 *.sqlite
 *.db
 db.sqlite3
+
+# Runtime state / logs
+backend/trades_complete/*.json
+trades_complete/
+pids/
+startup_*.txt
+startup_log.txt
+deploy_*.txt
+server_*.txt
+fe_*.log
